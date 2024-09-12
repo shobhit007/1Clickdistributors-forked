@@ -5,6 +5,8 @@ import { Provider } from "react-redux";
 import { store } from "./store";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -42,6 +44,15 @@ export default function RootLayout({ children }) {
         <Provider store={store}>
           <QueryClientProvider client={queryClient}>
             {children}
+
+            <ToastContainer
+              autoClose={3000}
+              theme="light"
+              closeOnClick
+              pauseOnFocusLoss
+              pauseOnHover
+              position="top-right"
+            />
           </QueryClientProvider>
         </Provider>
       </body>
