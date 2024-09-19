@@ -10,7 +10,7 @@ const panels = [
     panel: "roles_and_permissions",
   },
   {
-    panel: "allocate_lead",
+    panel: "allocate_leads",
   },
   {
     panel: "sales_panel",
@@ -56,7 +56,6 @@ const ManageRoles = () => {
       });
 
       const data = await response.json();
-      console.log("data in func ", data);
       if (data.roles) {
         return data?.roles;
       } else {
@@ -74,8 +73,6 @@ const ManageRoles = () => {
     refetchOnWindowFocus: false,
     retry: false,
   });
-
-  console.log("data is", data);
 
   const handleResize = () => {
     const resolution = window.innerWidth;

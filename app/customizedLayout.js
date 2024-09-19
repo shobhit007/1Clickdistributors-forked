@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
-const CustomLayout = ({ children }) => {
+const CustomizedLayout = ({ children }) => {
   const data = useSelector((state) => state.auth);
 
   let dispatch = useDispatch();
@@ -21,4 +21,4 @@ const CustomLayout = ({ children }) => {
   return <div>{children}</div>;
 };
 
-export default CustomLayout;
+export default CustomizedLayout;

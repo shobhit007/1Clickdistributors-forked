@@ -8,8 +8,8 @@ import { toast } from "react-toastify"; // Assuming you're using toast for error
 import PanelSelector from "@/components/homepage/PanelSelector";
 import ManageRolesAndPermission from "@/components/homepage/ManageRolesAndPermission";
 import ManageRoles from "@/components/homepage/ManageRoles";
-import ManageUsers from "/components/ManageUsers";
-
+import ManageUsers from "@/components/manageUsers";
+import AllocateLeadsPanel from "@/components/allocateLead";
 
 const Page = () => {
   const [displayComponent, setDisplayComponent] = useState("Manage roles");
@@ -56,16 +56,16 @@ const Page = () => {
     }
   }, [userRoles]);
 
-  if (isLoading) {
-    return (
-      <div className="w-full min-h-[60vh] flex flex-col items-center justify-center">
-        <img src="/loader.gif" className="h-[60px] w-auto" alt="loading" />
-        <p className="text-xl font-bold text-gray-500 mt-3">
-          Loading... please wait
-        </p>
-      </div>
-    );
-  }
+  // if (isLoading) {
+  //   return (
+  //     <div className="w-full min-h-[60vh] flex flex-col items-center justify-center">
+  //       <img src="/loader.gif" className="h-[60px] w-auto" alt="loading" />
+  //       <p className="text-xl font-bold text-gray-500 mt-3">
+  //         Loading... please wait
+  //       </p>
+  //     </div>
+  //   );
+  // }
 
   return (
     <panelContext.Provider
@@ -77,6 +77,7 @@ const Page = () => {
 
         {displayComponent == "roles_and_permissions" && <ManageRoles />}
         {displayComponent == "manage_users" && <ManageUsers />}
+        {displayComponent == "allocate_leads" && <AllocateLeadsPanel />}
       </div>
     </panelContext.Provider>
   );

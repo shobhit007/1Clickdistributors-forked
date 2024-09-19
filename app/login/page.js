@@ -59,7 +59,7 @@ const page = () => {
   };
 
   return (
-    <div className="w-full h-full flex items-center justify-center">
+    <div className="w-[98vw] h-[100vh] flex items-center justify-center">
       <div className="flex gap-2 justify-between  min-h-[60vh] min-w-[50vw] bg-[#ff98500a] rounded-md md:shadow-lg shadow-gray-500/20">
         {/* login component */}
 
