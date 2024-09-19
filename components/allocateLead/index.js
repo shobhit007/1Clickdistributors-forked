@@ -7,6 +7,9 @@ import Modal from "../utills/Modal";
 import { MdClose } from "react-icons/md";
 import AllocateLeadModal from "./allocateLeadModal";
 import { useQuery } from "@tanstack/react-query";
+import { toast } from "react-toastify";
+import local from "next/font/local";
+import ShowDetails from "./showDetails";
 
 const index = () => {
   let data = [
@@ -157,6 +160,8 @@ const index = () => {
   const [selectedEndDate, setSelectedEndDate] = useState(null);
   const [showAllocationModal, setShowAllocationModal] = useState(false);
   const [leadsLoading, setLeadsLoading] = useState(false);
+  const [allocatingLeads, setAllocatingLeads] = useState(false);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
 
   useEffect(() => {
     if (!leads) {
@@ -164,14 +169,6 @@ const index = () => {
       setSelectedEndDate(moment().endOf("day").format("YYYY-MM-DD"));
     }
   }, []);
-
-  const handleAssignLeads = async () => {
-    try {
-      setShowAllocationModal(false);
-    } catch (error) {
-      toast.error(error.message);
-    }
-  };
 
   const getAllLeads = async () => {
     try {
@@ -199,6 +196,7 @@ const index = () => {
         }),
       });
       const data = await response.json();
+      console.log("data is", data);
       setLeadsLoading(false);
       if (data.success && data?.leads) {
         return data.leads;
@@ -219,42 +217,108 @@ const index = () => {
     refetchOnWindowFocus: false,
   });
 
+  const handleAssignLeads = async (salesMember) => {
+    try {
+      if (!salesMember || salesMember == "") {
+        return;
+      }
+      const leads = selectedRows?.map((item) => item.leadId);
+      setAllocatingLeads(true);
+      let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/leads/assignLeadsToSalesMember`;
+      let token = localStorage.getItem("authToken");
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          leads,
+          salesMember,
+        }),
+      });
+      setAllocatingLeads(false);
+      const data = await response.json();
+
+      if (data.success) {
+        toast.success(data?.message || "Successfully allocated leads");
+        setShowAllocationModal(false);
+        refetchLeads();
+        setSelectedRows([]);
+      } else {
+        toast.error(data?.message || "Failed to allocate");
+      }
+    } catch (error) {
+      toast.error(error.message);
+      setAllocatingLeads(false);
+    }
+  };
+
+  const staticColumns = [
+    "assignedAt",
+    "createdAt",
+    "assignedBy",
+    "salesExecutive",
+  ];
+  const avoidCols = ["id", "adType"];
+
   const columns = useMemo(() => {
     if (leads?.length > 0) {
-      return Object.keys(leads[0] || {})
-        .filter((key) => {
-          if (key == "createdAt") {
-            return false;
-          }
-          return true;
-        })
+      let dynamicCols = Object.keys(leads[0] || {})
+        .filter(
+          (key) => !(avoidCols.includes(key) || staticColumns.includes(key))
+        )
         .map((key) => {
-          if (key == "createdAt") {
-            return {
-              Header: "Created At",
-              accessor: key,
-              Cell: ({ value }) => {
-                return <p>{new Date(value)?.toLocaleDateString()}</p>;
-              },
-              sortType: (rowA, rowB, columnId) => {
-                const dateA = new Date(rowA.values[columnId]);
-                const dateB = new Date(rowB.values[columnId]);
-                return dateA > dateB ? 1 : -1;
-              },
-              id: key,
-            };
-          }
-
           return {
             Header: camelToTitle(key),
             accessor: key,
             id: key,
           };
         });
+
+      let statiCols = staticColumns.map((key) => {
+        if (key == "assignedAt" || key == "createdAt") {
+          return {
+            Header: key,
+            accessor: key,
+            Cell: ({ value }) => {
+              return (
+                value && (
+                  <p>
+                    {new Date(value?._seconds * 1000)?.toLocaleDateString()}
+                  </p>
+                )
+              );
+            },
+            sortType: (rowA, rowB, columnId) => {
+              const dateA = rowA.values[columnId]?._seconds
+                ? new Date(rowA.values[columnId]?._seconds * 1000)
+                : null;
+              const dateB = rowB.values[columnId]?._seconds
+                ? new Date(rowB.values[columnId]?._seconds * 1000)
+                : null;
+
+              if (!dateA && !dateB) return 0; // Both dates are missing
+              if (!dateA) return 1; // dateA is missing, place it after dateB
+              if (!dateB) return -1; // dateB is missing, place it after dateA
+
+              return dateA > dateB ? 1 : -1; // Compare valid dates
+            },
+            id: key,
+          };
+        }
+        return {
+          Header: camelToTitle(key),
+          accessor: key,
+          id: key,
+        };
+      });
+
+      return [...dynamicCols, ...statiCols];
     } else {
       return [];
     }
-  }, []);
+  }, [leads]);
 
   if (leadsLoading) {
     return (
@@ -274,6 +338,21 @@ const index = () => {
   return (
     <div className="mt-4 px-2">
       <button onClick={refetchLeads}>Refetch</button>
+      {showDetailsModal && (
+        <Modal>
+          <div className="w-[90vw] sm:w-[55vw] md:w-[45vw] xl:w-[35vw] h-[70vh] bg-white rounded-md p-2 relative">
+            <MdClose
+              className="text-red-500 absolute top-2 right-4 cursor-pointer text-2xl"
+              onClick={() => setShowDetailsModal(false)}
+            />
+
+            <ShowDetails
+              data={selectedRows?.[0]}
+              close={() => setShowDetailsModal(false)}
+            />
+          </div>
+        </Modal>
+      )}
       {showAllocationModal && (
         <Modal>
           <div className="w-[90vw] sm:w-[50vw] md:w-[30vw] xl:w-[25vw] h-[50vh] bg-white rounded-md p-2 relative">
@@ -285,6 +364,7 @@ const index = () => {
             <AllocateLeadModal
               data={selectedRows}
               onSubmit={handleAssignLeads}
+              loading={allocatingLeads}
             />
           </div>
         </Modal>
@@ -323,15 +403,31 @@ const index = () => {
         />
         <button
           disabled={selectedRows?.length == 0}
-          className="bg-colorPrimary disabled:bg-colorPrimary/40 disabled:cursor-not-allowed py-1 px-3 rounded-md text-white"
+          className="bg-colorPrimary flex items-center gap-1 disabled:bg-colorPrimary/40 disabled:cursor-not-allowed py-1 px-3 rounded-md text-white"
           onClick={() => setShowAllocationModal(true)}
         >
-          Allocate lead
+          <span>Allocate lead {selectedRows?.length}</span>
         </button>
+        {selectedRows?.length > 0 && (
+          <button
+            className="bg-gray-500 flex items-center gap-1 disabled:bg-colorPrimary/40 disabled:cursor-not-allowed py-1 px-3 rounded-md text-white"
+            onClick={() => setSelectedRows([])}
+          >
+            Unselect all
+          </button>
+        )}
+        {selectedRows?.length == 1 && (
+          <button
+            className="bg-colorPrimary flex items-center gap-1 disabled:bg-colorPrimary/40 disabled:cursor-not-allowed py-1 px-3 rounded-md text-white"
+            onClick={() => setShowDetailsModal(true)}
+          >
+            See details
+          </button>
+        )}
       </div>
       <CustomTable
         data={leads || []}
-        uniqueDataKey={"id"}
+        uniqueDataKey={"email"}
         selectedRows={selectedRows}
         setSelectedRows={setSelectedRows}
         columns={columns}

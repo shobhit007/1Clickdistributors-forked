@@ -33,8 +33,7 @@ const CustomTable = ({
   openModal,
   closeModal,
 }) => {
-  const [uniqueKey, setUniqueKey] = useState("uniqueDataKey");
-
+  const [uniqueKey, setUniqueKey] = useState(uniqueDataKey);
   useEffect(() => {
     if (uniqueDataKey) {
       setUniqueKey(uniqueDataKey);
