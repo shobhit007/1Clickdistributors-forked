@@ -1,4 +1,4 @@
-import ManageUsers from "@/components/manageUsers";
+import ManageUsers from "../components/ManageUsers";
 import React from "react";
 
 const page = () => {

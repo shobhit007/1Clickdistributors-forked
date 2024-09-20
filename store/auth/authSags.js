@@ -40,7 +40,7 @@ function* handleCheckAuthStatus({ payload }) {
       // }
 
       yield put(login({ role, email, token }));
-      router.push("/panel");
+      router.push("/Panel");
     } else {
       yield put(failedToAuthenticate({ error: "Token not found" }));
       router.push("/login");
