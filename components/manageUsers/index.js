@@ -2,12 +2,13 @@
 
 import { useQuery } from "@tanstack/react-query";
 import React, { useEffect, useState } from "react";
-import Toggle from "./utills/Toggle";
-import Modal from "./utills/Modal";
+import Toggle from "../utills/Toggle";
+import Modal from "../utills/Modal";
 import { toast } from "react-toastify";
 import { CiEdit } from "react-icons/ci";
-import AdduserForm from "./manageUsers/addUserForm";
-import EdituserForm from "./manageUsers/edituserForm";
+import AdduserForm from "./addUserForm";
+import EdituserForm from "./edituserForm";
+import EdituserPermissions from "./editUserPermissions";
 
 const ManageUsers = () => {
   const [loading, setLoading] = useState(false);
@@ -15,6 +16,8 @@ const ManageUsers = () => {
   const [filteredData, setFilterdData] = useState([]);
   const [showAddUserModal, setShowAddUserModal] = useState(false);
   const [selectedUserToEdit, setSelectedUserToEdit] = useState(null);
+  const [selectedUserToEditPermissions, setSelectedUserToEditPermissions] =
+    useState(false);
 
   const getAllUsers = async () => {
     try {
@@ -143,6 +146,24 @@ const ManageUsers = () => {
           </div>
         </Modal>
       )}
+      {selectedUserToEditPermissions && (
+        <Modal>
+          <div className="w-[90vw] md:w-[60vw] lg:w-[50vw] h-[80vh] p-4 relative bg-white rounded-md">
+            <button
+              onClick={() => setSelectedUserToEditPermissions(null)}
+              className="text-white p-1 bg-red-500 absolute top-0 right-0"
+            >
+              Close
+            </button>
+
+            <EdituserPermissions
+              close={() => setSelectedUserToEditPermissions(null)}
+              refetchUsers={refetchUsers}
+              currentUser={selectedUserToEditPermissions}
+            />
+          </div>
+        </Modal>
+      )}
 
       <div className="p-6">
         <div className="mb-4 flex items-center gap-3">
@@ -195,11 +216,18 @@ const ManageUsers = () => {
                       item.createdAt?._seconds * 1000
                     ).toLocaleDateString() || "N/A"}
                   </td>
-                  <td className="px-4 py-2 border">
+                  <td className="px-4 py-2 border flex items-center justify-center gap-3">
                     <CiEdit
                       onClick={() => setSelectedUserToEdit(item)}
                       className="text-xl text-slate-600 cursor-pointer hover:text-colorPrimary"
                     />
+
+                    <button
+                      onClick={() => setSelectedUserToEditPermissions(item)}
+                      className="text-white bg-colorPrimary py-1 px-3 rounded-md"
+                    >
+                      Permissions
+                    </button>
                   </td>
                 </tr>
               ))}

@@ -8,7 +8,7 @@ import { toast } from "react-toastify"; // Assuming you're using toast for error
 import PanelSelector from "@/components/homepage/PanelSelector";
 import ManageRolesAndPermission from "@/components/homepage/ManageRolesAndPermission";
 import ManageRoles from "@/components/homepage/ManageRoles";
-import ManageUsers from "@/components/ManageUsers";
+import ManageUsers from "@/components/manageUsers";
 import AllocateLeadsPanel from "@/components/allocateLead";
 import Sales from "@/components/sales/Sales";
 

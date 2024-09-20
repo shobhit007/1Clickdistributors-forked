@@ -20,7 +20,15 @@ const geistMono = localFont({
   weight: "100 900",
 });
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: Infinity, // global staleTime
+      refetchOnWindowFocus: false, // global refetchOnWindowFocus
+      retry: false, // global retry option
+    },
+  },
+});
 
 // export const metadata = {
 //   title: "1clickdistributors",

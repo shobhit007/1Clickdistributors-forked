@@ -163,21 +163,11 @@ const index = () => {
   const [allocatingLeads, setAllocatingLeads] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
 
-  useEffect(() => {
-    if (!leads) {
-      setSelectedStartDate(moment().startOf("day").format("YYYY-MM-DD"));
-      setSelectedEndDate(moment().endOf("day").format("YYYY-MM-DD"));
-    }
-  }, []);
+  const [dateObjToSearch, setDateObjToSearch] = useState(null);
 
   const getAllLeads = async () => {
     try {
-      if (
-        !selectedStartDate ||
-        selectedStartDate == "" ||
-        selectedEndDate == "" ||
-        !selectedEndDate
-      ) {
+      if (!dateObjToSearch) {
         return null;
       }
 
@@ -191,12 +181,11 @@ const index = () => {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          startDate: selectedStartDate,
-          endDate: selectedEndDate,
+          startDate: dateObjToSearch?.selectedStartDate,
+          endDate: dateObjToSearch?.selectedEndDate,
         }),
       });
       const data = await response.json();
-      console.log("data is", data);
       setLeadsLoading(false);
       if (data.success && data?.leads) {
         return data.leads;
@@ -211,11 +200,23 @@ const index = () => {
   };
 
   const { data: leads, refetch: refetchLeads } = useQuery({
-    queryKey: ["allLeads"],
+    queryKey: ["allLeads", dateObjToSearch],
     queryFn: getAllLeads,
-    retry: false,
-    refetchOnWindowFocus: false,
   });
+
+  useEffect(() => {
+    let start = moment()
+      .startOf("day")
+      .subtract({ days: 4 })
+      .format("YYYY-MM-DD");
+    let end = moment().endOf("day").format("YYYY-MM-DD");
+    setSelectedStartDate(start);
+    setSelectedEndDate(end);
+    setDateObjToSearch({
+      selectedStartDate: start,
+      selectedEndDate: end,
+    });
+  }, []);
 
   const handleAssignLeads = async (salesMember) => {
     try {
@@ -265,9 +266,15 @@ const index = () => {
   const columns = useMemo(() => {
     if (leads?.length > 0) {
       let dynamicCols = Object.keys(leads[0] || {})
-        .filter(
-          (key) => !(avoidCols.includes(key) || staticColumns.includes(key))
-        )
+        .filter((key) => {
+          if (avoidCols.includes(key) || staticColumns.includes(key)) {
+            return false;
+          }
+          if (typeof leads[0][key] == "object") {
+            return false;
+          }
+          return true;
+        })
         .map((key) => {
           return {
             Header: camelToTitle(key),
@@ -277,7 +284,7 @@ const index = () => {
         });
 
       let statiCols = staticColumns.map((key) => {
-        if (key == "assignedAt" || key == "createdAt") {
+        if (key == "assignedAt" || key == "createdAt" || key == "updatedAt") {
           return {
             Header: key,
             accessor: key,
@@ -332,7 +339,10 @@ const index = () => {
   }
 
   const handleRefetchLeads = () => {
-    refetchLeads();
+    setDateObjToSearch({
+      selectedStartDate,
+      selectedEndDate,
+    });
   };
 
   return (
@@ -401,13 +411,6 @@ const index = () => {
           onClick={() => setOpenModal(true)}
           className="text-gray-800 text-2xl font-semibold cursor-pointer"
         />
-        <button
-          disabled={selectedRows?.length == 0}
-          className="bg-colorPrimary flex items-center gap-1 disabled:bg-colorPrimary/40 disabled:cursor-not-allowed py-1 px-3 rounded-md text-white"
-          onClick={() => setShowAllocationModal(true)}
-        >
-          <span>Allocate lead {selectedRows?.length}</span>
-        </button>
         {selectedRows?.length > 0 && (
           <button
             className="bg-gray-500 flex items-center gap-1 disabled:bg-colorPrimary/40 disabled:cursor-not-allowed py-1 px-3 rounded-md text-white"
@@ -433,6 +436,12 @@ const index = () => {
         columns={columns}
         openModal={openModal}
         closeModal={() => setOpenModal(false)}
+      />
+
+      <AllocateLeadModal
+        data={selectedRows}
+        onSubmit={handleAssignLeads}
+        loading={allocatingLeads}
       />
     </div>
   );

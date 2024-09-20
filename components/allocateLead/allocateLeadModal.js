@@ -51,37 +51,36 @@ const AllocateLeadModal = ({ data, onSubmit, loading }) => {
   };
 
   return (
-    <div className="w-full h-full p-2 flex flex-col">
-      <div className="h-[90%] flex flex-col">
-        <h2 className="text-lg font-semibold text-slate-600">
-          Allocate {data.length} leads
-        </h2>
+    <div className="w-full flex flex-row items-end gap-5 mt-2">
 
-        <select
-          onChange={(e) => setSelectedSalesMember(e.target.value)}
-          className="py-2 w-full px-2 rounded mt-1 border border-slate-600 outline-blue-500"
-        >
-          <option className="" value={""}>
-            {gettingSalesMembers ? "Loading..." : "Select sales member"}
-          </option>
+      <h2 className="text-lg font-semibold text-slate-600">
+        Allocate {data.length} leads
+      </h2>
 
-          {Array.isArray(salesMembers) &&
-            salesMembers?.length > 0 &&
-            salesMembers?.map((member) => (
-              <option
-                selected={selectedSalesMember == member.email}
-                className=""
-                value={member.email}
-              >
-                {member.name}
-              </option>
-            ))}
-        </select>
-      </div>
+      <select
+        onChange={(e) => setSelectedSalesMember(e.target.value)}
+        className="py-1  px-2 rounded mt-1 border border-slate-600 outline-blue-500"
+      >
+        <option className="" value={""}>
+          {gettingSalesMembers ? "Loading..." : "Select sales member"}
+        </option>
+
+        {Array.isArray(salesMembers) &&
+          salesMembers?.length > 0 &&
+          salesMembers?.map((member) => (
+            <option
+              selected={selectedSalesMember == member.email}
+              className=""
+              value={member.email}
+            >
+              {member.name}
+            </option>
+          ))}
+      </select>
 
       <button
         disabled={loading}
-        className={`text-white w-full bg-colorPrimary py-1 rounded-md disabled:bg-colorPrimary/40 ${
+        className={`text-white px-3 bg-colorPrimary py-[2px] rounded-md disabled:bg-colorPrimary/40 ${
           loading ? "animate-pulse" : ""
         }`}
         onClick={onFormSubmit}
