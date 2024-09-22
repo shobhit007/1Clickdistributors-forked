@@ -190,6 +190,7 @@ const ManageUsers = () => {
                 <th className="px-4 py-2 border">Name</th>
                 <th className="px-4 py-2 border">Email</th>
                 <th className="px-4 py-2 border">Role</th>
+                <th className="px-4 py-2 border">Manager</th>
                 <th className="px-4 py-2 border">Active</th>
                 <th className="px-4 py-2 border">Password</th>
                 <th className="px-4 py-2 border">Created At</th>
@@ -202,6 +203,7 @@ const ManageUsers = () => {
                   <td className="px-4 py-2 border">{item.name}</td>
                   <td className="px-4 py-2 border">{item.email}</td>
                   <td className="px-4 py-2 border">{item.role}</td>
+                  <td className="px-4 py-2 border">{item.manager}</td>
                   <td className="px-4 py-2 border">
                     <Toggle
                       toggle={item?.isActive ? true : false}

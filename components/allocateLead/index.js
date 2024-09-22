@@ -363,7 +363,6 @@ const index = () => {
 
   return (
     <div className="mt-4 px-2 py-1">
-      <button onClick={refetchLeads}>Refetch</button>
       {showDetailsModal && (
         <Modal>
           <div className="w-[90vw] sm:w-[55vw] md:w-[45vw] xl:w-[35vw] h-[70vh] bg-white rounded-md p-2 relative">
