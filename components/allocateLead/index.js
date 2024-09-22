@@ -162,7 +162,6 @@ const index = () => {
   const [leadsLoading, setLeadsLoading] = useState(false);
   const [allocatingLeads, setAllocatingLeads] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
-
   const [dateObjToSearch, setDateObjToSearch] = useState(null);
 
   const getAllLeads = async () => {
@@ -263,6 +262,23 @@ const index = () => {
   ];
   const avoidCols = ["id", "adType"];
 
+  let checkMarkCol = ["Select"].map((key) => {
+    return {
+      Header: camelToTitle(key),
+      Cell: ({ row }) => (
+        <div className="flex justify-center">
+          <input
+            type="checkbox"
+            checked={
+              selectedRows?.filter((item) => item.email == row?.original?.email)
+                ?.length > 0
+            }
+            readOnly={true}
+          />
+        </div>
+      ),
+    };
+  });
   const columns = useMemo(() => {
     if (leads?.length > 0) {
       let dynamicCols = Object.keys(leads[0] || {})
@@ -321,11 +337,11 @@ const index = () => {
         };
       });
 
-      return [...dynamicCols, ...statiCols];
+      return [...checkMarkCol, ...dynamicCols, ...statiCols];
     } else {
       return [];
     }
-  }, [leads]);
+  }, [leads, selectedRows]);
 
   if (leadsLoading) {
     return (
@@ -346,7 +362,7 @@ const index = () => {
   };
 
   return (
-    <div className="mt-4 px-2">
+    <div className="mt-4 px-2 py-1">
       <button onClick={refetchLeads}>Refetch</button>
       {showDetailsModal && (
         <Modal>
@@ -428,21 +444,32 @@ const index = () => {
           </button>
         )}
       </div>
-      <CustomTable
-        data={leads || []}
-        uniqueDataKey={"email"}
-        selectedRows={selectedRows}
-        setSelectedRows={setSelectedRows}
-        columns={columns}
-        openModal={openModal}
-        closeModal={() => setOpenModal(false)}
-      />
 
-      <AllocateLeadModal
-        data={selectedRows}
-        onSubmit={handleAssignLeads}
-        loading={allocatingLeads}
-      />
+      {leads?.length > 0 ? (
+        <CustomTable
+          data={leads || []}
+          uniqueDataKey={"email"}
+          selectedRows={selectedRows}
+          setSelectedRows={setSelectedRows}
+          columns={columns}
+          openModal={openModal}
+          closeModal={() => setOpenModal(false)}
+        />
+      ) : (
+        <div className="mt-10 w-full flex">
+          <h1 className="text-gray-600 font-semibold text-2xl">
+            No leads found for selected date range.
+          </h1>
+        </div>
+      )}
+
+      {selectedRows?.length > 0 && (
+        <AllocateLeadModal
+          data={selectedRows}
+          onSubmit={handleAssignLeads}
+          loading={allocatingLeads}
+        />
+      )}
     </div>
   );
 };
