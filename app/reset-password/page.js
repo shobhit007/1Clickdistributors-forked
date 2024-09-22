@@ -23,7 +23,7 @@ export default function PasswordReset() {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
+    <div className="flex justify-center items-center min-h-screen bg-gray-100 px-4 md:px-0">
       <div className="bg-white shadow-md rounded-lg p-8 max-w-md w-full">
         {currentStep === 0 && (
           <EmailStep
@@ -78,7 +78,9 @@ const EmailStep = ({ handleOtp, email, setEmail }) => {
 
   return (
     <div className="p-6">
-      <h2 className="text-2xl font-bold text-center mb-6">Enter Your Email</h2>
+      <h2 className="text-xl md:text-2xl font-bold text-center mb-6">
+        Enter Your Email
+      </h2>
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
           <label
@@ -149,7 +151,9 @@ const OtpStep = ({ onBack, onNext, data }) => {
 
   return (
     <div className="p-6">
-      <h2 className="text-2xl font-bold text-center mb-6">Enter OTP</h2>
+      <h2 className="text-xl md:text-2xl font-bold text-center mb-6">
+        Enter OTP
+      </h2>
       <p className="text-center mb-4">
         Please enter the OTP sent to your email.
       </p>
@@ -223,7 +227,9 @@ const UpdatePassword = ({ onBack, email }) => {
   };
   return (
     <div className="p-6">
-      <h2 className="text-2xl font-bold text-center mb-6">Enter Password</h2>
+      <h2 className="text-xl md:text-2xl font-bold text-center mb-6">
+        Enter Password
+      </h2>
       <p className="text-center mb-4">Enter you new password</p>
       <div className="mb-4">
         <label
