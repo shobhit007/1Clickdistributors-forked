@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { roles } from "@/lib/data/commonData";
 import { toast } from "react-toastify";
 
-const AdduserForm = ({ close, refetchUsers }) => {
+const AdduserForm = ({ close, refetchUsers, allUsers }) => {
   const [data, setData] = useState({
     name: "",
     email: "",
@@ -12,14 +12,21 @@ const AdduserForm = ({ close, refetchUsers }) => {
     phone: "",
     role: "",
     isActive: true,
+    manager: null,
   });
   const [loading, setLoading] = useState(false);
+  const [allManagers, setAllManagers] = useState(null);
 
   const handleInputChange = (event) => {
     let name = event.target.name;
     let value = event.target.value;
     setData((pre) => ({ ...pre, [name]: value }));
   };
+
+  useEffect(() => {
+    let managers = allUsers.filter((item) => item?.role?.includes("Manager"));
+    setAllManagers(managers);
+  }, [allUsers]);
 
   let spanStyle =
     "text-slate-600 font-semibold text-base flex items-center gap-1";
@@ -47,6 +54,17 @@ const AdduserForm = ({ close, refetchUsers }) => {
 
     try {
       setLoading(true);
+      let body = { ...data };
+
+      if (!body?.role?.includes("Member")) {
+        delete body.manager;
+      } else if (body.manager && body.manager != "") {
+        let selectedManger = allUsers.filter(
+          (item) => item.id == body.manager
+        )[0];
+        body.managerName = selectedManger.name;
+      }
+
       let token = localStorage.getItem("authToken");
       let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/auth/createAuth`;
       const res = await fetch(API_URL, {
@@ -55,7 +73,7 @@ const AdduserForm = ({ close, refetchUsers }) => {
           "Content-Type": "application/json",
           Authorization: "Bearer " + token,
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify(body),
       });
 
       const response = await res.json();
@@ -150,6 +168,30 @@ const AdduserForm = ({ close, refetchUsers }) => {
           ))}
         </select>
       </div>
+      {data.role?.includes("Member") && (
+        <div className="flex flex-col w-full gap-1">
+          <span className={`${spanStyle}`}>
+            {/* <MdOutlineMailOutline /> */}
+            Select manager
+          </span>
+          <select
+            className={`border p-1 rounded-md border-gray-400`}
+            name="manager"
+            value={data?.manager}
+            onChange={handleInputChange}
+          >
+            <option>Select manager</option>
+            {allManagers?.map((manager) => (
+              <option
+                value={manager.id}
+                selected={data?.manager == manager?.id}
+              >
+                {manager.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       <div className="mt-4 w-full">
         <button

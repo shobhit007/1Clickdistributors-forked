@@ -4,15 +4,17 @@ import React, { useEffect, useState } from "react";
 import { roles } from "@/lib/data/commonData";
 import { toast } from "react-toastify";
 
-const EdituserForm = ({ close, refetchUsers, currentUser }) => {
+const EdituserForm = ({ close, refetchUsers, currentUser, allUsers }) => {
   const [data, setData] = useState({
     name: "",
     password: "",
     phone: "",
     role: "",
+    manager: null,
+    managerName: null,
   });
   const [loading, setLoading] = useState(false);
-
+  const [allManagers, setAllManagers] = useState(null);
   useEffect(() => {
     if (currentUser) {
       setData({
@@ -20,13 +22,23 @@ const EdituserForm = ({ close, refetchUsers, currentUser }) => {
         password: currentUser.password,
         phone: currentUser.phone,
         role: currentUser.role,
+        manager: currentUser.manager || null,
       });
     }
   }, [currentUser]);
 
+  useEffect(() => {
+    let managers = allUsers.filter((item) => item?.role?.includes("Manager"));
+    setAllManagers(managers);
+  }, [allUsers]);
+
   const handleInputChange = (event) => {
     let name = event.target.name;
     let value = event.target.value;
+
+    if (name == "manager") {
+      console.log("for manager value is", value);
+    }
     setData((pre) => ({ ...pre, [name]: value }));
   };
 
@@ -51,6 +63,17 @@ const EdituserForm = ({ close, refetchUsers, currentUser }) => {
 
     try {
       setLoading(true);
+      let body = { ...data };
+
+      if (!body?.role?.includes("Member")) {
+        delete body.manager;
+      } else if (body.manager && body.manager != "") {
+        let selectedManger = allUsers.filter(
+          (item) => item.id == body.manager
+        )[0];
+        body.managerName = selectedManger.name;
+      }
+
       let token = localStorage.getItem("authToken");
       let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/auth/updateUser`;
       const res = await fetch(API_URL, {
@@ -59,7 +82,7 @@ const EdituserForm = ({ close, refetchUsers, currentUser }) => {
           "Content-Type": "application/json",
           Authorization: "Bearer " + token,
         },
-        body: JSON.stringify({ ...data, email: currentUser.email }),
+        body: JSON.stringify({ ...body, email: currentUser.email }),
       });
 
       const response = await res.json();
@@ -140,6 +163,31 @@ const EdituserForm = ({ close, refetchUsers, currentUser }) => {
           ))}
         </select>
       </div>
+
+      {data.role?.includes("Member") && (
+        <div className="flex flex-col w-full gap-1">
+          <span className={`${spanStyle}`}>
+            {/* <MdOutlineMailOutline /> */}
+            Select manager
+          </span>
+          <select
+            className={`border p-1 rounded-md border-gray-400`}
+            name="manager"
+            value={data?.manager}
+            onChange={handleInputChange}
+          >
+            <option>Select manager</option>
+            {allManagers?.map((manager) => (
+              <option
+                value={manager.id}
+                selected={data?.manager == manager?.id}
+              >
+                {manager.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       <div className="mt-4 w-full">
         <button

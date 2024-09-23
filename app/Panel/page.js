@@ -52,9 +52,8 @@ const Page = () => {
   });
 
   useEffect(() => {
-    console.log("user datails are", userDetails);
     if (userDetails?.permissionsType == "all_permissions") {
-      console.log("panels are", panels);
+      let panels = panelPermissions.map((item) => item.panelName);
       setuserRoles(panels);
       return;
     }

@@ -124,6 +124,7 @@ const ManageUsers = () => {
             <AdduserForm
               close={() => setShowAddUserModal(false)}
               refetchUsers={refetchUsers}
+              allUsers={allUsers}
             />
           </div>
         </Modal>
@@ -142,6 +143,7 @@ const ManageUsers = () => {
               close={() => setSelectedUserToEdit(false)}
               refetchUsers={refetchUsers}
               currentUser={selectedUserToEdit}
+              allUsers={allUsers}
             />
           </div>
         </Modal>
@@ -203,7 +205,7 @@ const ManageUsers = () => {
                   <td className="px-4 py-2 border">{item.name}</td>
                   <td className="px-4 py-2 border">{item.email}</td>
                   <td className="px-4 py-2 border">{item.role}</td>
-                  <td className="px-4 py-2 border">{item.manager}</td>
+                  <td className="px-4 py-2 border">{item.managerName}</td>
                   <td className="px-4 py-2 border">
                     <Toggle
                       toggle={item?.isActive ? true : false}
