@@ -225,6 +225,7 @@ const UpdatePassword = ({ onBack, email }) => {
       toast.error("Error sending OTP. Please try again.");
     }
   };
+
   return (
     <div className="p-6">
       <h2 className="text-xl md:text-2xl font-bold text-center mb-6">

@@ -46,7 +46,7 @@ const Header = () => {
         <h1 className="text-lg font-semibold capitalize">{role}</h1>
 
         <FaUser
-          className="text-3xl text-gray-700"
+          className="text-2xl text-gray-700 cursor-pointer"
           onClick={() => setShowUserDetailsPopup(true)}
         />
         <button
