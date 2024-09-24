@@ -9,9 +9,9 @@ import {
 } from "react-icons/md";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
-import Cookies from "js-cookie";
 import { useDispatch } from "react-redux";
 import { login } from "@/store/auth/authReducer";
+import Link from "next/link";
 
 const page = () => {
   const [email, setEmail] = useState("");
@@ -117,6 +117,12 @@ const page = () => {
           >
             {loading ? "Logging in..." : "Login"}
           </button>
+          <Link
+            href={`/reset-password`}
+            className="underline text-blue-500 mt-4 text-left"
+          >
+            Forgot Password
+          </Link>
         </div>
 
         {/* image component */}
