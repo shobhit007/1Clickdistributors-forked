@@ -259,7 +259,7 @@ export default function Sales() {
       </div>
       <CustomTable
         data={filterSalesLeads() || []}
-        uniqueDataKey={"email"}
+        uniqueDataKey={"leadId"}
         selectedRows={selectedRows}
         setSelectedRows={setSelectedRows}
         columns={columns}

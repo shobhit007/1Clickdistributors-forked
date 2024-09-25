@@ -10,7 +10,8 @@ import { useQuery } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import local from "next/font/local";
 import ShowDetails from "./showDetails";
-import ManualLeadForm from "../utills/ManualLeadForm";
+// import ManualLeadForm from "../utills/ManualLeadForm";
+import Filters from "./filters";
 
 const index = () => {
   const [openModal, setOpenModal] = useState(false);
@@ -23,6 +24,7 @@ const index = () => {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [dateObjToSearch, setDateObjToSearch] = useState(null);
   const [formVisible, setFormVisible] = useState(false);
+  const [leads, setLeads] = useState(null);
 
   const getAllLeads = async () => {
     try {
@@ -354,11 +356,11 @@ const index = () => {
           loading={allocatingLeads}
         />
       )}
-      {formVisible && (
+      {/* {formVisible && (
         <Modal>
           <div className="w-full h-[100vh] border-2 border-red-500"></div>
         </Modal>
-      )}
+      )} */}
     </div>
   );
 };
