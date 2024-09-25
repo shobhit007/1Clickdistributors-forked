@@ -10,10 +10,16 @@ import { useDispatch, useSelector } from "react-redux";
 import Modal from "./utills/Modal";
 import UserDetailView from "./userDetailView";
 import { GrLogout } from "react-icons/gr";
+import { MdSearch } from "react-icons/md";
 
 const Header = () => {
   const { role } = useSelector(authSelector);
-  const { displayComponent, userDetails } = useContext(panelContext);
+  const {
+    displayComponent,
+    userDetails,
+    setDisplayComponent,
+    setPreviousComponent,
+  } = useContext(panelContext);
   const dispatch = useDispatch();
   const router = useRouter();
   const [showUserDetailsPopup, setShowUserDetailsPopup] = useState(false);
@@ -22,6 +28,11 @@ const Header = () => {
     localStorage.clear();
     dispatch(logout());
     router.replace("/login");
+  };
+
+  const showGlobalSearch = () => {
+    setPreviousComponent(displayComponent);
+    setDisplayComponent("globalSearch");
   };
 
   return (
@@ -44,6 +55,11 @@ const Header = () => {
       {/* <img src="/logo.png" alt="logo" width={50} height={50} /> */}
       <div className="h-8 md:h-14 w-8 md:w-14 bg-colorPrimary rounded-full"></div>
       <div className="flex items-center gap-4">
+        <MdSearch
+          onClick={showGlobalSearch}
+          className="text-3xl text-gray-700 font-bold cursor-pointer"
+        />
+
         <div className="hidden md:flex flex-col">
           <h1 className="text-base font-semibold capitalize">
             Welcome, {userDetails?.name}

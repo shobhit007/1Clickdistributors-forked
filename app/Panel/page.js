@@ -12,11 +12,13 @@ import ManageUsers from "@/components/manageUsers";
 import AllocateLeadsPanel from "@/components/allocateLead";
 import Sales from "@/components/sales/Sales";
 import { panelPermissions } from "@/lib/data/commonData";
+import GlobalSearch from "@/components/globalSearch";
 
 const Page = () => {
   const [displayComponent, setDisplayComponent] = useState("Manage roles");
   const [userRoles, setuserRoles] = useState(null);
   const [token, setToken] = useState(null);
+  const [previousComponent, setPreviousComponent] = useState(null);
 
   useEffect(() => {
     let userToken = localStorage.getItem("authToken");
@@ -57,8 +59,6 @@ const Page = () => {
     queryFn: getUserDetails,
   });
 
-  console.log("user datials", userDetails);
-
   useEffect(() => {
     if (userDetails?.permissionsType == "all_permissions") {
       let panels = panelPermissions.map((item) => item.panelName);
@@ -91,17 +91,24 @@ const Page = () => {
 
   return (
     <panelContext.Provider
-      value={{ displayComponent, setDisplayComponent, userRoles, userDetails }}
+      value={{
+        displayComponent,
+        setDisplayComponent,
+        userRoles,
+        userDetails,
+        setPreviousComponent,
+        previousComponent,
+      }}
     >
       <div className="w-full h-[100vh] overflow-auto">
         <Header />
-        <PanelSelector />
-        {/* <button onClick={refetchUser}>refetch</button> */}
+        {displayComponent != "globalSearch" && <PanelSelector />}
 
         {displayComponent == "roles_and_permissions" && <ManageRoles />}
         {displayComponent == "manage_users" && <ManageUsers />}
         {displayComponent == "allocate_leads" && <AllocateLeadsPanel />}
         {displayComponent == "sales_panel" && <Sales />}
+        {displayComponent == "globalSearch" && <GlobalSearch />}
       </div>
     </panelContext.Provider>
   );
