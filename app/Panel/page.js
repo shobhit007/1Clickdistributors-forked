@@ -16,6 +16,7 @@ import { panelPermissions } from "@/lib/data/commonData";
 const Page = () => {
   const [displayComponent, setDisplayComponent] = useState("Manage roles");
   const [userRoles, setuserRoles] = useState(null);
+  const token = localStorage.getItem("authToken");
 
   // get roles of the user
   const getUserDetails = async () => {
@@ -47,9 +48,11 @@ const Page = () => {
     isLoading,
     refetch: refetchUser,
   } = useQuery({
-    queryKey: ["userRoles"],
+    queryKey: ["userRoles", token],
     queryFn: getUserDetails,
   });
+
+  console.log("user datials", userDetails);
 
   useEffect(() => {
     if (userDetails?.permissionsType == "all_permissions") {

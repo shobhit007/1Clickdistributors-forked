@@ -7,6 +7,7 @@ const INITIAL_STATE = {
   authenticationLoading: false,
   authenticationError: false,
   token: "",
+  userDetails: null,
 };
 
 const reducer = {
@@ -27,6 +28,7 @@ const reducer = {
     state.email = action.payload.email;
     state.role = action.payload.role;
     state.token = action.payload.token;
+    state.userDetails = action.payload.userDetails;
     state.authenticationLoading = false;
   },
   checkAuthStatus: (state, action) => {

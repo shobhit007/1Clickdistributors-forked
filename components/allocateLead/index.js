@@ -329,11 +329,13 @@ const index = () => {
           closeModal={() => setOpenModal(false)}
         />
       ) : (
-        <div className="mt-10 w-full flex">
-          <h1 className="text-gray-600 font-semibold text-2xl">
-            No leads found for selected date range.
-          </h1>
-        </div>
+        !leadsLoading && (
+          <div className="mt-10 w-full flex">
+            <h1 className="text-gray-600 font-semibold text-2xl">
+              No leads found for selected date range.
+            </h1>
+          </div>
+        )
       )}
 
       {selectedRows?.length > 0 && (

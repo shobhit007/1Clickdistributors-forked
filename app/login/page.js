@@ -46,7 +46,7 @@ const page = () => {
         localStorage.setItem("authToken", data.token);
         localStorage.setItem("role", data.role);
         localStorage.setItem("email", email);
-        router.push("/panel");
+        router.replace("/panel");
       } else {
         return toast.error(data.message);
       }

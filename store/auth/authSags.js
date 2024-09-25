@@ -29,18 +29,31 @@ function* handleCheckAuthStatus({ payload }) {
     let email = localStorage.getItem("email");
 
     const router = payload.router;
+    const toast = payload.toast;
 
     if (token) {
-      // const response = yield call(validateToken, payload);
-      // if (response.success) {
-      //   yield put(login(response));
-      // } else {
-      //   yield put(failedToAuthenticate({ error: "Invalid token" }));
-      //   router.push("/login");
-      // }
+      const response = yield call(validateToken, token);
+      console.log("response on check auth status", checkAuthStatus);
 
-      yield put(login({ role, email, token }));
-      router.push("/panel");
+      if (response.success && response.data) {
+        yield put(login({ role, email, token, userDetails: response.data }));
+        router.push("/panel");
+      } else if (
+        !response.success &&
+        response.message?.toLowerCase() == "jwt expired"
+      ) {
+        yield put(failedToAuthenticate({ error: "Token expired" }));
+        toast?.error("Your token has expired. we are logging you out.");
+        router.push("/login");
+      } else {
+        yield put(
+          failedToAuthenticate({ error: "Token could not be verified" })
+        );
+        toast?.error(
+          "Your token could not be verified. we are logging you out."
+        );
+        router.push("/login");
+      }
     } else {
       yield put(failedToAuthenticate({ error: "Token not found" }));
       router.push("/login");
