@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Toggle from "../utills/Toggle";
 import Modal from "../utills/Modal";
 import { toast } from "react-toastify";
@@ -9,6 +9,8 @@ import { CiEdit } from "react-icons/ci";
 import AdduserForm from "./addUserForm";
 import EdituserForm from "./edituserForm";
 import EdituserPermissions from "./editUserPermissions";
+import { camelToTitle } from "../utills/commonFunctions";
+import CustomTable from "../utills/customTable";
 
 const ManageUsers = () => {
   const [loading, setLoading] = useState(false);
@@ -98,6 +100,90 @@ const ManageUsers = () => {
     }
   };
 
+  const columns = useMemo(() => {
+    let cols = [
+      "name",
+      "email",
+      "role",
+      "managerName",
+      "active",
+      "password",
+      "createdAt",
+      "edit",
+    ];
+    return cols.map((key) => {
+      if (key == "createdAt") {
+        return {
+          Header: key,
+          accessor: key,
+          Cell: ({ value }) => {
+            return (
+              value && (
+                <p>{new Date(value?._seconds * 1000)?.toLocaleDateString()}</p>
+              )
+            );
+          },
+          sortType: (rowA, rowB, columnId) => {
+            const dateA = rowA.values[columnId]?._seconds
+              ? new Date(rowA.values[columnId]?._seconds * 1000)
+              : null;
+            const dateB = rowB.values[columnId]?._seconds
+              ? new Date(rowB.values[columnId]?._seconds * 1000)
+              : null;
+
+            if (!dateA && !dateB) return 0; // Both dates are missing
+            if (!dateA) return 1; // dateA is missing, place it after dateB
+            if (!dateB) return -1; // dateB is missing, place it after dateA
+
+            return dateA > dateB ? 1 : -1; // Compare valid dates
+          },
+          id: key,
+        };
+      }
+
+      if (key == "active") {
+        return {
+          Header: "Active",
+          accessor: "isActive",
+          Cell: ({ value, row }) => (
+            <div className="p-2">
+              <Toggle
+                toggle={value ? true : false}
+                handleClick={() => handleIsActive(value, row.original.email)}
+              />
+            </div>
+          ),
+        };
+      }
+      if (key == "edit") {
+        return {
+          Header: "Edit",
+          Cell: ({ value, row }) => (
+            <div className="flex justify-center items-center gap-4 ">
+              <CiEdit
+                onClick={() => setSelectedUserToEdit(row.original)}
+                className="text-xl text-slate-600 cursor-pointer hover:text-colorPrimary"
+              />
+
+              <button
+                onClick={() => setSelectedUserToEditPermissions(row.original)}
+                className="text-white bg-colorPrimary py-1 px-3 rounded-md"
+              >
+                Permissions
+              </button>
+            </div>
+          ),
+        };
+      }
+
+      return {
+        Header: camelToTitle(key),
+        accessor: key,
+        id: key,
+      };
+    });
+  }, []);
+
   if (loading) {
     return (
       <div className="w-full min-h-[60vh] flex flex-col items-center justify-center">
@@ -124,6 +210,7 @@ const ManageUsers = () => {
             <AdduserForm
               close={() => setShowAddUserModal(false)}
               refetchUsers={refetchUsers}
+              allUsers={allUsers}
             />
           </div>
         </Modal>
@@ -142,6 +229,7 @@ const ManageUsers = () => {
               close={() => setSelectedUserToEdit(false)}
               refetchUsers={refetchUsers}
               currentUser={selectedUserToEdit}
+              allUsers={allUsers}
             />
           </div>
         </Modal>
@@ -165,7 +253,7 @@ const ManageUsers = () => {
         </Modal>
       )}
 
-      <div className="p-6">
+      {/* <div className="p-6">
         <div className="mb-4 flex items-center gap-3">
           <input
             type="text"
@@ -190,6 +278,7 @@ const ManageUsers = () => {
                 <th className="px-4 py-2 border">Name</th>
                 <th className="px-4 py-2 border">Email</th>
                 <th className="px-4 py-2 border">Role</th>
+                <th className="px-4 py-2 border">Manager</th>
                 <th className="px-4 py-2 border">Active</th>
                 <th className="px-4 py-2 border">Password</th>
                 <th className="px-4 py-2 border">Created At</th>
@@ -202,6 +291,7 @@ const ManageUsers = () => {
                   <td className="px-4 py-2 border">{item.name}</td>
                   <td className="px-4 py-2 border">{item.email}</td>
                   <td className="px-4 py-2 border">{item.role}</td>
+                  <td className="px-4 py-2 border">{item.managerName}</td>
                   <td className="px-4 py-2 border">
                     <Toggle
                       toggle={item?.isActive ? true : false}
@@ -234,7 +324,34 @@ const ManageUsers = () => {
             </tbody>
           </table>
         </div>
+      </div> */}
+
+      <div className="mb-4 flex items-center gap-3">
+        <input
+          type="text"
+          value={searchTerm}
+          onChange={handleSearch}
+          placeholder="Search by name, email, or role"
+          className="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+
+        <button
+          onClick={() => setShowAddUserModal(true)}
+          className="text-white bg-colorPrimary py-1 px-3 rounded-md"
+        >
+          Add user
+        </button>
       </div>
+
+      <CustomTable
+        data={filteredData || []}
+        uniqueDataKey={"email"}
+        selectedRows={[]}
+        setSelectedRows={() => {}}
+        columns={columns}
+        // openModal={openModal}
+        // closeModal={() => setOpenModal(false)}
+      />
     </div>
   );
 };

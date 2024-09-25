@@ -13,148 +13,6 @@ import ShowDetails from "./showDetails";
 import ManualLeadForm from "../utills/ManualLeadForm";
 
 const index = () => {
-  let data = [
-    {
-      name: "Abhishek",
-      role: "superAdministrator",
-      age: 22,
-      createdAt: "2024-09-18T11:33:35.678Z",
-      language: "js",
-    },
-    {
-      name: "Shubham",
-      role: "administrator",
-      age: 26,
-      createdAt: "2024-09-13T11:33:35.678Z",
-      language: "python",
-    },
-    {
-      name: "Aman",
-      role: "manager",
-      age: 22,
-      createdAt: "2024-09-18T11:33:35.678Z",
-      language: "python",
-    },
-    {
-      name: "Vijay",
-      role: "sales",
-      age: 23,
-      createdAt: "2024-09-12T11:33:35.678Z",
-      language: "java",
-    },
-    {
-      name: "Rohit",
-      role: "superAdministrator",
-      age: 27,
-      createdAt: "2024-09-10T11:33:35.678Z",
-      language: "ruby",
-    },
-    {
-      name: "Aakash",
-      role: "administrator",
-      age: 28,
-      createdAt: "2024-09-28T11:33:35.678Z",
-      language: "go",
-    },
-    {
-      name: "Nishant",
-      role: "manager",
-      age: 24,
-      createdAt: "2024-09-11T11:33:35.678Z",
-      language: "js",
-    },
-    {
-      name: "Siddharth",
-      role: "sales",
-      age: 25,
-      createdAt: "2024-09-29T11:33:35.678Z",
-      language: "python",
-    },
-    {
-      name: "Harsh",
-      role: "superAdministrator",
-      age: 30,
-      createdAt: "2024-09-01T11:33:35.678Z",
-      language: "java",
-    },
-    {
-      name: "Ishan",
-      role: "administrator",
-      age: 21,
-      createdAt: "2024-09-08T11:33:35.678Z",
-      language: "ruby",
-    },
-    {
-      name: "Kartik",
-      role: "manager",
-      age: 29,
-      createdAt: "2024-09-07T11:33:35.678Z",
-      language: "go",
-    },
-    {
-      name: "Manish",
-      role: "sales",
-      age: 23,
-      createdAt: "2024-09-14T11:33:35.678Z",
-      language: "js",
-    },
-    {
-      name: "Ravi",
-      role: "superAdministrator",
-      age: 27,
-      createdAt: "2024-09-02T11:33:35.678Z",
-      language: "python",
-    },
-    {
-      name: "Rahul",
-      role: "administrator",
-      age: 26,
-      createdAt: "2024-09-18T11:33:35.678Z",
-      language: "java",
-    },
-    {
-      name: "Sumit",
-      role: "manager",
-      age: 25,
-      createdAt: "2024-09-07T11:33:35.678Z",
-      language: "ruby",
-    },
-    {
-      name: "Tanmay",
-      role: "sales",
-      age: 28,
-      createdAt: "2024-09-09T11:33:35.678Z",
-      language: "go",
-    },
-    {
-      name: "Ujjwal",
-      role: "superAdministrator",
-      age: 22,
-      createdAt: "2024-09-22T11:33:35.678Z",
-      language: "js",
-    },
-    {
-      name: "Yash",
-      role: "administrator",
-      age: 24,
-      createdAt: "2024-09-27T11:33:35.678Z",
-      language: "python",
-    },
-    {
-      name: "Zaid",
-      role: "manager",
-      age: 26,
-      createdAt: "2024-09-30T11:33:35.678Z",
-      language: "java",
-    },
-    {
-      name: "Vivek",
-      role: "sales",
-      age: 29,
-      createdAt: "2024-09-17T11:33:35.678Z",
-      language: "ruby",
-    },
-  ];
   const [openModal, setOpenModal] = useState(false);
   const [selectedRows, setSelectedRows] = useState([]);
   const [selectedStartDate, setSelectedStartDate] = useState(null);
@@ -200,10 +58,16 @@ const index = () => {
     }
   };
 
-  const { data: leads, refetch: refetchLeads } = useQuery({
+  const { data, refetch: refetchLeads } = useQuery({
     queryKey: ["allLeads", dateObjToSearch],
     queryFn: getAllLeads,
   });
+
+  useEffect(() => {
+    if (Array.isArray(data) && data?.length > 0) {
+      setLeads(data);
+    }
+  }, [data]);
 
   useEffect(() => {
     let start = moment()
@@ -221,7 +85,7 @@ const index = () => {
 
   const handleAssignLeads = async (salesMember) => {
     try {
-      if (!salesMember || salesMember == "") {
+      if (!salesMember) {
         return;
       }
       const leads = selectedRows?.map((item) => item.leadId);
@@ -236,7 +100,8 @@ const index = () => {
         },
         body: JSON.stringify({
           leads,
-          salesMember,
+          salesMember: salesMember.id,
+          salesMemberName: salesMember.name,
         }),
       });
       setAllocatingLeads(false);
@@ -332,6 +197,13 @@ const index = () => {
             id: key,
           };
         }
+        if (key == "salesExecutive") {
+          return {
+            Header: camelToTitle(key),
+            accessor: "salesExecutiveName",
+            id: key,
+          };
+        }
         return {
           Header: camelToTitle(key),
           accessor: key,
@@ -344,17 +216,6 @@ const index = () => {
       return [];
     }
   }, [leads, selectedRows]);
-
-  if (leadsLoading) {
-    return (
-      <div className="w-full min-h-[40vh] flex flex-col items-center justify-center">
-        <img src="/loader.gif" className="h-[60px] w-auto" alt="loading" />
-        <p className="text-xl font-bold text-gray-500 mt-3">
-          Loading leads... please wait
-        </p>
-      </div>
-    );
-  }
 
   const handleRefetchLeads = () => {
     setDateObjToSearch({
@@ -454,6 +315,17 @@ const index = () => {
           </button>
         )}
       </div>
+
+      <Filters setLeads={setLeads} originalData={data} />
+
+      {leadsLoading && (
+        <div className="w-full flex flex-col items-center justify-center">
+          <img src="/loader.gif" className="h-[30px] w-auto" alt="loading" />
+          <p className="text-xl font-bold text-gray-500 mt-3">
+            Loading leads... please wait
+          </p>
+        </div>
+      )}
 
       {leads?.length > 0 ? (
         <CustomTable

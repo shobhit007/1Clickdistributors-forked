@@ -11,15 +11,17 @@ import ManageRoles from "@/components/homepage/ManageRoles";
 import ManageUsers from "@/components/manageUsers";
 import AllocateLeadsPanel from "@/components/allocateLead";
 import Sales from "@/components/sales/Sales";
+import { panelPermissions } from "@/lib/data/commonData";
 
 const Page = () => {
   const [displayComponent, setDisplayComponent] = useState("Manage roles");
+  const [userRoles, setuserRoles] = useState(null);
 
   // get roles of the user
-  const getRoles = async () => {
+  const getUserDetails = async () => {
     try {
       const token = localStorage.getItem("authToken");
-      let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/roles/getRolePanels`;
+      let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/auth/getUserDetails`;
       const response = await fetch(API_URL, {
         method: "GET",
         headers: {
@@ -29,7 +31,7 @@ const Page = () => {
 
       const data = await response.json();
       if (data.success) {
-        return data;
+        return data.data;
       } else {
         return null;
       }
@@ -41,40 +43,52 @@ const Page = () => {
 
   // Fetch user roles using react-query
   const {
-    data: userRoles,
+    data: userDetails,
     isLoading,
-    refetch: refetchRoles,
+    refetch: refetchUser,
   } = useQuery({
     queryKey: ["userRoles"],
-    queryFn: getRoles,
-    retry: false,
-    refetchOnWindowFocus: false,
+    queryFn: getUserDetails,
   });
 
   useEffect(() => {
-    if (userRoles?.panels?.length > 0) {
-      setDisplayComponent(userRoles?.panels?.[0]);
+    if (userDetails?.permissionsType == "all_permissions") {
+      let panels = panelPermissions.map((item) => item.panelName);
+      setuserRoles(panels);
+      return;
+    }
+
+    if (userDetails?.userPermissions) {
+      let panels = Object.keys(userDetails.userPermissions || {});
+      let roles = [];
+      for (let panel of panels) {
+        if (userDetails.userPermissions[panel]?.length > 0) {
+          roles.push(panel);
+        }
+      }
+      setuserRoles(roles);
+    }
+  }, [userDetails]);
+
+  useEffect(() => {
+    if (userRoles?.length > 0) {
+      let previousComponent = localStorage.getItem("currentDisplayComponent");
+      if (previousComponent && userRoles.includes(previousComponent)) {
+        setDisplayComponent(previousComponent);
+      } else {
+        setDisplayComponent(userRoles[0]);
+      }
     }
   }, [userRoles]);
 
-  // if (isLoading) {
-  //   return (
-  //     <div className="w-full min-h-[60vh] flex flex-col items-center justify-center">
-  //       <img src="/loader.gif" className="h-[60px] w-auto" alt="loading" />
-  //       <p className="text-xl font-bold text-gray-500 mt-3">
-  //         Loading... please wait
-  //       </p>
-  //     </div>
-  //   );
-  // }
-
   return (
     <panelContext.Provider
-      value={{ displayComponent, setDisplayComponent, userRoles }}
+      value={{ displayComponent, setDisplayComponent, userRoles, userDetails }}
     >
       <div className="w-full h-[100vh] overflow-auto">
         <Header />
         <PanelSelector />
+        {/* <button onClick={refetchUser}>refetch</button> */}
 
         {displayComponent == "roles_and_permissions" && <ManageRoles />}
         {displayComponent == "manage_users" && <ManageUsers />}
