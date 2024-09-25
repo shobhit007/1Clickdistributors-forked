@@ -1,19 +1,39 @@
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import moment from "moment";
 import { useQuery } from "@tanstack/react-query";
 import CustomTable from "../utills/customTable";
 import { camelToTitle } from "../utills/commonFunctions";
 import Modal from "../utills/Modal";
 import UpdateLead from "./UpdateLead";
+import MultiSelectDropDown from "../uiCompoents/MultiSelectDropDown";
+import { dispositions, subDispositions } from "@/lib/data/commonData";
+
+const salesFilters = ["All", "Pendings", "New Leads", "Follow Ups"];
 
 export default function Sales() {
   const [openModal, setOpenModal] = React.useState(false);
   const [selectedRows, setSelectedRows] = React.useState([]);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
+  const [startDate, setStartDate] = useState(moment().format("YYYY-MM-DD"));
+  const [endDate, setEndDate] = useState(moment().format("YYYY-MM-DD"));
+  const [date, setDate] = useState(null);
+  const [selectedFilter, setSelectedFilter] = useState("All");
+  const [filters, setFilters] = useState({
+    divisions: [],
+  });
+
+  // search for default date
+  useEffect(() => {
+    setDate({
+      startDate: startDate,
+      endDate: endDate,
+    });
+  }, []);
 
   // get roles of the user
   const getLeads = async () => {
     try {
+      if (!date) return null;
       const token = localStorage.getItem("authToken");
       let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/leads/getLeads`;
       const response = await fetch(API_URL, {
@@ -23,8 +43,8 @@ export default function Sales() {
           "content-type": "application/json",
         },
         body: JSON.stringify({
-          startDate: moment("2024-09-15"),
-          endDate: moment(),
+          startDate: date.startDate,
+          endDate: date.endDate,
         }),
       });
 
@@ -41,12 +61,19 @@ export default function Sales() {
   };
 
   // Fetch user roles using react-query
-  const { data: leads, refetch: refetchRoles } = useQuery({
-    queryKey: ["salesLeads"],
+  const { data: leads } = useQuery({
+    queryKey: ["salesLeads", date],
     queryFn: getLeads,
     retry: false,
     refetchOnWindowFocus: false,
   });
+
+  const handleSearchLeads = () => {
+    setDate({
+      startDate: startDate,
+      endDate: endDate,
+    });
+  };
 
   const staticColumns = [
     "assignedAt",
@@ -123,9 +150,93 @@ export default function Sales() {
     }
   }, [leads]);
 
+  const subDispositionOptions = [
+    ...new Set(Object.values(subDispositions).flat()),
+  ];
+
+  const filterSalesLeads = () => {
+    if (!leads) return [];
+    const filteredLeads = leads?.filter((lead) => {
+      if (selectedFilter === "All") {
+        return true;
+      } else if (selectedFilter === "Pendings") {
+        return lead.disposition === "Not Open";
+      } else if (selectedFilter === "New Leads") {
+        if (
+          lead.disposition === "Not Open" &&
+          moment(lead.createdAt).isAfter(moment().startOf("day")) &&
+          moment(lead.createdAt).isBefore(moment().endOf("day"))
+        ) {
+          return true;
+        }
+      } else if (selectedFilter === "Follow Ups") {
+        return lead.disposition === "FollowUp";
+      }
+    });
+
+    return filteredLeads;
+  };
+
   return (
     <div className="pt-4">
       <div className="px-4 mb-6">
+        <div className="flex gap-2 items-end pt-1 ob-2 px-3 rounded-md flex-wrap">
+          <div className="flex gap-2">
+            <div className="flex flex-col">
+              <span className="text-[12px] text-gray-500">From</span>
+              <input
+                type="date"
+                className="text-[12px] border border-gray-600 rounded px-2"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+              />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[12px] text-gray-500">To</span>
+              <input
+                type="date"
+                className="text-[12px] border border-gray-600 rounded px-2"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+              />
+            </div>
+            <div className="flex ml-2">
+              <button
+                onClick={handleSearchLeads}
+                className="text-white bg-blue-500 px-2 py-1 rounded-md text-xs mt-auto"
+              >
+                Search
+              </button>
+            </div>
+          </div>
+          <div className="flex flex-1 gap-2 ml-4">
+            <MultiSelectDropDown
+              label={"Dispositions"}
+              options={dispositions}
+            />
+            <MultiSelectDropDown
+              label={"Sub Dispositions"}
+              options={subDispositionOptions}
+            />
+            {salesFilters.map((filter, idx) => (
+              <button
+                key={idx.toString()}
+                onClick={() => setSelectedFilter(filter)}
+                className={`border  rounded px-4 py-1 cursor-pointer ${
+                  selectedFilter === filter ? "bg-colorPrimary" : "bg-white"
+                } ${
+                  selectedFilter === filter
+                    ? "border-colorPrimary"
+                    : "border-gray-300"
+                } ${
+                  selectedFilter === filter ? "text-white" : "text-gray-600"
+                }`}
+              >
+                {filter}
+              </button>
+            ))}
+          </div>
+        </div>
         <div className="w-full flex items-center gap-4">
           <button
             disabled={!selectedRows.length || selectedRows.length > 1}
@@ -147,7 +258,7 @@ export default function Sales() {
         </div>
       </div>
       <CustomTable
-        data={leads || []}
+        data={filterSalesLeads() || []}
         uniqueDataKey={"email"}
         selectedRows={selectedRows}
         setSelectedRows={setSelectedRows}

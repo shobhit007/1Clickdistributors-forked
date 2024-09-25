@@ -10,6 +10,7 @@ import { useQuery } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import local from "next/font/local";
 import ShowDetails from "./showDetails";
+import ManualLeadForm from "../utills/ManualLeadForm";
 
 const index = () => {
   let data = [
@@ -163,6 +164,7 @@ const index = () => {
   const [allocatingLeads, setAllocatingLeads] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [dateObjToSearch, setDateObjToSearch] = useState(null);
+  const [formVisible, setFormVisible] = useState(false);
 
   const getAllLeads = async () => {
     try {
@@ -363,7 +365,15 @@ const index = () => {
 
   return (
     <div className="mt-4 px-2 py-1">
-      <button onClick={refetchLeads}>Refetch</button>
+      <div className="flex items-center gap-4">
+        <button onClick={refetchLeads}>Refetch</button>
+        <button
+          onClick={() => setFormVisible(true)}
+          className="rounded py-1 px-2 text-white bg-gray-400 hover:bg-gray-600"
+        >
+          Create Manual Lead
+        </button>
+      </div>
       {showDetailsModal && (
         <Modal>
           <div className="w-[90vw] sm:w-[55vw] md:w-[45vw] xl:w-[35vw] h-[70vh] bg-white rounded-md p-2 relative">
@@ -469,6 +479,11 @@ const index = () => {
           onSubmit={handleAssignLeads}
           loading={allocatingLeads}
         />
+      )}
+      {formVisible && (
+        <Modal>
+          <div className="w-full h-[100vh] border-2 border-red-500"></div>
+        </Modal>
       )}
     </div>
   );
