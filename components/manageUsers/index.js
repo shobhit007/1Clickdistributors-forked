@@ -35,7 +35,6 @@ const ManageUsers = () => {
 
       const data = await response.json();
       setLoading(false);
-      console.log("data in func ", data);
       if (data.users) {
         return data?.users;
       } else {

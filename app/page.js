@@ -5,8 +5,7 @@ import { useRouter } from "next/navigation";
 const page = () => {
   const router = useRouter();
   useEffect(() => {
-    console.log("pusing to panel")
-    router.push("/panel");
+    router.replace("/panel");
   }, []);
 
   return (

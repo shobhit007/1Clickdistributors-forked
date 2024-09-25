@@ -9,10 +9,11 @@ import { FaUser } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import Modal from "./utills/Modal";
 import UserDetailView from "./userDetailView";
+import { GrLogout } from "react-icons/gr";
 
 const Header = () => {
   const { role } = useSelector(authSelector);
-  const { displayComponent, ...body } = useContext(panelContext);
+  const { displayComponent, userDetails } = useContext(panelContext);
   const dispatch = useDispatch();
   const router = useRouter();
   const [showUserDetailsPopup, setShowUserDetailsPopup] = useState(false);
@@ -20,11 +21,11 @@ const Header = () => {
   const handleLogout = () => {
     localStorage.clear();
     dispatch(logout());
-    router.push("/login");
+    router.replace("/login");
   };
 
   return (
-    <div className="bg-gray-200 px-2 py-4 flex justify-between w-full items-center ">
+    <div className="bg-gray-200 px-2 py-1 md:py-4 flex justify-between w-full items-center ">
       {showUserDetailsPopup && (
         <Modal>
           <div className="w-[95vw] md:[50vw] lg:[40vw] xl:w-[28vw] h-[70vh] p-2 bg-white relative rounded-md overflow-hidden">
@@ -41,20 +42,34 @@ const Header = () => {
       )}
 
       {/* <img src="/logo.png" alt="logo" width={50} height={50} /> */}
-      <div className="h-14 w-14 bg-colorPrimary rounded-full"></div>
-      <div className="flex items-center gap-3">
-        <h1 className="text-lg font-semibold capitalize">{role}</h1>
+      <div className="h-8 md:h-14 w-8 md:w-14 bg-colorPrimary rounded-full"></div>
+      <div className="flex items-center gap-4">
+        <div className="hidden md:flex flex-col">
+          <h1 className="text-base font-semibold capitalize">
+            Welcome, {userDetails?.name}
+          </h1>
+          <h1 className="text-sm text-gray-500 capitalize">
+            ({userDetails?.role})
+          </h1>
+        </div>
 
-        <FaUser
-          className="text-2xl text-gray-700 cursor-pointer"
-          onClick={() => setShowUserDetailsPopup(true)}
-        />
+        <div className="flex items-center gap-1">
+          <FaUser
+            className="text-xl md:text-2xl text-gray-700 cursor-pointer"
+            onClick={() => setShowUserDetailsPopup(true)}
+          />
+        </div>
         <button
-          className="text-white bg-colorPrimary px-4 py-1 rounded-md"
+          className="text-white bg-colorPrimary px-4 hidden md:flex items-center gap-2 py-1 rounded-md"
           onClick={handleLogout}
         >
           Logout
+          <GrLogout className="text-white text-sm" />
         </button>
+        <GrLogout
+          onClick={handleLogout}
+          className="text-gray-800 text-xl md:hidden"
+        />
       </div>
     </div>
   );
