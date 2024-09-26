@@ -1,22 +1,68 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { MdClose } from "react-icons/md";
+import { useQuery } from "@tanstack/react-query";
+import { dispositions, subDispositions } from "@/lib/data/commonData";
+import { toast } from "react-toastify";
 
-const ManualLeadForm = () => {
+const ManualLeadForm = ({ onClose }) => {
   // Initialize state for each form field
   const [formData, setFormData] = useState({
     date: "",
     lookingFor: "",
     companyName: "",
     contactPerson: "",
-    mobile: "",
-    altMobile: "",
-    mailId: "",
+    phone: "",
+    altPhone: "",
+    email: "",
     city: "",
-    message: "",
+    requirement: "",
     profileScore: "",
-    allocatedTo: "",
-    disposition: "",
+    salesMember: "",
+    disposition: dispositions[0],
+    subDisposition: "",
     remarks: "",
   });
+  const [loading, setLoading] = useState(false);
+
+  const getSalesMembers = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+      let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/sales/getSalesMembers`;
+      const response = await fetch(API_URL, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await response.json();
+      return data.salesMembers;
+    } catch (error) {
+      console.log("error in getting leads", error.message);
+      return null;
+    }
+  };
+
+  const { data: salesMembers } = useQuery({
+    queryKey: ["salesMembers"],
+    queryFn: getSalesMembers,
+  });
+
+  // Set default salesMember once salesMembers are fetched
+  useEffect(() => {
+    if (salesMembers?.length > 0) {
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        salesMember: salesMembers[0].salesMemberId,
+      }));
+    }
+  }, [salesMembers]);
+
+  useEffect(() => {
+    setFormData((pre) => ({
+      ...pre,
+      subDisposition: subDispositions[formData.disposition][0],
+    }));
+  }, [formData.disposition]);
 
   // Handle input changes
   const handleChange = (e) => {
@@ -30,320 +76,349 @@ const ManualLeadForm = () => {
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
     try {
-      const response = await fetch("/api/submit-form", {
+      let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/leads/createdManualLead`;
+      const response = await fetch(API_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
         },
         body: JSON.stringify(formData),
       });
 
       const result = await response.json();
-      console.log(result.message);
 
-      // Optionally, display a success message to the user
-      alert(result.message);
-
-      // Reset form
-      setFormData({
-        date: "",
-        lookingFor: "",
-        companyName: "",
-        contactPerson: "",
-        mobile: "",
-        altMobile: "",
-        mailId: "",
-        city: "",
-        message: "",
-        profileScore: "",
-        allocatedTo: "",
-        disposition: "",
-        remarks: "",
-      });
+      if (result.success) {
+        toast.success("Lead created successfully");
+        onClose();
+      } else {
+        toast.error(result.message);
+      }
+      setLoading(false);
     } catch (error) {
-      console.error("Error submitting form:", error);
-      alert("There was an error submitting the form. Please try again.");
+      setLoading(false);
+      toast.error(error.message);
     }
   };
 
   return (
     <div className="max-w-xl mx-auto p-6 bg-white shadow-md rounded-md mt-10">
-      <h1 className="text-2xl font-bold mb-6 text-center">Contact Form</h1>
-      <form onSubmit={handleSubmit}>
-        {/* Date */}
-        <div className="mb-4">
-          <label
-            htmlFor="date"
-            className="block text-gray-700 font-semibold mb-2"
-          >
-            Date:
-          </label>
-          <input
-            type="date"
-            id="date"
-            name="date"
-            value={formData.date}
-            onChange={handleChange}
-            required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300"
-          />
-        </div>
+      <div className="flex justify-end">
+        <MdClose
+          className="text-gray-700 cursor-pointer text-2xl mr-4"
+          onClick={onClose}
+        />
+      </div>
+      <div className="h-[80vh] overflow-auto">
+        <h1 className="text-2xl font-bold mb-6 text-center">
+          Create Manual Lead
+        </h1>
+        <form onSubmit={handleSubmit} className="px-4">
+          {/* Date */}
+          <div className="mb-4">
+            <label
+              htmlFor="date"
+              className="block text-gray-700 font-semibold mb-2"
+            >
+              Date:
+            </label>
+            <input
+              type="date"
+              id="date"
+              name="date"
+              value={formData.date}
+              onChange={handleChange}
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300"
+            />
+          </div>
 
-        {/* Looking For */}
-        <div className="mb-4">
-          <label
-            htmlFor="lookingFor"
-            className="block text-gray-700 font-semibold mb-2"
-          >
-            Looking For:
-          </label>
-          <input
-            type="text"
-            id="lookingFor"
-            name="lookingFor"
-            value={formData.lookingFor}
-            onChange={handleChange}
-            required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300"
-            placeholder="What are you looking for?"
-          />
-        </div>
+          {/* Looking For */}
+          <div className="mb-4">
+            <label
+              htmlFor="lookingFor"
+              className="block text-gray-700 font-semibold mb-2"
+            >
+              Looking For:
+            </label>
+            <input
+              type="text"
+              id="lookingFor"
+              name="lookingFor"
+              value={formData.lookingFor}
+              onChange={handleChange}
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300"
+              placeholder="What are you looking for?"
+            />
+          </div>
 
-        {/* Company Name */}
-        <div className="mb-4">
-          <label
-            htmlFor="companyName"
-            className="block text-gray-700 font-semibold mb-2"
-          >
-            Company Name:
-          </label>
-          <input
-            type="text"
-            id="companyName"
-            name="companyName"
-            value={formData.companyName}
-            onChange={handleChange}
-            required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300"
-            placeholder="Enter your company name"
-          />
-        </div>
+          {/* Company Name */}
+          <div className="mb-4">
+            <label
+              htmlFor="companyName"
+              className="block text-gray-700 font-semibold mb-2"
+            >
+              Company Name:
+            </label>
+            <input
+              type="text"
+              id="companyName"
+              name="companyName"
+              value={formData.companyName}
+              onChange={handleChange}
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300"
+              placeholder="Enter your company name"
+            />
+          </div>
 
-        {/* Contact Person */}
-        <div className="mb-4">
-          <label
-            htmlFor="contactPerson"
-            className="block text-gray-700 font-semibold mb-2"
-          >
-            Contact Person:
-          </label>
-          <input
-            type="text"
-            id="contactPerson"
-            name="contactPerson"
-            value={formData.contactPerson}
-            onChange={handleChange}
-            required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300"
-            placeholder="Enter contact person's name"
-          />
-        </div>
+          {/* Contact Person */}
+          <div className="mb-4">
+            <label
+              htmlFor="contactPerson"
+              className="block text-gray-700 font-semibold mb-2"
+            >
+              Contact Person:
+            </label>
+            <input
+              type="text"
+              id="contactPerson"
+              name="contactPerson"
+              value={formData.contactPerson}
+              onChange={handleChange}
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300"
+              placeholder="Enter contact person's name"
+            />
+          </div>
 
-        {/* Mobile */}
-        <div className="mb-4">
-          <label
-            htmlFor="mobile"
-            className="block text-gray-700 font-semibold mb-2"
-          >
-            Mobile:
-          </label>
-          <input
-            type="tel"
-            id="mobile"
-            name="mobile"
-            value={formData.mobile}
-            onChange={handleChange}
-            required
-            pattern="[0-9]{10}"
-            placeholder="Enter 10-digit mobile number"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300"
-          />
-        </div>
+          {/* Mobile */}
+          <div className="mb-4">
+            <label
+              htmlFor="phone"
+              className="block text-gray-700 font-semibold mb-2"
+            >
+              Phone:
+            </label>
+            <input
+              type="tel"
+              id="phone"
+              name="phone"
+              value={formData.phone}
+              onChange={handleChange}
+              required
+              pattern="[0-9]{10}"
+              placeholder="Enter 10-digit mobile number"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300"
+            />
+          </div>
 
-        {/* Alt Mobile */}
-        <div className="mb-4">
-          <label
-            htmlFor="altMobile"
-            className="block text-gray-700 font-semibold mb-2"
-          >
-            Alternate Mobile:
-          </label>
-          <input
-            type="tel"
-            id="altMobile"
-            name="altMobile"
-            value={formData.altMobile}
-            onChange={handleChange}
-            pattern="[0-9]{10}"
-            placeholder="Enter 10-digit alternative mobile number"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300"
-          />
-        </div>
+          {/* Alt Mobile */}
+          <div className="mb-4">
+            <label
+              htmlFor="altMobile"
+              className="block text-gray-700 font-semibold mb-2"
+            >
+              Alternate Phone:
+            </label>
+            <input
+              type="tel"
+              id="altPhone"
+              name="altPhone"
+              value={formData.altPhone}
+              onChange={handleChange}
+              pattern="[0-9]{10}"
+              placeholder="Enter 10-digit alternative mobile number"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300"
+            />
+          </div>
 
-        {/* Mail ID */}
-        <div className="mb-4">
-          <label
-            htmlFor="mailId"
-            className="block text-gray-700 font-semibold mb-2"
-          >
-            Mail ID:
-          </label>
-          <input
-            type="email"
-            id="mailId"
-            name="mailId"
-            value={formData.mailId}
-            onChange={handleChange}
-            required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300"
-            placeholder="Enter your email address"
-          />
-        </div>
+          {/* Mail ID */}
+          <div className="mb-4">
+            <label
+              htmlFor="mailId"
+              className="block text-gray-700 font-semibold mb-2"
+            >
+              Email ID:
+            </label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300"
+              placeholder="Enter your email address"
+            />
+          </div>
 
-        {/* City */}
-        <div className="mb-4">
-          <label
-            htmlFor="city"
-            className="block text-gray-700 font-semibold mb-2"
-          >
-            City:
-          </label>
-          <input
-            type="text"
-            id="city"
-            name="city"
-            value={formData.city}
-            onChange={handleChange}
-            required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300"
-            placeholder="Enter your city"
-          />
-        </div>
+          {/* City */}
+          <div className="mb-4">
+            <label
+              htmlFor="city"
+              className="block text-gray-700 font-semibold mb-2"
+            >
+              City:
+            </label>
+            <input
+              type="text"
+              id="city"
+              name="city"
+              value={formData.city}
+              onChange={handleChange}
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300"
+              placeholder="Enter your city"
+            />
+          </div>
 
-        {/* Message / Requirement */}
-        <div className="mb-4">
-          <label
-            htmlFor="message"
-            className="block text-gray-700 font-semibold mb-2"
-          >
-            Message / Requirement:
-          </label>
-          <textarea
-            id="message"
-            name="message"
-            value={formData.message}
-            onChange={handleChange}
-            required
-            rows="4"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300"
-            placeholder="Describe your requirements"
-          ></textarea>
-        </div>
+          {/* Message / Requirement */}
+          <div className="mb-4">
+            <label
+              htmlFor="requirement"
+              className="block text-gray-700 font-semibold mb-2"
+            >
+              Message / Requirement:
+            </label>
+            <textarea
+              id="requirement"
+              name="requirement"
+              value={formData.requirement}
+              onChange={handleChange}
+              required
+              rows="4"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300"
+              placeholder="Describe your requirements"
+            ></textarea>
+          </div>
 
-        {/* Profile Score */}
-        <div className="mb-4">
-          <label
-            htmlFor="profileScore"
-            className="block text-gray-700 font-semibold mb-2"
-          >
-            Profile Score:
-          </label>
-          <input
-            type="number"
-            id="profileScore"
-            name="profileScore"
-            value={formData.profileScore}
-            onChange={handleChange}
-            min="0"
-            max="100"
-            required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300"
-            placeholder="Enter profile score (0-100)"
-          />
-        </div>
+          {/* Profile Score */}
+          <div className="mb-4">
+            <label
+              htmlFor="profileScore"
+              className="block text-gray-700 font-semibold mb-2"
+            >
+              Profile Score:
+            </label>
+            <input
+              type="text"
+              id="profileScore"
+              name="profileScore"
+              value={formData.profileScore}
+              onChange={handleChange}
+              min="0"
+              max="100"
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300"
+              placeholder="Enter profile score"
+            />
+          </div>
 
-        {/* Allocated To */}
-        <div className="mb-4">
-          <label
-            htmlFor="allocatedTo"
-            className="block text-gray-700 font-semibold mb-2"
-          >
-            Allocated To:
-          </label>
-          <input
-            type="text"
-            id="allocatedTo"
-            name="allocatedTo"
-            value={formData.allocatedTo}
-            onChange={handleChange}
-            required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300"
-            placeholder="Enter name of the person allocated to"
-          />
-        </div>
+          {/* Allocated To */}
+          <div className="mb-4">
+            <label
+              htmlFor="salesMember"
+              className="block text-gray-700 font-semibold mb-2"
+            >
+              Allocated To:
+            </label>
+            <select
+              id="salesMember"
+              name="salesMember"
+              value={formData.salesMember}
+              onChange={handleChange}
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300 bg-white"
+            >
+              {salesMembers?.map((sm, i) => (
+                <option key={sm.salesMemberId} value={sm.salesMemberId}>
+                  {sm.name}
+                </option>
+              ))}
+            </select>
+          </div>
 
-        {/* Disposition */}
-        <div className="mb-4">
-          <label
-            htmlFor="disposition"
-            className="block text-gray-700 font-semibold mb-2"
-          >
-            Disposition:
-          </label>
-          <select
-            id="disposition"
-            name="disposition"
-            value={formData.disposition}
-            onChange={handleChange}
-            required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300 bg-white"
-          >
-            <option value="">-- Select Disposition --</option>
-            <option value="Interested">Interested</option>
-            <option value="Not Interested">Not Interested</option>
-            <option value="Follow Up">Follow Up</option>
-          </select>
-        </div>
+          {/* Disposition */}
+          <div className="mb-4">
+            <label
+              htmlFor="disposition"
+              className="block text-gray-700 font-semibold mb-2"
+            >
+              Disposition:
+            </label>
+            <select
+              id="disposition"
+              name="disposition"
+              value={formData.disposition}
+              onChange={handleChange}
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300 bg-white"
+            >
+              {dispositions.map((disposition) => (
+                <option key={disposition} value={disposition}>
+                  {disposition}
+                </option>
+              ))}
+            </select>
+          </div>
 
-        {/* Remarks */}
-        <div className="mb-6">
-          <label
-            htmlFor="remarks"
-            className="block text-gray-700 font-semibold mb-2"
-          >
-            Remarks:
-          </label>
-          <textarea
-            id="remarks"
-            name="remarks"
-            value={formData.remarks}
-            onChange={handleChange}
-            rows="3"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300"
-            placeholder="Any additional remarks"
-          ></textarea>
-        </div>
+          {/* Sub Disposition */}
+          <div className="mb-4">
+            <label
+              htmlFor="disposition"
+              className="block text-gray-700 font-semibold mb-2"
+            >
+              Sub-Disposition:
+            </label>
+            <select
+              id="subDisposition"
+              name="subDisposition"
+              value={formData.subDisposition}
+              onChange={handleChange}
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300 bg-white"
+            >
+              {subDispositions[formData.disposition].map((disposition) => (
+                <option key={disposition} value={disposition}>
+                  {disposition}
+                </option>
+              ))}
+            </select>
+          </div>
 
-        {/* Submit Button */}
-        <button
-          type="submit"
-          className="w-full bg-blue-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-blue-600 transition duration-300"
-        >
-          Submit
-        </button>
-      </form>
+          {/* Remarks */}
+          <div className="mb-6">
+            <label
+              htmlFor="remarks"
+              className="block text-gray-700 font-semibold mb-2"
+            >
+              Remarks:
+            </label>
+            <textarea
+              id="remarks"
+              name="remarks"
+              value={formData.remarks}
+              onChange={handleChange}
+              rows="3"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300"
+              placeholder="Any additional remarks"
+            ></textarea>
+          </div>
+
+          {/* Submit Button */}
+          <button
+            type="submit"
+            className="w-full bg-blue-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-blue-600 transition duration-300"
+          >
+            {loading ? "Submitting..." : "Submit"}
+          </button>
+        </form>
+      </div>
     </div>
   );
 };

@@ -10,7 +10,7 @@ import { useQuery } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import local from "next/font/local";
 import ShowDetails from "./showDetails";
-// import ManualLeadForm from "../utills/ManualLeadForm";
+import ManualLeadForm from "../utills/ManualLeadForm";
 import Filters from "./filters";
 
 const index = () => {
@@ -356,11 +356,13 @@ const index = () => {
           loading={allocatingLeads}
         />
       )}
-      {/* {formVisible && (
+      {formVisible && (
         <Modal>
-          <div className="w-full h-[100vh] border-2 border-red-500"></div>
+          <div className="w-full h-[100vh] py-4 md:py-8">
+            <ManualLeadForm onClose={() => setFormVisible(false)} />
+          </div>
         </Modal>
-      )} */}
+      )}
     </div>
   );
 };
