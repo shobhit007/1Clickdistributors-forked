@@ -1,38 +1,19 @@
-import { useState, useEffect, Fragment } from "react";
+import { useState, useEffect, Fragment, useContext } from "react";
 import { toast } from "react-toastify";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Dialog, Transition } from "@headlessui/react";
 import { GrCheckboxSelected, GrCheckbox } from "react-icons/gr";
 import Modal from "../utills/Modal";
-
-const panels = [
-  {
-    panel: "roles_and_permissions",
-  },
-  {
-    panel: "allocate_leads",
-  },
-  {
-    panel: "sales_panel",
-  },
-  {
-    panel: "hrms",
-  },
-  {
-    panel: "accounts",
-  },
-  {
-    panel: "manage_users",
-  },
-];
+import { panelRoles, panels } from "@/lib/data/commonData";
+import panelContext from "@/lib/context/panelContext";
 
 const camelToTitle = (string) => {
   if (!string) {
     return null;
   }
 
-  let arr = string.split("_")
-  return arr.join(" ")
+  let arr = string.split("_");
+  return arr.join(" ");
 };
 
 const ManageRoles = () => {
@@ -43,36 +24,26 @@ const ManageRoles = () => {
   const [unassignFromList, setUnAssignFromList] = useState([]);
   const [selectSelected, setSelectSelected] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const { allUserRoles } = useContext(panelContext);
 
-  const getAllUserRoles = async () => {
-    try {
-      const token = localStorage.getItem("authToken");
-      let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/roles/getRoles`;
-      const response = await fetch(API_URL, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+  const [data, setData] = useState([]);
 
-      const data = await response.json();
-      if (data.roles) {
-        return data?.roles;
-      } else {
-        return null;
-      }
-    } catch (error) {
-      console.log("error in getting roles", error.message);
-      return null;
-    }
-  };
+  useEffect(() => {
+    const array1Ids = allUserRoles?.map((obj) => obj.id);
 
-  const { data, isLoading, error } = useQuery({
-    queryKey: "roles",
-    queryFn: getAllUserRoles,
-    refetchOnWindowFocus: false,
-    retry: false,
-  });
+    // Filter objects from array2 whose ids are not present in array1
+    let filteredArray2 = panelRoles.map((role) => {
+      let roles = role.hierarchy;
+      return roles?.filter((role) => !array1Ids.includes(role));
+    });
+
+    filteredArray2 = filteredArray2
+      .flat()
+      .map((role) => ({ id: role, panels: [] }));
+    // Combine both arrays
+    const resultArray = allUserRoles.concat(filteredArray2);
+    setData(resultArray);
+  }, [allUserRoles]);
 
   const handleResize = () => {
     const resolution = window.innerWidth;
@@ -148,7 +119,7 @@ const ManageRoles = () => {
 
   return (
     <div className="w-full mx-auto">
-      {isLoading ? (
+      {0 ? (
         <div>Loading...</div>
       ) : (
         <div className="flex justify-between w-[80%] mx-auto">

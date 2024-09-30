@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { roles } from "@/lib/data/commonData";
+import { panelRoles, roles } from "@/lib/data/commonData";
 import { toast } from "react-toastify";
 
 const AdduserForm = ({ close, refetchUsers, allUsers }) => {
@@ -10,9 +10,9 @@ const AdduserForm = ({ close, refetchUsers, allUsers }) => {
     email: "",
     password: "",
     phone: "",
-    role: "",
+    department: "",
+    hierarchy: "",
     isActive: true,
-    manager: null,
   });
   const [loading, setLoading] = useState(false);
   const [allManagers, setAllManagers] = useState(null);
@@ -48,13 +48,16 @@ const AdduserForm = ({ close, refetchUsers, allUsers }) => {
       return toast.error("Enter valid phone number");
     }
 
-    if (!data?.role || data.role == "") {
-      return toast.error("Please choose user role");
+    if (!data?.department || data.department == "") {
+      return toast.error("Please choose department of user");
+    }
+    if (!data?.hierarchy || data.hierarchy == "") {
+      return toast.error("Please choose hierarchy of user");
     }
 
     try {
-      setLoading(true);
       let body = { ...data };
+      setLoading(true);
 
       if (!body?.role?.includes("Member")) {
         delete body.manager;
@@ -152,23 +155,49 @@ const AdduserForm = ({ close, refetchUsers, allUsers }) => {
       <div className="flex flex-col w-full gap-1">
         <span className={`${spanStyle}`}>
           {/* <MdOutlineMailOutline /> */}
-          Select role of user
+          Select department of user
         </span>
         <select
           className={`border p-1 rounded-md border-gray-400`}
-          name="role"
-          value={data.role}
-          onChange={handleInputChange}
+          name="department"
+          value={data.department}
+          onChange={(e) => {
+            handleInputChange(e), setData((pre) => ({ ...pre, hierarchy: "" }));
+          }}
         >
-          <option>Select role</option>
-          {roles?.map((role) => (
-            <option value={role} selected={data?.role == role}>
-              {role}
+          <option>Select department</option>
+          {panelRoles?.map((role) => (
+            <option
+              value={role.department}
+              selected={data?.department == role.department}
+            >
+              {role?.department}
             </option>
           ))}
         </select>
       </div>
-      {data.role?.includes("Member") && (
+      <div className="flex flex-col w-full gap-1">
+        <span className={`${spanStyle}`}>
+          {/* <MdOutlineMailOutline /> */}
+          Select Hierarchy
+        </span>
+        <select
+          className={`border p-1 rounded-md border-gray-400`}
+          name="hierarchy"
+          value={data.hierarchy}
+          onChange={handleInputChange}
+        >
+          <option>Select Hierarchy</option>
+          {panelRoles
+            .filter((item) => item.department == data.department)?.[0]
+            ?.hierarchy.map((item) => (
+              <option value={item} selected={data?.hierarchy == item}>
+                {item}
+              </option>
+            ))}
+        </select>
+      </div>
+      {data.hierarchy == "member" && (
         <div className="flex flex-col w-full gap-1">
           <span className={`${spanStyle}`}>
             {/* <MdOutlineMailOutline /> */}

@@ -139,7 +139,7 @@ const index = () => {
           <input
             type="checkbox"
             checked={
-              selectedRows?.filter((item) => item.email == row?.original?.email)
+              selectedRows?.filter((item) => item.leadId == row?.original?.leadId)
                 ?.length > 0
             }
             readOnly={true}
@@ -332,7 +332,7 @@ const index = () => {
       {leads?.length > 0 ? (
         <CustomTable
           data={leads || []}
-          uniqueDataKey={"email"}
+          uniqueDataKey={"leadId"}
           selectedRows={selectedRows}
           setSelectedRows={setSelectedRows}
           columns={columns}

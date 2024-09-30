@@ -6,7 +6,9 @@ const reducer = combineReducers({
 });
 
 export const rootReducer = (state, action) => {
-  if (action.type === "auth/logout") {
+  console.log("action type is", action.type);
+  if (action.type === "LOGOUT") {
+    console.log("LOGOUT action disabled");
     state = undefined;
   }
   return reducer(state, action);

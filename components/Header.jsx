@@ -11,8 +11,10 @@ import Modal from "./utills/Modal";
 import UserDetailView from "./userDetailView";
 import { GrLogout } from "react-icons/gr";
 import { MdSearch } from "react-icons/md";
+import { useQueryClient } from "@tanstack/react-query";
 
 const Header = () => {
+  const queryClient = useQueryClient();
   const { role } = useSelector(authSelector);
   const {
     displayComponent,
@@ -26,6 +28,7 @@ const Header = () => {
 
   const handleLogout = () => {
     localStorage.clear();
+    dispatch({ type: "LOGOUT" });
     dispatch(logout());
     router.replace("/login");
   };
@@ -65,7 +68,7 @@ const Header = () => {
             Welcome, {userDetails?.name}
           </h1>
           <h1 className="text-sm text-gray-500 capitalize">
-            ({userDetails?.role})
+            ({userDetails?.hierarchy})
           </h1>
         </div>
 

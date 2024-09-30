@@ -18,8 +18,8 @@ export default function Sales() {
   const [openModal, setOpenModal] = React.useState(false);
   const [selectedRows, setSelectedRows] = React.useState([]);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
-  const [startDate, setStartDate] = useState(moment().format("YYYY-MM-DD"));
-  const [endDate, setEndDate] = useState(moment().format("YYYY-MM-DD"));
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
   const [date, setDate] = useState(null);
   const [selectedFilter, setSelectedFilter] = useState("All");
   const [filters, setFilters] = useState({
@@ -31,9 +31,13 @@ export default function Sales() {
 
   // search for default date
   useEffect(() => {
+    let startD = moment().subtract({ days: 3 }).format("YYYY-MM-DD");
+    let endD = moment().format("YYYY-MM-DD");
+    setStartDate(startD);
+    setEndDate(endD);
     setDate({
-      startDate: startDate,
-      endDate: endDate,
+      startDate: startD,
+      endDate: endD,
     });
   }, []);
 
@@ -75,6 +79,35 @@ export default function Sales() {
     refetchOnWindowFocus: false,
   });
 
+  const getColumnsForSalesPanel = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+      let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/panel/getAllColumnsForSalesPanel`;
+      const response = await fetch(API_URL, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await response.json();
+      console.log("data is", data);
+      if (data.success && data.data) {
+        return data.data;
+      } else {
+        toast.error(data.message || "couldn't fetch columns");
+        return null;
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  const { data: assignedColumns, refetch } = useQuery({
+    queryKey: ["assignedColumnsForSalesPanel"],
+    queryFn: getColumnsForSalesPanel,
+  });
+
   const handleSearchLeads = () => {
     setDate({
       startDate: startDate,
@@ -82,38 +115,13 @@ export default function Sales() {
     });
   };
 
-  const staticColumns = [
-    "assignedAt",
-    "createdAt",
-    "updatedAt",
-    "disposition",
-    "subDisposition",
-    "FollowUpDate",
-  ];
+  const staticColumns = [];
 
   const avoidCols = ["id"];
 
   const columns = useMemo(() => {
     if (leads?.length > 0) {
-      let dynamicCols = Object.keys(leads[0] || {})
-        .filter((key) => {
-          if (avoidCols.includes(key) || staticColumns.includes(key)) {
-            return false;
-          }
-          if (typeof leads[0][key] == "object") {
-            return false;
-          }
-          return true;
-        })
-        .map((key) => {
-          return {
-            Header: camelToTitle(key),
-            accessor: key,
-            id: key,
-          };
-        });
-
-      let statiCols = staticColumns.map((key) => {
+      let dynamicCols = assignedColumns?.map((key) => {
         if (key == "assignedAt" || key == "createdAt" || key == "updatedAt") {
           return {
             Header: key,
@@ -151,11 +159,19 @@ export default function Sales() {
         };
       });
 
+      let statiCols = staticColumns.map((key) => {
+        return {
+          Header: camelToTitle(key),
+          accessor: key,
+          id: key,
+        };
+      });
+
       return [...dynamicCols, ...statiCols];
     } else {
       return [];
     }
-  }, [leads]);
+  }, [assignedColumns, leads]);
 
   const subDispositionOptions = [
     ...new Set(Object.values(subDispositions).flat()),
