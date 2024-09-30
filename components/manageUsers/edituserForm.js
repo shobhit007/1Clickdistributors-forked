@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { roles } from "@/lib/data/commonData";
+import { panelRoles, roles } from "@/lib/data/commonData";
 import { toast } from "react-toastify";
 
 const EdituserForm = ({ close, refetchUsers, currentUser, allUsers }) => {
@@ -9,9 +9,8 @@ const EdituserForm = ({ close, refetchUsers, currentUser, allUsers }) => {
     name: "",
     password: "",
     phone: "",
-    role: "",
-    manager: null,
-    managerName: null,
+    department: "",
+    hierarchy: "",
   });
   const [loading, setLoading] = useState(false);
   const [allManagers, setAllManagers] = useState(null);
@@ -22,7 +21,8 @@ const EdituserForm = ({ close, refetchUsers, currentUser, allUsers }) => {
         password: currentUser.password,
         phone: currentUser.phone,
         role: currentUser.role,
-        manager: currentUser.manager || null,
+        department: currentUser.department,
+        hierarchy: currentUser.hierarchy,
       });
     }
   }, [currentUser]);
@@ -147,44 +147,64 @@ const EdituserForm = ({ close, refetchUsers, currentUser, allUsers }) => {
       <div className="flex flex-col w-full gap-1">
         <span className={`${spanStyle}`}>
           {/* <MdOutlineMailOutline /> */}
-          Select role of user
+          Select department of user
         </span>
         <select
           className={`border p-1 rounded-md border-gray-400`}
-          name="role"
-          value={data.role}
-          onChange={handleInputChange}
+          name="department"
+          value={data.department}
+          onChange={(e) => {
+            handleInputChange(e), setData((pre) => ({ ...pre, hierarchy: "" }));
+          }}
         >
-          <option>Select role</option>
-          {roles?.map((role) => (
-            <option value={role} selected={data?.role == role}>
-              {role}
+          <option>Select department</option>
+          {panelRoles?.map((role) => (
+            <option
+              value={role.department}
+              selected={data?.department == role.department}
+            >
+              {role?.department}
             </option>
           ))}
         </select>
       </div>
-
-      {data.role?.includes("Member") && (
-        <div className="flex flex-col w-full gap-1">
-          <span className={`${spanStyle}`}>
-            {/* <MdOutlineMailOutline /> */}
-            Select manager
-          </span>
-          <select
-            className={`border p-1 rounded-md border-gray-400`}
-            name="manager"
-            value={data?.manager}
-            onChange={handleInputChange}
-          >
-            <option>Select manager</option>
-            {allManagers?.map((manager) => (
-              <option
-                value={manager.id}
-                selected={data?.manager == manager?.id}
-              >
-                {manager.name}
+      <div className="flex flex-col w-full gap-1">
+        <span className={`${spanStyle}`}>
+          {/* <MdOutlineMailOutline /> */}
+          Select Hierarchy
+        </span>
+        <select
+          className={`border p-1 rounded-md border-gray-400`}
+          name="hierarchy"
+          value={data.hierarchy}
+          onChange={handleInputChange}
+        >
+          <option>Select Hierarchy</option>
+          {panelRoles
+            .filter((item) => item.department == data.department)?.[0]
+            ?.hierarchy.map((item) => (
+              <option value={item} selected={data?.hierarchy == item}>
+                {item}
               </option>
             ))}
+        </select>
+      </div>
+
+      {data.hierarchy == "member" && (
+        <div className="flex flex-col w-full gap-1">
+          <span className={`${spanStyle}`}>Select team leader</span>
+          <select
+            className={`border p-1 rounded-md border-gray-400`}
+            name="leader"
+            value={data.leader}
+            onChange={handleInputChange}
+          >
+            <option>Select Hierarchy</option>
+            {
+              allLeaders.map((item)=>{
+                return <option className=""></option>
+              })
+            }
           </select>
         </div>
       )}

@@ -11,12 +11,15 @@ import ManageRoles from "@/components/homepage/ManageRoles";
 import ManageUsers from "@/components/manageUsers";
 import AllocateLeadsPanel from "@/components/allocateLead";
 import Sales from "@/components/sales/Sales";
-import { panelPermissions } from "@/lib/data/commonData";
+import { panelPermissions, panels } from "@/lib/data/commonData";
+import GlobalSearch from "@/components/globalSearch";
+import Panelsettings from "@/components/panelSettings";
 
 const Page = () => {
   const [displayComponent, setDisplayComponent] = useState("Manage roles");
   const [userRoles, setuserRoles] = useState(null);
   const [token, setToken] = useState(null);
+  const [previousComponent, setPreviousComponent] = useState(null);
 
   useEffect(() => {
     let userToken = localStorage.getItem("authToken");
@@ -57,24 +60,47 @@ const Page = () => {
     queryFn: getUserDetails,
   });
 
-  console.log("user datials", userDetails);
+  const getAllUserRoles = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+      let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/roles/getRoles`;
+      const response = await fetch(API_URL, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+      if (data.roles) {
+        return data?.roles;
+      } else {
+        return null;
+      }
+    } catch (error) {
+      console.log("error in getting roles", error.message);
+      return null;
+    }
+  };
+
+  const { data: allUserRoles, error } = useQuery({
+    queryKey: ["roles"],
+    queryFn: getAllUserRoles,
+  });
 
   useEffect(() => {
-    if (userDetails?.permissionsType == "all_permissions") {
-      let panels = panelPermissions.map((item) => item.panelName);
-      setuserRoles(panels);
+    console.log("user details are", userDetails);
+    if (userDetails?.hierarchy == "superAdmin") {
+      let userPanels = panels.map((item) => item.panel);
+      setuserRoles(userPanels);
       return;
     }
 
-    if (userDetails?.userPermissions) {
-      let panels = Object.keys(userDetails.userPermissions || {});
-      let roles = [];
-      for (let panel of panels) {
-        if (userDetails.userPermissions[panel]?.length > 0) {
-          roles.push(panel);
-        }
-      }
-      setuserRoles(roles);
+    if (userDetails?.hierarchy) {
+      let userPanels = allUserRoles?.filter(
+        (item) => item.id == userDetails?.hierarchy
+      )?.[0]?.panels;
+      setuserRoles(userPanels);
     }
   }, [userDetails]);
 
@@ -91,17 +117,26 @@ const Page = () => {
 
   return (
     <panelContext.Provider
-      value={{ displayComponent, setDisplayComponent, userRoles, userDetails }}
+      value={{
+        displayComponent,
+        setDisplayComponent,
+        userRoles,
+        userDetails,
+        setPreviousComponent,
+        previousComponent,
+        allUserRoles,
+      }}
     >
       <div className="w-full h-[100vh] overflow-auto">
         <Header />
-        <PanelSelector />
-        {/* <button onClick={refetchUser}>refetch</button> */}
+        {displayComponent != "globalSearch" && <PanelSelector />}
 
         {displayComponent == "roles_and_permissions" && <ManageRoles />}
         {displayComponent == "manage_users" && <ManageUsers />}
         {displayComponent == "allocate_leads" && <AllocateLeadsPanel />}
         {displayComponent == "sales_panel" && <Sales />}
+        {displayComponent == "globalSearch" && <GlobalSearch />}
+        {displayComponent == "panel_settings" && <Panelsettings />}
       </div>
     </panelContext.Provider>
   );

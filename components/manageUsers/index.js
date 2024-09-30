@@ -103,8 +103,8 @@ const ManageUsers = () => {
     let cols = [
       "name",
       "email",
-      "role",
-      "managerName",
+      "department",
+      "hierarchy",
       "active",
       "password",
       "createdAt",

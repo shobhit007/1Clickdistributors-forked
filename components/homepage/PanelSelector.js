@@ -6,8 +6,8 @@ const PanelSelector = () => {
     useContext(panelContext);
 
   const formatString = (string) => {
-    let arr = string.split("_");
-    return arr.join(" ");
+    let arr = string?.split("_");
+    return arr?.join(" ");
   };
 
   return (

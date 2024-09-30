@@ -12,6 +12,7 @@ const UserProfile = ({ params }) => {
   const dispatch = useDispatch();
 
   const handleLogout = () => {
+    dispatch({ type: "LOGOUT" });
     dispatch(logout());
     Cookies.remove("authToken");
     localStorage.removeItem("authToken");

@@ -39,11 +39,11 @@ const AllocateLeadModal = ({ data, onSubmit, loading }) => {
   //   }
   // };
 
-  const getAllManagers = async () => {
+  const getAllTeamLeaders = async () => {
     try {
       const token = localStorage.getItem("authToken");
       setGettingSalesMembers(true);
-      let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/leads/getAllManagers`;
+      let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/leads/getAllLeaders`;
       const response = await fetch(API_URL, {
         method: "GET",
         headers: {
@@ -52,6 +52,7 @@ const AllocateLeadModal = ({ data, onSubmit, loading }) => {
         },
       });
       const data = await response.json();
+      console.log("data is", data);
       setGettingSalesMembers(false);
       if (data.success && data.data) {
         return data.data;
@@ -69,12 +70,12 @@ const AllocateLeadModal = ({ data, onSubmit, loading }) => {
 
   // const { data: salesMembers, refetch } = useQuery({
 
-  const { data: allManagers, refetch } = useQuery({
-    queryKey: ["allManagers"],
-    queryFn: getAllManagers,
+  const { data: allTeamLeaders, refetch } = useQuery({
+    queryKey: ["allTeamLeaders"],
+    queryFn: getAllTeamLeaders,
   });
 
-  console.log("all managers are", allManagers);
+  console.log("all managers are", allTeamLeaders);
   const onFormSubmit = () => {
     if (!selectedSalesMember || selectedSalesMember == "") {
       return toast.error("Please select sales member");
@@ -120,6 +121,7 @@ const AllocateLeadModal = ({ data, onSubmit, loading }) => {
       <h2 className="text-lg font-semibold text-slate-600">
         Allocate {data.length} leads
       </h2>
+      <button onClick={refetch}>refetch</button>
 
       {/* <select
         onChange={(e) => setSelectedSalesMember(e.target.value)}
@@ -161,19 +163,19 @@ const AllocateLeadModal = ({ data, onSubmit, loading }) => {
             id="dropdown"
             className="absolute bottom-10 left-0 bg-gray-100 shadow-md shadow-gray-400 w-full p-2 rounded min-w-56 max-h-[55vh] z-30 overflow-auto"
           >
-            {Array.isArray(allManagers) &&
-              allManagers?.map((manager) => {
+            {Array.isArray(allTeamLeaders) &&
+              allTeamLeaders?.map((leader) => {
                 return (
                   <div className="border-b flex flex-col gap-1 border-b-gray-500 text-gray-600 py-1 cursor-pointer relative">
                     <div className="flex justify-between w-full">
                       <div className="flex flex-col">
-                        <span>{manager.name}</span>
+                        <span>{leader.name}</span>
                         <span className="text-xs text-gray-400">
-                          {manager.role}
+                          {leader.role}
                         </span>
                       </div>
 
-                      {subLevelToShow == manager.id ? (
+                      {subLevelToShow == leader.id ? (
                         <MdArrowDropUp
                           className="text-2xl"
                           onClick={() => setSubLevelToShow(null)}
@@ -181,14 +183,14 @@ const AllocateLeadModal = ({ data, onSubmit, loading }) => {
                       ) : (
                         <MdArrowRight
                           className="text-2xl"
-                          onClick={() => setSubLevelToShow(manager?.id)}
+                          onClick={() => setSubLevelToShow(leader?.id)}
                         />
                       )}
                     </div>
 
-                    {subLevelToShow == manager.id && (
+                    {subLevelToShow == leader.id && (
                       <div className="rounded-md w-full mt-1 px-2 transition-all flex flex-col gap-2">
-                        {manager?.teamMembers?.map((item) => {
+                        {leader?.teamMembers?.map((item) => {
                           return (
                             <div
                               onClick={() => onSelectMember(item)}

@@ -15,7 +15,7 @@ const ShowDetails = ({ data, close }) => {
   return (
     <div className="p-1 flex flex-col h-full overflow-auto gap-3">
       <div className="w-full flex justify-center gap-3 items-center">
-        {["User details", "Updates"].map((item) => {
+        {/* {["User details"].map((item) => {
           return (
             <button
               className={`py-1 px-3 rounded-md ${
@@ -28,7 +28,8 @@ const ShowDetails = ({ data, close }) => {
               {item}
             </button>
           );
-        })}
+        })} */}
+        <h1 className="text-colorPrimary text-xl font-semibold">Complete lead details</h1>
       </div>
       {selectedViewType == "User details" && (
         <>
