@@ -57,7 +57,7 @@ const AllocateLeadModal = ({ data, onSubmit, loading }) => {
       if (data.success && data.data) {
         return data.data;
       } else {
-        toast.error(data.message || "couldn't find sales managers");
+        toast.error(data.message || "couldn't find leaders");
         return null;
       }
     } catch (error) {
@@ -74,24 +74,12 @@ const AllocateLeadModal = ({ data, onSubmit, loading }) => {
     queryKey: ["allTeamLeaders"],
     queryFn: getAllTeamLeaders,
   });
-
-  console.log("all managers are", allTeamLeaders);
   const onFormSubmit = () => {
     if (!selectedSalesMember || selectedSalesMember == "") {
       return toast.error("Please select sales member");
     }
     onSubmit({ id: selectedSalesMember.id, name: selectedSalesMember.name });
   };
-
-  const managers = [
-    {
-      id: "1",
-      name: "Level 1",
-      data: ["sublevel_1-1", "sublevel_1-2", "sublevel_1-3"],
-    },
-    { id: "2", name: "Level 2", data: ["sublevel_2-1", "sublevel_2-2"] },
-    { id: "3", name: "Level 1", data: [] },
-  ];
 
   const onSelectMember = (item) => {
     setSelectedSalesMember(item);

@@ -105,6 +105,7 @@ const ManageUsers = () => {
       "email",
       "department",
       "hierarchy",
+      "leaderName",
       "active",
       "password",
       "createdAt",
@@ -164,12 +165,12 @@ const ManageUsers = () => {
                 className="text-xl text-slate-600 cursor-pointer hover:text-colorPrimary"
               />
 
-              <button
+              {/* <button
                 onClick={() => setSelectedUserToEditPermissions(row.original)}
                 className="text-white bg-colorPrimary py-1 px-3 rounded-md"
               >
                 Permissions
-              </button>
+              </button> */}
             </div>
           ),
         };

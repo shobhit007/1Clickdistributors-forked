@@ -65,11 +65,11 @@ const index = () => {
     queryFn: getAllLeads,
   });
 
-  useEffect(() => {
-    if (Array.isArray(data) && data?.length > 0) {
-      setLeads(data);
-    }
-  }, [data]);
+  // useEffect(() => {
+  //   if (Array.isArray(data) && data?.length > 0) {
+  //     setLeads(data);
+  //   }
+  // }, [data]);
 
   useEffect(() => {
     let start = moment()
@@ -318,7 +318,7 @@ const index = () => {
         )}
       </div>
 
-      <Filters setLeads={setLeads} originalData={data} />
+      <Filters setLeads={setLeads} leads={leads} originalData={data} />
 
       {leadsLoading && (
         <div className="w-full flex flex-col items-center justify-center">
