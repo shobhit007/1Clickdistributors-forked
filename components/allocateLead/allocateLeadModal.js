@@ -78,7 +78,7 @@ const AllocateLeadModal = ({ data, onSubmit, loading }) => {
     if (!selectedSalesMember || selectedSalesMember == "") {
       return toast.error("Please select sales member");
     }
-    onSubmit({ id: selectedSalesMember.id, name: selectedSalesMember.name });
+    onSubmit({ id: selectedSalesMember.id });
   };
 
   const onSelectMember = (item) => {

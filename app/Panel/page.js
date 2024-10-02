@@ -56,7 +56,7 @@ const Page = () => {
     isLoading,
     refetch: refetchUser,
   } = useQuery({
-    queryKey: ["userRoles"],
+    queryKey: ["currentUserDetail"],
     queryFn: getUserDetails,
   });
 

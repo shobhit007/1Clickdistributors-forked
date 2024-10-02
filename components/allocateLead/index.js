@@ -87,7 +87,7 @@ const index = () => {
 
   const handleAssignLeads = async (salesMember) => {
     try {
-      if (!salesMember) {
+      if (!salesMember.id) {
         return;
       }
       const leads = selectedRows?.map((item) => item.leadId);
@@ -103,7 +103,6 @@ const index = () => {
         body: JSON.stringify({
           leads,
           salesMember: salesMember.id,
-          salesMemberName: salesMember.name,
         }),
       });
       setAllocatingLeads(false);
@@ -139,8 +138,9 @@ const index = () => {
           <input
             type="checkbox"
             checked={
-              selectedRows?.filter((item) => item.leadId == row?.original?.leadId)
-                ?.length > 0
+              selectedRows?.filter(
+                (item) => item.leadId == row?.original?.leadId
+              )?.length > 0
             }
             readOnly={true}
           />

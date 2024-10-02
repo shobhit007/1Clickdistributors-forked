@@ -1,5 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
-import React, { useEffect, useState } from "react";
+import panelContext from "@/lib/context/panelContext";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import React, { useContext, useEffect, useState } from "react";
 import { FaArrowCircleLeft } from "react-icons/fa";
 import { toast } from "react-toastify";
 
@@ -15,42 +16,53 @@ const UserDetailView = ({ close }) => {
   });
   const [passwordView, setPasswordView] = useState(false);
   const [password, setPassword] = useState("");
+  const { userDetails } = useContext(panelContext);
+  const queryClient = useQueryClient();
 
-  const getUserDetails = async () => {
+  const saveUpdatedData = async () => {
     try {
-      const token = localStorage.getItem("authToken");
+      const body = {
+        email: user?.email,
+        name: user?.name,
+      };
+
       setLoading(true);
-      let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/auth/getUserDetails`;
-      const response = await fetch(API_URL, {
-        method: "GET",
+      const token = localStorage.getItem("authToken");
+      const API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/auth/updateUser`;
+      const res = await fetch(API_URL, {
+        method: "POST",
         headers: {
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
+        body: JSON.stringify(body),
       });
-      const data = await response.json();
+
+      const result = await res.json();
       setLoading(false);
-      if (data.success) {
-        return data.data;
+      if (result.success) {
+        toast.success("Updated");
+        queryClient.invalidateQueries(["currentUserDetail"]);
       } else {
-        return null;
+        toast.error("Something went wrong");
       }
-    } catch (error) {
+    } catch (err) {
       setLoading(false);
-      console.log("error in getting leads", error.message);
-      return null;
+      console.log(err);
+      toast.error("Error sending OTP. Please try again.");
     }
   };
 
-  const { data, refetch } = useQuery({
-    queryKey: ["userDetail"],
-    queryFn: getUserDetails,
-  });
+  // const { data, refetch } = useQuery({
+  //   queryKey: ["userDetail"],
+  //   queryFn: getUserDetails,
+  // });
 
   useEffect(() => {
-    if (data) {
-      setuser(data);
+    if (userDetails) {
+      setuser(userDetails);
     }
-  }, [data]);
+  }, [userDetails]);
 
   const handleFieldsChange = (e) => {
     let name = e.target.name;
@@ -149,6 +161,7 @@ const UserDetailView = ({ close }) => {
 
       if (result.success) {
         toast.success("Password updated!");
+        queryClient.invalidateQueries(["currentUserDetail"]);
         close();
       } else {
         toast.error("Something went wrong");
@@ -264,19 +277,27 @@ const UserDetailView = ({ close }) => {
 
   return (
     <div className="w-full h-full overflow-auto">
-      <div className="p-2 flex">
+      <div className="p-2 flex gap-3 items-center">
         <button
           onClick={() => setIsEditable(!isEditable)}
           className="text-white bg-blue-500 py-1 px-2 rounded-md"
         >
           {isEditable ? "Cancel" : "Edit"}
         </button>
+        {isEditable && (
+          <button
+            onClick={saveUpdatedData}
+            className="text-white bg-blue-500 py-1 px-2 rounded-md"
+          >
+            Save
+          </button>
+        )}
       </div>
       <div className="flex flex-col px-2 gap-3 mt-3">
         <div className="w-full flex flex-col gap-1">
           <span className="text-lg font-semibold text-gray-500 ml-1">Name</span>
           <input
-            className="py-1 px-2 w-full text-gray-500 border-2 border-gray-500 disabled:border-gray-400 disabled:border rounded-md"
+            className="py-1 px-2 w-full text-gray-500 border-2 border-blue-500 disabled:border-gray-400 disabled:border rounded-md"
             disabled={!isEditable}
             value={user?.name}
             name="name"
@@ -294,11 +315,25 @@ const UserDetailView = ({ close }) => {
           />
         </div>
         <div className="w-full flex flex-col gap-1">
-          <span className="text-lg font-semibold text-gray-500 ml-1">Role</span>
+          <span className="text-lg font-semibold text-gray-500 ml-1">
+            Department
+          </span>
           <input
             className="py-1 px-2 w-full text-gray-500 border border-gray-400 rounded-md"
             disabled={true}
-            value={user?.role}
+            readOnly={true}
+            value={user?.department}
+          />
+        </div>
+        <div className="w-full flex flex-col gap-1">
+          <span className="text-lg font-semibold text-gray-500 ml-1">
+            Hierarchy
+          </span>
+          <input
+            className="py-1 px-2 w-full text-gray-500 border border-gray-400 rounded-md"
+            disabled={true}
+            readOnly={true}
+            value={user?.hierarchy}
           />
         </div>
         <div className="w-full flex flex-col gap-1">

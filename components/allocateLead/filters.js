@@ -90,7 +90,7 @@ const Filters = ({ setLeads, originalData, leads }) => {
     <div className="flex items-end gap-4 px-2 flex-wrap my-2 mt-1">
       <button
         onClick={resetFilters}
-        className="flex items-center gap-1 hover:bg-colorPrimary/20 bg-colorPrimary/10 px-3 py-1 rounded-md border border-colorPrimary text-colorPrimary font-semibold"
+        className="flex items-center gap-1 hover:bg-colorPrimary/20 bg-colorPrimary/10 px-3 py-[2px] rounded-md border border-colorPrimary text-colorPrimary font-semibold text-sm"
       >
         Reset filters
         <MdClose className="text-colorPrimary text-lg" />
@@ -131,13 +131,13 @@ const Filters = ({ setLeads, originalData, leads }) => {
         onClick={() =>
           setFilters((pre) => ({ ...pre, unAllocated: !pre.unAllocated }))
         }
-        className={`py-1 px-3 border font-semibold rounded-md ${
+        className={`py-[2px] text-sm px-3 border font-semibold rounded-md ${
           filters?.unAllocated
             ? "bg-colorPrimary  text-white"
             : "bg-white text-gray-500"
         }`}
       >
-        Unallocated
+        Unallocated leads
       </button>
     </div>
   );

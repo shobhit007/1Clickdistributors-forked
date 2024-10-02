@@ -66,13 +66,11 @@ const AdduserForm = ({ close, refetchUsers, allUsers }) => {
     try {
       let body = { ...data };
       setLoading(true);
-
+      
+      delete body.leaderName;
       if (body?.hierarchy != "member") {
         delete body.leader;
         delete body.leaderName;
-      } else if (body.leader && body.leader != "") {
-        let selectedUser = allUsers.filter((item) => item.id == body.leader)[0];
-        body.leaderName = selectedUser.name;
       }
 
       let token = localStorage.getItem("authToken");

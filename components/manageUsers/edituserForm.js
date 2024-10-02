@@ -24,7 +24,6 @@ const EdituserForm = ({ close, refetchUsers, currentUser, allUsers }) => {
         department: currentUser.department,
         hierarchy: currentUser.hierarchy,
         leader: currentUser.leader,
-        leaderName: currentUser.leaderName,
       });
     }
   }, [currentUser]);
@@ -72,12 +71,10 @@ const EdituserForm = ({ close, refetchUsers, currentUser, allUsers }) => {
     try {
       setLoading(true);
       let body = { ...data };
+      delete body.leaderName;
       if (body?.hierarchy != "member") {
         delete body.leader;
         delete body.leaderName;
-      } else if (body.leader && body.leader != "") {
-        let selectedUser = allUsers.filter((item) => item.id == body.leader)[0];
-        body.leaderName = selectedUser.name;
       }
 
       // return console.log("body is", body);
