@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import moment from "moment";
 import { useQuery } from "@tanstack/react-query";
 import CustomTable from "../utills/customTable";
@@ -8,9 +8,7 @@ import UpdateLead from "./UpdateLead";
 import MultiSelectDropDown from "../uiCompoents/MultiSelectDropDown";
 import { dispositions, subDispositions } from "@/lib/data/commonData";
 import { RiCloseCircleFill } from "react-icons/ri";
-import { MdClose } from "react-icons/md";
-import LeadUpdateHistory from "../leadUpdateHistory";
-import ShowDetails from "../allocateLead/showDetails";
+import LeadManager from "../leadManager/index";
 
 const salesFilters = ["All", "Pendings", "New Leads", "Follow Ups"];
 
@@ -22,6 +20,7 @@ export default function Sales() {
   const [endDate, setEndDate] = useState(null);
   const [date, setDate] = useState(null);
   const [selectedFilter, setSelectedFilter] = useState("All");
+  const [showLeadManager, setShowLeadManager] = useState(false);
   const [filters, setFilters] = useState({
     divisions: [],
   });
@@ -232,7 +231,7 @@ export default function Sales() {
               </button>
             </div>
           </div>
-          <div className="flex items-center gap-1 md:gap-4 flex-wrap">
+          {/* <div className="flex items-center gap-1 md:gap-4 flex-wrap">
             <button
               onClick={() => setSelectedRows([])}
               disabled={!selectedRows.length}
@@ -268,7 +267,7 @@ export default function Sales() {
             >
               Update History
             </button>
-          </div>
+          </div> */}
         </div>
 
         <div className="flex flex-1 gap-2 mt-2 flex-wrap w-full">
@@ -292,6 +291,13 @@ export default function Sales() {
               {filter}
             </button>
           ))}
+          <button
+            disabled={!selectedRows.length || selectedRows.length > 1}
+            className={`rounded p-2 bg-colorPrimary text-white`}
+            onClick={() => setShowLeadManager(true)}
+          >
+            Lead manager
+          </button>
         </div>
       </div>
       <CustomTable
@@ -342,6 +348,13 @@ export default function Sales() {
             />
           </div>
         </Modal>
+      )}
+
+      {showLeadManager && (
+        <LeadManager
+          onClose={() => setShowLeadManager(false)}
+          lead={selectedRows[0]}
+        />
       )}
     </div>
   );
