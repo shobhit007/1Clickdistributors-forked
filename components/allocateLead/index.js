@@ -65,11 +65,11 @@ const index = () => {
     queryFn: getAllLeads,
   });
 
-  useEffect(() => {
-    if (Array.isArray(data) && data?.length > 0) {
-      setLeads(data);
-    }
-  }, [data]);
+  // useEffect(() => {
+  //   if (Array.isArray(data) && data?.length > 0) {
+  //     setLeads(data);
+  //   }
+  // }, [data]);
 
   useEffect(() => {
     let start = moment()
@@ -87,7 +87,7 @@ const index = () => {
 
   const handleAssignLeads = async (salesMember) => {
     try {
-      if (!salesMember) {
+      if (!salesMember.id) {
         return;
       }
       const leads = selectedRows?.map((item) => item.leadId);
@@ -103,7 +103,6 @@ const index = () => {
         body: JSON.stringify({
           leads,
           salesMember: salesMember.id,
-          salesMemberName: salesMember.name,
         }),
       });
       setAllocatingLeads(false);
@@ -139,8 +138,9 @@ const index = () => {
           <input
             type="checkbox"
             checked={
-              selectedRows?.filter((item) => item.leadId == row?.original?.leadId)
-                ?.length > 0
+              selectedRows?.filter(
+                (item) => item.leadId == row?.original?.leadId
+              )?.length > 0
             }
             readOnly={true}
           />
@@ -318,7 +318,7 @@ const index = () => {
         )}
       </div>
 
-      <Filters setLeads={setLeads} originalData={data} />
+      <Filters setLeads={setLeads} leads={leads} originalData={data} />
 
       {leadsLoading && (
         <div className="w-full flex flex-col items-center justify-center">

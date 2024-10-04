@@ -15,7 +15,7 @@ const AdduserForm = ({ close, refetchUsers, allUsers }) => {
     isActive: true,
   });
   const [loading, setLoading] = useState(false);
-  const [allManagers, setAllManagers] = useState(null);
+  const [allLeaders, setAllLeaders] = useState(null);
 
   const handleInputChange = (event) => {
     let name = event.target.name;
@@ -24,8 +24,8 @@ const AdduserForm = ({ close, refetchUsers, allUsers }) => {
   };
 
   useEffect(() => {
-    let managers = allUsers.filter((item) => item?.role?.includes("Manager"));
-    setAllManagers(managers);
+    let leaders = allUsers.filter((item) => item?.hierarchy == "teamLead");
+    setAllLeaders(leaders);
   }, [allUsers]);
 
   let spanStyle =
@@ -55,17 +55,22 @@ const AdduserForm = ({ close, refetchUsers, allUsers }) => {
       return toast.error("Please choose hierarchy of user");
     }
 
+    if (
+      data?.department == "sales" &&
+      data?.hierarchy == "member" &&
+      (!data.leader || data.leader == "")
+    ) {
+      return toast.error("Choose leader of user");
+    }
+
     try {
       let body = { ...data };
       setLoading(true);
-
-      if (!body?.role?.includes("Member")) {
-        delete body.manager;
-      } else if (body.manager && body.manager != "") {
-        let selectedManger = allUsers.filter(
-          (item) => item.id == body.manager
-        )[0];
-        body.managerName = selectedManger.name;
+      
+      delete body.leaderName;
+      if (body?.hierarchy != "member") {
+        delete body.leader;
+        delete body.leaderName;
       }
 
       let token = localStorage.getItem("authToken");
@@ -199,25 +204,21 @@ const AdduserForm = ({ close, refetchUsers, allUsers }) => {
       </div>
       {data.hierarchy == "member" && (
         <div className="flex flex-col w-full gap-1">
-          <span className={`${spanStyle}`}>
-            {/* <MdOutlineMailOutline /> */}
-            Select manager
-          </span>
+          <span className={`${spanStyle}`}>Select team leader</span>
           <select
             className={`border p-1 rounded-md border-gray-400`}
-            name="manager"
-            value={data?.manager}
+            name="leader"
+            value={data.leader}
             onChange={handleInputChange}
           >
-            <option>Select manager</option>
-            {allManagers?.map((manager) => (
-              <option
-                value={manager.id}
-                selected={data?.manager == manager?.id}
-              >
-                {manager.name}
-              </option>
-            ))}
+            <option>Select Leader</option>
+            {allLeaders?.map((item) => {
+              return (
+                <option className="" value={item.id}>
+                  {item.name}
+                </option>
+              );
+            })}
           </select>
         </div>
       )}

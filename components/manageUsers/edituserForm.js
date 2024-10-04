@@ -11,34 +11,31 @@ const EdituserForm = ({ close, refetchUsers, currentUser, allUsers }) => {
     phone: "",
     department: "",
     hierarchy: "",
+    leader: "",
   });
   const [loading, setLoading] = useState(false);
-  const [allManagers, setAllManagers] = useState(null);
+  const [allLeaders, setAllLeaders] = useState(null);
   useEffect(() => {
     if (currentUser) {
       setData({
         name: currentUser.name,
         password: currentUser.password,
         phone: currentUser.phone,
-        role: currentUser.role,
         department: currentUser.department,
         hierarchy: currentUser.hierarchy,
+        leader: currentUser.leader,
       });
     }
   }, [currentUser]);
 
   useEffect(() => {
-    let managers = allUsers.filter((item) => item?.role?.includes("Manager"));
-    setAllManagers(managers);
+    let leaders = allUsers.filter((item) => item?.hierarchy == "teamLead");
+    setAllLeaders(leaders);
   }, [allUsers]);
 
   const handleInputChange = (event) => {
     let name = event.target.name;
     let value = event.target.value;
-
-    if (name == "manager") {
-      console.log("for manager value is", value);
-    }
     setData((pre) => ({ ...pre, [name]: value }));
   };
 
@@ -56,24 +53,31 @@ const EdituserForm = ({ close, refetchUsers, currentUser, allUsers }) => {
     if (!data?.phone || data.phone == "" || data.phone.length < 5) {
       return toast.error("Enter valid phone number");
     }
+    if (!data?.department || data.department == "") {
+      return toast.error("Choose department of user");
+    }
+    if (!data?.hierarchy || data.hierarchy == "") {
+      return toast.error("Choose hierarchy of user");
+    }
 
-    if (!data?.role || data.role == "") {
-      return toast.error("Please choose user role");
+    if (
+      data?.department == "sales" &&
+      data?.hierarchy == "member" &&
+      (!data.leader || data.leader == "")
+    ) {
+      return toast.error("Choose leader of user");
     }
 
     try {
       setLoading(true);
       let body = { ...data };
-
-      if (!body?.role?.includes("Member")) {
-        delete body.manager;
-      } else if (body.manager && body.manager != "") {
-        let selectedManger = allUsers.filter(
-          (item) => item.id == body.manager
-        )[0];
-        body.managerName = selectedManger.name;
+      delete body.leaderName;
+      if (body?.hierarchy != "member") {
+        delete body.leader;
+        delete body.leaderName;
       }
 
+      // return console.log("body is", body);
       let token = localStorage.getItem("authToken");
       let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/auth/updateUser`;
       const res = await fetch(API_URL, {
@@ -199,12 +203,14 @@ const EdituserForm = ({ close, refetchUsers, currentUser, allUsers }) => {
             value={data.leader}
             onChange={handleInputChange}
           >
-            <option>Select Hierarchy</option>
-            {
-              allLeaders.map((item)=>{
-                return <option className=""></option>
-              })
-            }
+            <option>Select Leader</option>
+            {allLeaders?.map((item) => {
+              return (
+                <option className="" value={item.id}>
+                  {item.name}
+                </option>
+              );
+            })}
           </select>
         </div>
       )}
