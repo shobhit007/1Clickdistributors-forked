@@ -4,22 +4,23 @@ import Header from "@/components/Header";
 import React, { useEffect, useState } from "react";
 import panelContext from "@/lib/context/panelContext";
 import { useQuery } from "@tanstack/react-query";
-import { toast } from "react-toastify"; // Assuming you're using toast for error notifications
 import PanelSelector from "@/components/homepage/PanelSelector";
-import ManageRolesAndPermission from "@/components/homepage/ManageRolesAndPermission";
 import ManageRoles from "@/components/homepage/ManageRoles";
 import ManageUsers from "@/components/manageUsers";
 import AllocateLeadsPanel from "@/components/allocateLead";
 import Sales from "@/components/sales/Sales";
-import { panelPermissions, panels } from "@/lib/data/commonData";
+import { panels } from "@/lib/data/commonData";
 import GlobalSearch from "@/components/globalSearch";
 import Panelsettings from "@/components/panelSettings";
+import { AnimatePresence } from "framer-motion";
+import Dashboard from "@/components/dashboard";
 
 const Page = () => {
   const [displayComponent, setDisplayComponent] = useState("Manage roles");
   const [userRoles, setuserRoles] = useState(null);
   const [token, setToken] = useState(null);
   const [previousComponent, setPreviousComponent] = useState(null);
+  const [showSidebar, setShowSidebar] = useState(false);
 
   useEffect(() => {
     let userToken = localStorage.getItem("authToken");
@@ -125,11 +126,13 @@ const Page = () => {
         setPreviousComponent,
         previousComponent,
         allUserRoles,
+        showSidebar,
+        setShowSidebar,
       }}
     >
-      <div className="w-full h-[100vh] overflow-auto">
+      <div className="w-full h-[100vh] overflow-auto relative">
         <Header />
-        {displayComponent != "globalSearch" && <PanelSelector />}
+        <AnimatePresence>{showSidebar && <PanelSelector />}</AnimatePresence>
 
         {displayComponent == "roles_and_permissions" && <ManageRoles />}
         {displayComponent == "manage_users" && <ManageUsers />}
@@ -137,6 +140,7 @@ const Page = () => {
         {displayComponent == "sales_panel" && <Sales />}
         {displayComponent == "globalSearch" && <GlobalSearch />}
         {displayComponent == "panel_settings" && <Panelsettings />}
+        {displayComponent == "dashboard" && <Dashboard />}
       </div>
     </panelContext.Provider>
   );

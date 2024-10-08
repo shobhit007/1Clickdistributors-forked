@@ -31,7 +31,6 @@ const ManageRoles = () => {
   useEffect(() => {
     const array1Ids = allUserRoles?.map((obj) => obj.id);
 
-    // Filter objects from array2 whose ids are not present in array1
     let filteredArray2 = panelRoles.map((role) => {
       let roles = role.hierarchy;
       return roles?.filter((role) => !array1Ids.includes(role));
@@ -41,7 +40,21 @@ const ManageRoles = () => {
       .flat()
       .map((role) => ({ id: role, panels: [] }));
     // Combine both arrays
-    const resultArray = allUserRoles.concat(filteredArray2);
+    let resultArray = allUserRoles.concat(filteredArray2);
+
+    let allRoleWithDept = panelRoles?.map((obj) => {
+      return obj.hierarchy?.map((role) => ({
+        department: obj.department,
+        id: role,
+      }));
+    });
+    allRoleWithDept = allRoleWithDept.flat();
+    resultArray = resultArray.map((role) => {
+      let searchDept = allRoleWithDept?.find((obj) => obj.id === role.id);
+      role.department = searchDept?.department;
+
+      return role;
+    });
     setData(resultArray);
   }, [allUserRoles]);
 
@@ -118,7 +131,7 @@ const ManageRoles = () => {
   const openModal = () => {};
 
   return (
-    <div className="w-full mx-auto">
+    <div className="w-full mx-auto mt-4">
       {0 ? (
         <div>Loading...</div>
       ) : (
@@ -161,7 +174,7 @@ const ManageRoles = () => {
                 );
               })}
             </div>
-            <div className="flex justify-end mt-2">
+            {/* <div className="flex justify-end mt-2">
               <label>
                 {selectSelected === false ? (
                   <>
@@ -187,7 +200,7 @@ const ManageRoles = () => {
                   </p>
                 )}
               </label>
-            </div>
+            </div> */}
 
             <div className="mt-10">
               <button
@@ -325,7 +338,10 @@ const RoleTile = ({
     }`}
       onClick={handleAddToList}
     >
-      <p className="mb-2 capitalize">{camelToTitle(role.id)}</p>
+      <p className="mb-2 capitalize flex gap-2 items-center">
+        {camelToTitle(role.id)}{" "}
+        {role.department && <span className="text-sm text-gray-500">({role.department})</span>}
+      </p>
       <div className="flex flex-wrap overflow-y-auto scrollbar-thin mb-1 gap-1">
         {role.panels.map((panel, index) => {
           return (

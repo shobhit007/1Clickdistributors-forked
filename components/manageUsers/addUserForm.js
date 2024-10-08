@@ -4,6 +4,20 @@ import React, { useEffect, useState } from "react";
 import { panelRoles, roles } from "@/lib/data/commonData";
 import { toast } from "react-toastify";
 
+export const getSeniorRole = (department, currentRole) => {
+  const roleData = panelRoles.find((role) => role.department === department);
+
+  if (roleData && roleData.hierarchy) {
+    const hierarchy = roleData.hierarchy;
+    const currentIndex = hierarchy.indexOf(currentRole);
+
+    if (currentIndex > 0) {
+      return hierarchy[currentIndex - 1];
+    }
+  }
+  return null;
+};
+
 const AdduserForm = ({ close, refetchUsers, allUsers }) => {
   const [data, setData] = useState({
     name: "",
@@ -13,9 +27,30 @@ const AdduserForm = ({ close, refetchUsers, allUsers }) => {
     department: "",
     hierarchy: "",
     isActive: true,
+    senior: null,
   });
   const [loading, setLoading] = useState(false);
-  const [allLeaders, setAllLeaders] = useState(null);
+  // const [allLeaders, setAllLeaders] = useState(null);
+
+  const [seniorPosition, setSeniorPosition] = useState(null);
+
+  useEffect(() => {
+    setData((pre) => ({ ...pre, senior: null }));
+  }, [data.department, data.hierarchy]);
+
+  useEffect(() => {
+    if (
+      !data.department ||
+      !data.hierarchy ||
+      data.hierarchy == "" ||
+      data.department == ""
+    ) {
+      setSeniorPosition(null);
+    } else {
+      const pos = getSeniorRole(data.department, data.hierarchy);
+      setSeniorPosition(pos);
+    }
+  }, [data]);
 
   const handleInputChange = (event) => {
     let name = event.target.name;
@@ -23,10 +58,10 @@ const AdduserForm = ({ close, refetchUsers, allUsers }) => {
     setData((pre) => ({ ...pre, [name]: value }));
   };
 
-  useEffect(() => {
-    let leaders = allUsers.filter((item) => item?.hierarchy == "teamLead");
-    setAllLeaders(leaders);
-  }, [allUsers]);
+  // useEffect(() => {
+  //   let leaders = allUsers.filter((item) => item?.hierarchy == "teamLead");
+  //   setAllLeaders(leaders);
+  // }, [allUsers]);
 
   let spanStyle =
     "text-slate-600 font-semibold text-base flex items-center gap-1";
@@ -54,25 +89,9 @@ const AdduserForm = ({ close, refetchUsers, allUsers }) => {
     if (!data?.hierarchy || data.hierarchy == "") {
       return toast.error("Please choose hierarchy of user");
     }
-
-    if (
-      data?.department == "sales" &&
-      data?.hierarchy == "member" &&
-      (!data.leader || data.leader == "")
-    ) {
-      return toast.error("Choose leader of user");
-    }
-
     try {
       let body = { ...data };
       setLoading(true);
-      
-      delete body.leaderName;
-      if (body?.hierarchy != "member") {
-        delete body.leader;
-        delete body.leaderName;
-      }
-
       let token = localStorage.getItem("authToken");
       let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/auth/createAuth`;
       const res = await fetch(API_URL, {
@@ -202,23 +221,35 @@ const AdduserForm = ({ close, refetchUsers, allUsers }) => {
             ))}
         </select>
       </div>
-      {data.hierarchy == "member" && (
+      {seniorPosition && (
         <div className="flex flex-col w-full gap-1">
-          <span className={`${spanStyle}`}>Select team leader</span>
+          <span className={`${spanStyle}`}>Select senior {seniorPosition}</span>
           <select
             className={`border p-1 rounded-md border-gray-400`}
-            name="leader"
-            value={data.leader}
+            name="senior"
+            value={data.senior}
             onChange={handleInputChange}
           >
-            <option>Select Leader</option>
-            {allLeaders?.map((item) => {
-              return (
-                <option className="" value={item.id}>
-                  {item.name}
-                </option>
-              );
-            })}
+            <option selected={!data.senior || data.senior == ""} value={""}>
+              Select Senior
+            </option>
+            {allUsers
+              ?.filter(
+                (item) =>
+                  item.department == data.department &&
+                  item.hierarchy == seniorPosition
+              )
+              .map((item) => {
+                return (
+                  <option
+                    className=""
+                    value={item.id}
+                    selected={data.senior == item.id}
+                  >
+                    {item.name}
+                  </option>
+                );
+              })}
           </select>
         </div>
       )}

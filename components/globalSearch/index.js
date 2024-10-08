@@ -19,7 +19,11 @@ const index = () => {
   const [showUpdateHistoryModal, setShowUpdateHistoryModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
 
-  const searchByField = ["leadId", "phone"];
+  const searchByField = [
+    { label: "Lead Id", value: "leadId" },
+    { label: "Phone", value: "phone" },
+    { label: "Company name", value: "companyName" },
+  ];
 
   const handleSearch = async () => {
     try {
@@ -35,7 +39,7 @@ const index = () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ searchBy, searchText: parseInt(searchText) }),
+        body: JSON.stringify({ searchBy, searchText }),
       });
       setLoading(false);
       const data = await response.json();
@@ -148,11 +152,11 @@ const index = () => {
           >
             {searchByField?.map((field) => (
               <option
-                value={field}
+                value={field.value}
                 selected={searchBy == field}
                 className="capitalize"
               >
-                {field}
+                {field.label}
               </option>
             ))}
           </select>
@@ -166,7 +170,7 @@ const index = () => {
           >
             <input
               className="py-1 px-3 rounded-md  border-gray-400 outline-none"
-              type="number"
+              type="text"
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
             />

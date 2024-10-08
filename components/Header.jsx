@@ -12,6 +12,7 @@ import UserDetailView from "./userDetailView";
 import { GrLogout } from "react-icons/gr";
 import { MdSearch } from "react-icons/md";
 import { useQueryClient } from "@tanstack/react-query";
+import { RiMenu2Fill } from "react-icons/ri";
 
 const Header = () => {
   const queryClient = useQueryClient();
@@ -21,6 +22,8 @@ const Header = () => {
     userDetails,
     setDisplayComponent,
     setPreviousComponent,
+    setShowSidebar,
+    showSidebar
   } = useContext(panelContext);
   const dispatch = useDispatch();
   const router = useRouter();
@@ -56,7 +59,11 @@ const Header = () => {
       )}
 
       {/* <img src="/logo.png" alt="logo" width={50} height={50} /> */}
-      <div className="h-8 md:h-14 w-8 md:w-14 bg-colorPrimary rounded-full"></div>
+      <div className="flex items-center gap-3">
+        <RiMenu2Fill onClick={()=>setShowSidebar(!showSidebar)} className="text-[35px] text-gray-600 cursor-pointer" />
+        <div className="h-8 md:h-14 w-8 md:w-14 bg-colorPrimary rounded-full"></div>
+      </div>
+
       <div className="flex items-center gap-4">
         <MdSearch
           onClick={showGlobalSearch}

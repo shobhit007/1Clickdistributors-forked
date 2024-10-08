@@ -5,6 +5,7 @@ import {
   useFilters,
   usePagination,
   useColumnOrder,
+  useGlobalFilter,
 } from "react-table";
 import { camelToTitle } from "./commonFunctions";
 import ColumnOrderControl from "./columnOrderControl";
@@ -32,6 +33,7 @@ const CustomTable = ({
   columns,
   openModal,
   closeModal,
+  searchValue,
 }) => {
   const [uniqueKey, setUniqueKey] = useState(uniqueDataKey);
   useEffect(() => {
@@ -44,8 +46,8 @@ const CustomTable = ({
 
   const defaultColumn = useMemo(
     () => ({
-      Filter: DefaultColumnFilter,
-      maxWidth: 300,
+      // Filter: DefaultColumnFilter,
+      maxWidth: 400,
       width: 150,
     }),
     []
@@ -88,6 +90,7 @@ const CustomTable = ({
       initialState: { pageIndex: 0, pageSize: 20 },
     },
     useFilters,
+    useGlobalFilter,
     useSortBy,
     usePagination,
     useColumnOrder
@@ -121,6 +124,10 @@ const CustomTable = ({
     filteredRows,
     state: { pageIndex, pageSize },
   } = tableInstance;
+
+  useEffect(() => {
+    setGlobalFilter(searchValue);
+  }, [searchValue]);
 
   return (
     <div className="mx-auto h-full flex flex-col justify-between">
@@ -164,9 +171,9 @@ const CustomTable = ({
                             : ""}
                         </span>
                       </div>
-                      <div className="w-full">
+                      {/* <div className="w-full">
                         {column.canFilter ? column.render("Filter") : null}
-                      </div>
+                      </div> */}
                     </div>
                   </th>
                 ))}
@@ -183,7 +190,14 @@ const CustomTable = ({
                       {...cell.getCellProps()}
                       className="px-2 whitespace-nowrap text-base min-w-[80px] max-w-[250px] border border-gray-500 overflow-auto scrollbar-none"
                     >
-                      {cell.render("Cell")}
+                      {cell.value && typeof cell.value != "object" ? (
+                        <HighlightText
+                          text={cell.value || ""}
+                          searchValue={searchValue}
+                        />
+                      ) : (
+                        cell.render("Cell") // Use default render function for other columns
+                      )}
                     </td>
                   ))}
                 </tr>
@@ -264,3 +278,25 @@ const CustomTable = ({
 };
 
 export default CustomTable;
+
+const HighlightText = ({ text, searchValue }) => {
+  if (!searchValue) return <span>{text}</span>;
+
+  const lowerText = text?.toString().toLowerCase();
+  const lowerSearchValue = searchValue.toLowerCase();
+  const startIndex = lowerText.indexOf(lowerSearchValue);
+
+  if (startIndex === -1) return <span>{text}</span>;
+
+  const beforeMatch = text.slice(0, startIndex);
+  const matchText = text.slice(startIndex, startIndex + searchValue.length);
+  const afterMatch = text.slice(startIndex + searchValue.length);
+
+  return (
+    <span>
+      {beforeMatch}
+      <span style={{ backgroundColor: "orange" }}>{matchText}</span>
+      {afterMatch}
+    </span>
+  );
+};
