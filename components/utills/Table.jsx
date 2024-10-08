@@ -17,18 +17,20 @@ export default ({ columns, data }) => {
           </tr>
         </thead>
         <tbody>
-          {data.map((row, rowIndex) => (
-            <tr key={rowIndex}>
-              {columns.map((column, columnIndex) => (
-                <td
-                  key={columnIndex}
-                  className="border border-gray-300 px-4 py-2"
-                >
-                  {column.Cell ? column.Cell({ row }) : row[column.accessor]}
-                </td>
-              ))}
-            </tr>
-          ))}
+          {data.map((row, rowIndex) => {
+            return (
+              <tr key={rowIndex}>
+                {columns.map((column, columnIndex) => (
+                  <td
+                    key={columnIndex}
+                    className="border border-gray-300 px-4 py-2"
+                  >
+                    {column.Cell ? column.Cell({ row }) : row[column.accessor]}
+                  </td>
+                ))}
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

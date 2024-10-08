@@ -75,7 +75,7 @@ export default function LeadManager({ onClose, lead }) {
           ) : (
             <div className="w-full h-full flex gap-2">
               {/* call details */}
-              <CallDetails data={data} />
+              <CallDetails data={data} onClose={onClose} />
               {/* Tabs */}
               <div className="bg-white flex flex-1 border border-gray-200">
                 <Tabs data={data} />
@@ -131,7 +131,9 @@ const Tabs = ({ data }) => {
           );
         })}
       </div>
-      <div className="w-full flex-1 overflow-auto">{renderTab(currentTab)}</div>
+      <div className="w-full flex-1 overflow-auto relative">
+        <div className="w-full max-w-2xl">{renderTab(currentTab)}</div>
+      </div>
     </div>
   );
 };

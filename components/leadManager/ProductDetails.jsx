@@ -4,20 +4,45 @@ import Modal from "../utills/Modal";
 import { toast } from "react-toastify";
 import Table from "../utills/Table";
 import { AiOutlineEdit } from "react-icons/ai";
+import { useQuery } from "@tanstack/react-query";
 
-const ProductDetails = () => {
+const ProductDetails = ({ data: lead }) => {
+  const { leadData } = lead;
   const [visible, setVisible] = useState(false);
-  const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState(lead?.products || []);
   const [productData, setProductData] = useState({});
   const [edit, setEdit] = useState(false);
 
-  const handleAddProduct = (data) => {
-    setProducts((pre) => [...pre, data]);
+  const handleAddProduct = async (product) => {
+    try {
+      const token = localStorage.getItem("authToken");
+      let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/sales/addProduct`;
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({ ...product, leadId: leadData?.leadId }),
+      });
+
+      const data = await response.json();
+      console.log("data", data);
+      if (data.success) {
+        toast.success(data.message);
+      } else {
+        toast.error("Something went wrong");
+      }
+    } catch (error) {
+      console.log("error in addProduct", error.message);
+      toast.error(error.message);
+    }
   };
 
   const editProduct = (data) => {
+    console.log("data", data);
     const newProducts = products.map((p) => {
-      if (p.name === data.name) {
+      if (p.id === data.id) {
         return data;
       }
       return p;
@@ -36,6 +61,10 @@ const ProductDetails = () => {
   const columns = useMemo(
     () => [
       {
+        Header: "ID",
+        accessor: "id",
+      },
+      {
         Header: "Name",
         accessor: "name",
       },
@@ -50,17 +79,19 @@ const ProductDetails = () => {
       {
         Header: "Actions",
         accessor: "actions",
-        Cell: ({ row }) => (
-          <div className="flex items-center gap-2">
-            <button
-              className="bg-blue-500 text-white py-1 px-2 rounded-md flex items-center gap-2"
-              onClick={() => handleEditProduct(row)}
-            >
-              <span>Edit</span>
-              <AiOutlineEdit className="text-white text-xl" />
-            </button>
-          </div>
-        ),
+        Cell: ({ row }) => {
+          return (
+            <div className="flex items-center gap-2">
+              <button
+                className="bg-blue-500 text-white py-1 px-2 rounded-md flex items-center gap-2"
+                onClick={() => handleEditProduct(row)}
+              >
+                <span>Edit</span>
+                <AiOutlineEdit className="text-white text-xl" />
+              </button>
+            </div>
+          );
+        },
       },
     ],
     []
