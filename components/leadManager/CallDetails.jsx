@@ -5,9 +5,7 @@ import moment from "moment";
 import { toast } from "react-toastify";
 import { convertTimeStamp } from "@/lib/commonFunctions";
 
-const CallDetails = ({ data, onClose }) => {
-  const { leadData } = data;
-
+const CallDetails = ({ data: leadDetails, onClose }) => {
   const [editCallDetails, setEditCallDetails] = useState(false);
   const [fields, setFields] = useState({
     disposition: "Not Open",
@@ -42,7 +40,7 @@ const CallDetails = ({ data, onClose }) => {
         return;
       }
       const body = {
-        leadId: leadData.leadId,
+        leadId: leadDetails?.leadData?.leadId,
         followUpDate: fields.followUpDate,
         disposition: fields.disposition,
         subDisposition: fields.subDisposition,
@@ -96,7 +94,9 @@ const CallDetails = ({ data, onClose }) => {
             </label>
           </div>
           <div className="flex-1 text-left">
-            <p className="text-base text-gray-700">{leadData?.full_name}</p>
+            <p className="text-base text-gray-700">
+              {leadDetails?.leadData?.full_name}
+            </p>
           </div>
         </div>
         <div className="flex items-start gap-2 mt-4">
@@ -109,7 +109,9 @@ const CallDetails = ({ data, onClose }) => {
             </label>
           </div>
           <div className="flex-1 text-left">
-            <p className="text-base text-gray-700">{leadData?.company_name}</p>
+            <p className="text-base text-gray-700">
+              {leadDetails?.leadData?.company_name}
+            </p>
           </div>
         </div>
         {/* <div className="flex items-start gap-2 mt-4">
@@ -142,7 +144,8 @@ const CallDetails = ({ data, onClose }) => {
           </div>
           <div className="flex-1 text-left">
             <p className="text-base text-gray-700">
-              {leadData?.phone_number || leadData.mobile_number}
+              {leadDetails?.leadData?.phone_number ||
+                leadDetails?.leadData?.mobile_number}
             </p>
           </div>
         </div>
@@ -157,7 +160,7 @@ const CallDetails = ({ data, onClose }) => {
           </div>
           <div className="flex-1 text-left">
             <p className="text-base text-gray-700">
-              {leadData?.altPhoneNumber || "NA"}
+              {leadDetails?.leadData?.altPhoneNumber || "NA"}
             </p>
           </div>
         </div>
@@ -171,7 +174,9 @@ const CallDetails = ({ data, onClose }) => {
             </label>
           </div>
           <div className="flex-1 text-left">
-            <p className="text-base text-gray-700">{leadData?.city}</p>
+            <p className="text-base text-gray-700">
+              {leadDetails?.leadData?.city}
+            </p>
           </div>
         </div>
         <div className="flex items-start gap-2 mt-4">
@@ -185,7 +190,9 @@ const CallDetails = ({ data, onClose }) => {
           </div>
           <div className="flex-1 text-left">
             <p className="text-base text-gray-700">
-              {leadData["whats_is_your_requirement_?_write_in_brief"] || "NA"}
+              {leadDetails?.leadData[
+                "whats_is_your_requirement_?_write_in_brief"
+              ] || "NA"}
             </p>
           </div>
         </div>
@@ -215,7 +222,7 @@ const CallDetails = ({ data, onClose }) => {
               </select>
             ) : (
               <p className="text-base text-gray-700">
-                {leadData?.disposition || "NA"}
+                {leadDetails?.leadData?.disposition || "NA"}
               </p>
             )}
           </div>
@@ -247,7 +254,7 @@ const CallDetails = ({ data, onClose }) => {
               </select>
             ) : (
               <p className="text-base text-gray-700">
-                {leadData?.subDisposition || "NA"}
+                {leadDetails?.leadData?.subDisposition || "NA"}
               </p>
             )}
           </div>
@@ -263,8 +270,10 @@ const CallDetails = ({ data, onClose }) => {
           </div>
           <div className="flex-1 text-left">
             <p className="text-base text-gray-700">
-              {leadData?.lastCallBackDate
-                ? moment(leadData.lastCallBackDate).toLocaleString()
+              {leadDetails?.leadData?.lastCallBackDate
+                ? moment(
+                    leadDetails?.leadData.lastCallBackDate
+                  ).toLocaleString()
                 : "NA"}
             </p>
           </div>
@@ -289,8 +298,8 @@ const CallDetails = ({ data, onClose }) => {
               />
             ) : (
               <p className="text-base text-gray-700">
-                {leadData?.followUpDate
-                  ? convertTimeStamp(leadData.followUpDate)
+                {leadDetails?.leadData?.followUpDate
+                  ? convertTimeStamp(leadDetails?.leadData.followUpDate)
                   : "NA"}
               </p>
             )}
@@ -318,7 +327,7 @@ const CallDetails = ({ data, onClose }) => {
               />
             ) : (
               <p className="text-base text-gray-700">
-                {leadData?.remarks || "NA"}
+                {leadDetails?.leadData?.remarks || "NA"}
               </p>
             )}
           </div>

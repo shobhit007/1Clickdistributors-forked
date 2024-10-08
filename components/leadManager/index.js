@@ -32,12 +32,11 @@ export default function LeadManager({ onClose, lead }) {
         },
         body: JSON.stringify({ leadId }),
       });
-      const data = await response.json();
-      console.log("data is", data);
-      if (data.success) {
-        return data.data;
+      const result = await response.json();
+      if (result.success) {
+        return result.data;
       } else {
-        toast.error(data.message);
+        toast.error(result.message);
         return null;
       }
     } catch (error) {
@@ -46,7 +45,7 @@ export default function LeadManager({ onClose, lead }) {
   };
 
   const { data, refetch, isLoading } = useQuery({
-    queryKey: ["leadData", leadId],
+    queryKey: ["leadHistoryData", leadId],
     queryFn: getLeadDetails,
   });
 
@@ -58,6 +57,12 @@ export default function LeadManager({ onClose, lead }) {
     <Modal>
       <div className="w-screen h-screen p-4 flex">
         <div className="bg-slate-50 w-full px-4 pb-4 pt-8 overflow-hidden relative rounded">
+          <button
+            className="absolute right-20 top-0 text-gray-800 text-sm px-3 py-1"
+            onClick={refetch}
+          >
+            refetch
+          </button>
           <button
             className="absolute right-0 top-0 bg-red-600 text-white text-sm px-3 py-1"
             onClick={onClose}
@@ -75,10 +80,10 @@ export default function LeadManager({ onClose, lead }) {
           ) : (
             <div className="w-full h-full flex gap-2">
               {/* call details */}
-              <CallDetails data={data} onClose={onClose} />
+              <CallDetails data={data} onClose={onClose} refetch={refetch} />
               {/* Tabs */}
               <div className="bg-white flex flex-1 border border-gray-200">
-                <Tabs data={data} />
+                <Tabs data={data} refetch={refetch} />
               </div>
             </div>
           )}
@@ -88,21 +93,21 @@ export default function LeadManager({ onClose, lead }) {
   );
 }
 
-const Tabs = ({ data }) => {
+const Tabs = ({ data, refetch }) => {
   const [currentTab, setCurrentTab] = useState("Business Details");
 
   const renderTab = (tab) => {
     switch (tab) {
       case "Business Details":
-        return <BusinessDetails data={data} />;
+        return <BusinessDetails data={data} refetch={refetch} />;
       case "Contact Details":
-        return <ContactDetails data={data} />;
+        return <ContactDetails data={data} refetch={refetch} />;
       case "Activity History":
-        return <ActivityHistory data={data} />;
+        return <ActivityHistory data={data} refetch={refetch} />;
       case "Product Details":
-        return <ProductDetails data={data} />;
+        return <ProductDetails data={data} refetch={refetch} />;
       case "Contract Details":
-        return <ContractDetails data={data} />;
+        return <ContractDetails data={data} refetch={refetch} />;
     }
   };
 

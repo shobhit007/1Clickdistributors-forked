@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { MdEdit } from "react-icons/md";
 import moment from "moment";
+import { convertTimeStamp } from "@/lib/commonFunctions";
+import { toast } from "react-toastify";
 
 const profiles = [
   "Proprietor",
@@ -21,32 +23,36 @@ const natureOfBusiness = [
   "Franchiser",
 ];
 
-const BusinessDetails = () => {
+const BusinessDetails = ({ data }) => {
+  const {
+    leadData,
+    leadDetails: { business },
+  } = data;
+
   const [edit, setEdit] = useState(false);
   const [fields, setFields] = useState({
-    establishYear: "",
-    businessNature: "",
-    turnOver: "",
-    state: "",
-    address: "",
-    country: "",
-    gst: "",
-    employee: "",
-    website: "",
-    onlineLink1: "",
-    onlineLink2: "",
-    onlineLink3: "",
-    onlineLink4: "",
-    facebook: "",
-    insta: "",
-    linkedIn: "",
-    youtube: "",
-    quora: "",
-    profileScore: "",
-    profileStatus: "",
-    companyType: "",
-    aboutCompany: "",
-    pincode: "",
+    establishYear: business?.establishYear || "",
+    businessNature: business?.businessNature || "",
+    turnOver: business?.turnOver || "",
+    state: business?.state || "",
+    address: business?.address || "",
+    country: business?.country || "",
+    gstNumber: business?.gstNumber || "",
+    website: business?.website || "",
+    onlineLink1: business?.onlineLink1 || "",
+    onlineLink2: business?.onlineLink2 || "",
+    onlineLink3: business?.onlineLink3 || "",
+    onlineLink4: business?.onlineLink4 || "",
+    facebook: business?.facebook || "",
+    insta: business?.insta || "",
+    linkedIn: business?.linkedIn || "",
+    youtube: business?.youtube || "",
+    quora: business?.quora || "",
+    profileScore: business?.profileScore || "",
+    profileStatus: business?.profileStatus || "",
+    companyType: business?.companyType || "",
+    aboutCompany: business?.aboutCompany || "",
+    pincode: business?.pincode || "",
   });
 
   const handleChange = (e) => {
@@ -59,6 +65,32 @@ const BusinessDetails = () => {
 
   const toggleEdit = () => {
     setEdit(!edit);
+  };
+
+  const addBusinessDetails = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+      let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/sales/updateBusinessDetails`;
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({ ...fields, leadId: leadData?.leadId }),
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        setEdit(false);
+        toast.success(result.message);
+      } else {
+        toast.error("Something went wrong");
+      }
+    } catch (error) {
+      console.log("error in update business details", error.message);
+      toast.error(error.message);
+    }
   };
 
   return (
@@ -80,7 +112,7 @@ const BusinessDetails = () => {
             </label>
           </div>
           <div className="flex-1 text-left">
-            <p className="text-base text-gray-700">Test</p>
+            <p className="text-base text-gray-700">{leadData?.company_name}</p>
           </div>
         </div>
         <div className="flex items-start gap-4 mt-4">
@@ -132,7 +164,7 @@ const BusinessDetails = () => {
           </div>
           <div className="flex-1 text-left">
             <p className="text-base text-gray-700">
-              {moment().toDate().toLocaleString()}
+              {convertTimeStamp(leadData?.createdAt)}
             </p>
           </div>
         </div>
@@ -146,7 +178,7 @@ const BusinessDetails = () => {
             </label>
           </div>
           <div className="flex-1 text-left">
-            <p className="text-base text-gray-700">facebook</p>
+            <p className="text-base text-gray-700">{leadData?.source}</p>
           </div>
         </div>
         <div className="flex items-start gap-4 mt-4">
@@ -190,6 +222,7 @@ const BusinessDetails = () => {
               name="aboutCompany"
               value={fields.aboutCompany}
               onChange={handleChange}
+              placeholder="About Company"
               className={`flex-1 px-3 py-2 ${
                 edit &&
                 "border border-gray-300 rounded-md focus:outline-none w-full"
@@ -214,6 +247,7 @@ const BusinessDetails = () => {
               name="companyType"
               value={fields.companyType}
               onChange={handleChange}
+              placeholder="Enter Company Type"
               className={`flex-1 px-3 py-2 ${
                 edit &&
                 "border border-gray-300 rounded-md focus:outline-none w-full"
@@ -238,6 +272,7 @@ const BusinessDetails = () => {
               name="establishYear"
               value={fields.establishYear}
               onChange={handleChange}
+              placeholder="Enter Establishment Year"
               className={`flex-1 px-3 py-2 ${
                 edit &&
                 "border border-gray-300 rounded-md focus:outline-none w-full"
@@ -282,11 +317,12 @@ const BusinessDetails = () => {
           <div className="flex-1">
             <input
               disabled={!edit}
-              type="tel"
+              type="number"
               id="turnOver"
               name="turnOver"
               value={fields.turnOver}
               onChange={handleChange}
+              placeholder="Enter Turn Over"
               className={`flex-1 px-3 py-2 ${
                 edit &&
                 "border border-gray-300 rounded-md focus:outline-none w-full"
@@ -304,8 +340,8 @@ const BusinessDetails = () => {
             </label>
           </div>
           <div className="text-left flex-1">
-            <p className="text-base text-gray-700" id="city">
-              Test
+            <p className="text-base text-gray-800" id="city">
+              {leadData?.city}
             </p>
           </div>
         </div>
@@ -326,6 +362,7 @@ const BusinessDetails = () => {
               name="state"
               value={fields.state}
               onChange={handleChange}
+              placeholder="Enter State"
               className={`flex-1 px-3 py-2 ${
                 edit &&
                 "border border-gray-300 rounded-md focus:outline-none w-full"
@@ -350,6 +387,7 @@ const BusinessDetails = () => {
               name="address"
               value={fields.address}
               onChange={handleChange}
+              placeholder="Enter Address"
               className={`flex-1 px-3 py-2 ${
                 edit &&
                 "border border-gray-300 rounded-md focus:outline-none w-full"
@@ -369,11 +407,12 @@ const BusinessDetails = () => {
           <div className="flex-1">
             <input
               disabled={!edit}
-              type="tel"
+              type="number"
               id="pincode"
               name="pincode"
               value={fields.pincode}
               onChange={handleChange}
+              placeholder="Enter Pincode"
               className={`flex-1 px-3 py-2 ${
                 edit &&
                 "border border-gray-300 rounded-md focus:outline-none w-full"
@@ -398,6 +437,7 @@ const BusinessDetails = () => {
               name="country"
               value={fields.country}
               onChange={handleChange}
+              placeholder="Enter Country"
               className={`flex-1 px-3 py-2 ${
                 edit &&
                 "border border-gray-300 rounded-md focus:outline-none w-full"
@@ -408,7 +448,7 @@ const BusinessDetails = () => {
         <div className="flex items-start gap-4 mt-4">
           <div className="w-40 text-left">
             <label
-              htmlFor="gst"
+              htmlFor="gstNumber"
               className=" text-gray-700 font-semibold nowrap"
             >
               GST Number:
@@ -417,11 +457,12 @@ const BusinessDetails = () => {
           <div className="flex-1">
             <input
               disabled={!edit}
-              type="tel"
-              id="gst"
-              name="gst"
-              value={fields.gst}
+              type="text"
+              id="gstNumber"
+              name="gstNumber"
+              value={fields.gstNumber}
               onChange={handleChange}
+              placeholder="Enter GST Number"
               className={`flex-1 px-3 py-2 ${
                 edit &&
                 "border border-gray-300 rounded-md focus:outline-none w-full"
@@ -440,7 +481,7 @@ const BusinessDetails = () => {
           </div>
           <div className="flex-1 text-left">
             <p className="text-base text-gray-700" id="phone">
-              1234567890
+              {leadData?.phone_number}
             </p>
           </div>
         </div>
@@ -456,10 +497,11 @@ const BusinessDetails = () => {
           <RightBox>
             <input
               disabled={!edit}
-              type="tel"
+              type="number"
               id="employeeCount"
               name="employeeCount"
               value={fields.employeeCount}
+              placeholder="Employee Count"
               onChange={handleChange}
               className={`flex-1 px-3 py-2 ${
                 edit &&
@@ -485,6 +527,7 @@ const BusinessDetails = () => {
               name="onlineLink1"
               value={fields.onlineLink1}
               onChange={handleChange}
+              placeholder="Online Link - 1"
               className={`flex-1 px-3 py-2 ${
                 edit &&
                 "border border-gray-300 rounded-md focus:outline-none w-full"
@@ -509,6 +552,7 @@ const BusinessDetails = () => {
               name="onlineLink2"
               value={fields.onlineLink2}
               onChange={handleChange}
+              placeholder="Online Link - 2"
               className={`flex-1 px-3 py-2 ${
                 edit &&
                 "border border-gray-300 rounded-md focus:outline-none w-full"
@@ -533,6 +577,7 @@ const BusinessDetails = () => {
               name="onlineLink3"
               value={fields.onlineLink3}
               onChange={handleChange}
+              placeholder="Online Link - 3"
               className={`flex-1 px-3 py-2 ${
                 edit &&
                 "border border-gray-300 rounded-md focus:outline-none w-full"
@@ -555,6 +600,7 @@ const BusinessDetails = () => {
               type="text"
               id="onlineLink4"
               name="onlineLink4"
+              placeholder="Online Link - 4"
               value={fields.onlineLink4}
               onChange={handleChange}
               className={`flex-1 px-3 py-2 ${
@@ -581,6 +627,7 @@ const BusinessDetails = () => {
               name="website"
               value={fields.website}
               onChange={handleChange}
+              placeholder="Website URL"
               className={`flex-1 px-3 py-2 ${
                 edit &&
                 "border border-gray-300 rounded-md focus:outline-none w-full"
@@ -604,6 +651,7 @@ const BusinessDetails = () => {
               id="facebook"
               name="facebook"
               value={fields.facebook}
+              placeholder="Facebook ID"
               onChange={handleChange}
               className={`flex-1 px-3 py-2 ${
                 edit &&
@@ -629,6 +677,7 @@ const BusinessDetails = () => {
               name="insta"
               value={fields.insta}
               onChange={handleChange}
+              placeholder="Insta ID"
               className={`flex-1 px-3 py-2 ${
                 edit &&
                 "border border-gray-300 rounded-md focus:outline-none w-full"
@@ -652,6 +701,7 @@ const BusinessDetails = () => {
               id="linkedIn"
               name="linkedIn"
               value={fields.linkedIn}
+              placeholder="LinkedIn ID"
               onChange={handleChange}
               className={`flex-1 px-3 py-2 ${
                 edit &&
@@ -677,6 +727,7 @@ const BusinessDetails = () => {
               name="youtube"
               value={fields.youtube}
               onChange={handleChange}
+              placeholder="Youtube Channel"
               className={`flex-1 px-3 py-2 ${
                 edit &&
                 "border border-gray-300 rounded-md focus:outline-none w-full"
@@ -701,6 +752,7 @@ const BusinessDetails = () => {
               name="quora"
               value={fields.quora}
               onChange={handleChange}
+              placeholder="Quora Profile"
               className={`flex-1 px-3 py-2 ${
                 edit &&
                 "border border-gray-300 rounded-md focus:outline-none w-full"
@@ -713,7 +765,7 @@ const BusinessDetails = () => {
           className={`mt-8 bg-colorPrimary text-white p-2 rounded-md w-full max-w-52 ${
             edit ? "opacity-100" : "opacity-70"
           }`}
-          onClick={() => {}}
+          onClick={addBusinessDetails}
         >
           Submit
         </button>
