@@ -12,7 +12,7 @@ import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { login } from "@/store/auth/authReducer";
 import Link from "next/link";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const page = () => {
   const [email, setEmail] = useState("");
@@ -22,6 +22,30 @@ const page = () => {
   const router = useRouter();
   const dispatch = useDispatch();
   const queryClient = useQueryClient();
+
+  const getLoginPageImage = async () => {
+    try {
+      let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/panel/getLoginPageImageLink`;
+      const response = await fetch(API_URL);
+      const data = await response.json();
+      if (data.success) {
+        return data.link;
+      } else {
+        return null;
+      }
+    } catch (error) {
+      toast.error("Error in getting image link");
+    }
+  };
+
+  const {
+    data: loginPageImage,
+    refetch,
+    isLoading,
+  } = useQuery({
+    queryKey: ["loginPageImage"],
+    queryFn: getLoginPageImage,
+  });
 
   const loginUser = async () => {
     try {
@@ -64,7 +88,12 @@ const page = () => {
   return (
     <div className="w-[98vw] h-[100vh] flex items-center justify-center">
       <div className="imgComponent hidden sm:block sm:w-[70%] h-full bg-gray-200">
-        <img src="/loginbg.jpg" className="w-full h-full bg-cover" />
+        {!isLoading && (
+          <img
+            src={loginPageImage || "/loginbg.jpg"}
+            className="w-full h-full bg-cover"
+          />
+        )}
       </div>
 
       <div className="flex flex-col justify-center h-full items-center w-full sm:w-[30%] bg-[#ff98500a] rounded-md ">
