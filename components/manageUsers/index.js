@@ -49,11 +49,8 @@ const ManageUsers = () => {
   };
 
   const { data: allUsers, refetch: refetchUsers } = useQuery({
-    queryKey: "allUsers",
+    queryKey: ["allUsers"],
     queryFn: getAllUsers,
-    refetchOnWindowFocus: false,
-    retry: false,
-    staleTime: Infinity,
   });
 
   const handleSearch = (event) => {
@@ -105,7 +102,7 @@ const ManageUsers = () => {
       "email",
       "department",
       "hierarchy",
-      "leaderName",
+      "seniorName",
       "active",
       "password",
       "createdAt",
@@ -144,12 +141,13 @@ const ManageUsers = () => {
       if (key == "active") {
         return {
           Header: "Active",
-          accessor: "isActive",
-          Cell: ({ value, row }) => (
+          Cell: ({ row }) => (
             <div className="p-2">
               <Toggle
-                toggle={value ? true : false}
-                handleClick={() => handleIsActive(value, row.original.email)}
+                toggle={row.original?.isActive ? true : false}
+                handleClick={() =>
+                  handleIsActive(row.original?.isActive, row.original.email)
+                }
               />
             </div>
           ),
@@ -349,6 +347,7 @@ const ManageUsers = () => {
         selectedRows={[]}
         setSelectedRows={() => {}}
         columns={columns}
+        searchValue={searchTerm}
         // openModal={openModal}
         // closeModal={() => setOpenModal(false)}
       />

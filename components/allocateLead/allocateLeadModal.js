@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import React, { useEffect, useState } from "react";
 import { MdArrowDropUp, MdArrowRight } from "react-icons/md";
 import { toast } from "react-toastify";
+import MultiLevelDropdown from "./multiLevelDropdown";
 
 const AllocateLeadModal = ({ data, onSubmit, loading }) => {
   const [gettingSalesMembers, setGettingSalesMembers] = useState(false);
@@ -11,39 +12,11 @@ const AllocateLeadModal = ({ data, onSubmit, loading }) => {
   const [dropDownVisible, setDropDownVisible] = useState(false);
   const [subLevelToShow, setSubLevelToShow] = useState(null);
 
-  // const getAllSalesMembers = async () => {
-  //   try {
-  //     const token = localStorage.getItem("authToken");
-  //     setGettingSalesMembers(true);
-  //     let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/sales/getSalesMembers`;
-  //     const response = await fetch(API_URL, {
-  //       method: "GET",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //         Authorization: `Bearer ${token}`,
-  //       },
-  //     });
-  //     const data = await response.json();
-  //     setGettingSalesMembers(false);
-  //     if (data.success && data?.salesMembers) {
-  //       return data.salesMembers;
-  //     } else {
-  //       toast.error(data.message || "couldn't find sales members");
-  //       return null;
-  //     }
-  //   } catch (error) {
-  //     setGettingSalesMembers(false);
-  //     console.log("error in getting salesMembers", error.message);
-  //     toast.error(error.message);
-  //     return null;
-  //   }
-  // };
-
   const getAllTeamLeaders = async () => {
     try {
       const token = localStorage.getItem("authToken");
       setGettingSalesMembers(true);
-      let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/leads/getAllLeaders`;
+      let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/leads/getSalesTeamMembers`;
       const response = await fetch(API_URL, {
         method: "GET",
         headers: {
@@ -52,7 +25,6 @@ const AllocateLeadModal = ({ data, onSubmit, loading }) => {
         },
       });
       const data = await response.json();
-      console.log("data is", data);
       setGettingSalesMembers(false);
       if (data.success && data.data) {
         return data.data;
@@ -67,8 +39,6 @@ const AllocateLeadModal = ({ data, onSubmit, loading }) => {
       return null;
     }
   };
-
-  // const { data: salesMembers, refetch } = useQuery({
 
   const { data: allTeamLeaders, refetch } = useQuery({
     queryKey: ["allTeamLeaders"],
@@ -87,55 +57,16 @@ const AllocateLeadModal = ({ data, onSubmit, loading }) => {
     setSubLevelToShow(null);
   };
 
-  // useEffect(() => {
-  //   const onClickOutside = (e) => {
-  //     if (
-  //       e.target.id != "dropdown-button" &&
-  //       e.target.id != "dropdown" &&
-  //       e.target.id != "dropdown-icon"
-  //     ) {
-  //       setDropDownVisible(false);
-  //     }
-  //   };
-  //   window.addEventListener("click", onClickOutside);
-
-  //   return () => window.removeEventListener("click", onClickOutside);
-  // }, [dropDownVisible]);
-
-  // console.log("visibleDropDownVisible", dropDownVisible);
-
   return (
-    <div className="w-full flex flex-row items-end gap-5 mt-2">
+    <div className="w-full flex flex-row items-end gap-5 mt-2 flex-wrap">
       <h2 className="text-lg font-semibold text-slate-600">
         Allocate {data.length} leads
       </h2>
-      <button onClick={refetch}>refetch</button>
-
-      {/* <select
-        onChange={(e) => setSelectedSalesMember(e.target.value)}
-        className="py-1  px-2 rounded mt-1 border border-slate-600 outline-blue-500"
-      >
-        <option className="" value={""}>
-          {gettingSalesMembers ? "Loading..." : "Select sales member"}
-        </option>
-
-        {Array.isArray(salesMembers) &&
-          salesMembers?.length > 0 &&
-          salesMembers?.map((member) => (
-            <option
-              selected={selectedSalesMember == member.email}
-              className=""
-              value={member.email}
-            >
-              {member.name}
-            </option>
-          ))}
-      </select> */}
 
       <div className="w-fit relative">
         <button
           id="dropdown-button"
-          className="w-48 py-1 px-2 border border-gray-500 rounded-md text-start flex justify-between"
+          className="min-w-[200px] py-1 px-2 border border-gray-500 rounded-md text-start flex justify-between"
           onClick={() => setDropDownVisible(!dropDownVisible)}
         >
           {selectedSalesMember ? selectedSalesMember?.name : "Select"}
@@ -146,7 +77,7 @@ const AllocateLeadModal = ({ data, onSubmit, loading }) => {
             <MdArrowRight className="text-2xl" id="dropdown-icon" />
           )}
         </button>
-        {dropDownVisible && (
+        {/* {dropDownVisible && (
           <div
             id="dropdown"
             className="absolute bottom-10 left-0 bg-gray-100 shadow-md shadow-gray-400 w-full p-2 rounded min-w-56 max-h-[55vh] z-30 overflow-auto"
@@ -194,6 +125,17 @@ const AllocateLeadModal = ({ data, onSubmit, loading }) => {
                 );
               })}
           </div>
+        )} */}
+
+        {dropDownVisible && Array.isArray(allTeamLeaders) && (
+          <div className="absolute bottom-10 left-0 bg-white shadow-md shadow-gray-400 min-w-[300px] max-w-[500px] p-2 rounded max-h-[55vh] z-30 overflow-auto">
+            <MultiLevelDropdown
+              items={allTeamLeaders}
+              onSelect={(e) => {
+                setSelectedSalesMember(e), setDropDownVisible(false);
+              }}
+            />
+          </div>
         )}
       </div>
 
@@ -214,6 +156,8 @@ const AllocateLeadModal = ({ data, onSubmit, loading }) => {
       >
         refetch
       </button>
+
+      {/* <MultiLevelDropdown /> */}
     </div>
   );
 };

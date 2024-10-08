@@ -25,6 +25,7 @@ const index = () => {
   const [dateObjToSearch, setDateObjToSearch] = useState(null);
   const [formVisible, setFormVisible] = useState(false);
   const [leads, setLeads] = useState(null);
+  const [searchValue, setSearchValue] = useState("");
 
   const getAllLeads = async () => {
     try {
@@ -64,12 +65,6 @@ const index = () => {
     queryKey: ["allLeads", dateObjToSearch],
     queryFn: getAllLeads,
   });
-
-  // useEffect(() => {
-  //   if (Array.isArray(data) && data?.length > 0) {
-  //     setLeads(data);
-  //   }
-  // }, [data]);
 
   useEffect(() => {
     let start = moment()
@@ -226,8 +221,31 @@ const index = () => {
     });
   };
 
+  const filterTable = () => {
+    if (searchValue == "") {
+      setLeads(data);
+    }
+    // Convert searchValue to lowercase to make the search case-insensitive
+    const lowerSearchValue = searchValue?.toLowerCase();
+    // Filter the array of objects
+    const filtered = data?.filter((obj) =>
+      Object.values(obj).some((value) =>
+        value?.toString().toLowerCase().includes(lowerSearchValue)
+      )
+    );
+
+    setLeads(filtered);
+  };
+
+  useEffect(() => {
+    if (Array.isArray(data) && data?.length > 0) {
+      console.log("filtereing");
+      filterTable();
+    }
+  }, [searchValue, data?.length]);
+
   return (
-    <div className="mt-4 px-2 py-1">
+    <div className="py-1 px-2">
       <div className="flex items-center gap-4">
         <button onClick={refetchLeads}>Refetch</button>
         <button
@@ -237,38 +255,6 @@ const index = () => {
           Create Manual Lead
         </button>
       </div>
-      {showDetailsModal && (
-        <Modal>
-          <div className="w-[90vw] sm:w-[55vw] md:w-[45vw] xl:w-[35vw] h-[70vh] bg-white rounded-md p-2 relative">
-            <MdClose
-              className="text-red-500 absolute top-2 right-4 cursor-pointer text-2xl"
-              onClick={() => setShowDetailsModal(false)}
-            />
-
-            <ShowDetails
-              data={selectedRows?.[0]}
-              close={() => setShowDetailsModal(false)}
-            />
-          </div>
-        </Modal>
-      )}
-      {showAllocationModal && (
-        <Modal>
-          <div className="w-[90vw] sm:w-[50vw] md:w-[30vw] xl:w-[25vw] h-[50vh] bg-white rounded-md p-2 relative">
-            <MdClose
-              className="text-red-500 absolute top-2 right-4 cursor-pointer text-2xl"
-              onClick={() => setShowAllocationModal(false)}
-            />
-
-            <AllocateLeadModal
-              data={selectedRows}
-              onSubmit={handleAssignLeads}
-              loading={allocatingLeads}
-            />
-          </div>
-        </Modal>
-      )}
-
       <div className="flex items-center gap-4 px-2 flex-wrap my-2">
         <div className="flex gap-2 bg-gray-200 items-end py-1 px-3 rounded-md flex-wrap">
           <div className="flex flex-col">
@@ -300,22 +286,20 @@ const index = () => {
           onClick={() => setOpenModal(true)}
           className="text-gray-800 text-2xl font-semibold cursor-pointer"
         />
-        {selectedRows?.length > 0 && (
-          <button
-            className="bg-gray-500 flex items-center gap-1 disabled:bg-colorPrimary/40 disabled:cursor-not-allowed py-1 px-3 rounded-md text-white"
-            onClick={() => setSelectedRows([])}
-          >
-            Unselect all
-          </button>
-        )}
-        {selectedRows?.length == 1 && (
-          <button
-            className="bg-colorPrimary flex items-center gap-1 disabled:bg-colorPrimary/40 disabled:cursor-not-allowed py-1 px-3 rounded-md text-white"
-            onClick={() => setShowDetailsModal(true)}
-          >
-            See details
-          </button>
-        )}
+        <button
+          disabled={!selectedRows?.length}
+          className="bg-gray-500 flex items-center gap-1 disabled:bg-gray-500/40 disabled:cursor-not-allowed py-1 px-3 rounded-md text-white"
+          onClick={() => setSelectedRows([])}
+        >
+          Unselect all
+        </button>
+
+        <input
+          value={searchValue}
+          onChange={(e) => setSearchValue(e.target.value)}
+          className="min-w-[160px] border border-gray-400 outline-blue-500 py-1 px-2 rounded"
+          placeholder="Enter to search table"
+        />
       </div>
 
       <Filters setLeads={setLeads} leads={leads} originalData={data} />
@@ -338,12 +322,13 @@ const index = () => {
           columns={columns}
           openModal={openModal}
           closeModal={() => setOpenModal(false)}
+          searchValue={searchValue}
         />
       ) : (
         !leadsLoading && (
-          <div className="mt-10 w-full flex">
+          <div className="mt-10 w-full flex px-4">
             <h1 className="text-gray-600 font-semibold text-2xl">
-              No leads found for selected date range.
+              No data found with current date and filters.
             </h1>
           </div>
         )
