@@ -239,7 +239,6 @@ const index = () => {
 
   useEffect(() => {
     if (Array.isArray(data) && data?.length > 0) {
-      console.log("filtereing");
       filterTable();
     }
   }, [searchValue, data?.length]);

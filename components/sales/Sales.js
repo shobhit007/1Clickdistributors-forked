@@ -9,6 +9,7 @@ import MultiSelectDropDown from "../uiCompoents/MultiSelectDropDown";
 import { dispositions, subDispositions } from "@/lib/data/commonData";
 import { RiCloseCircleFill } from "react-icons/ri";
 import LeadManager from "../leadManager/index";
+import Filters from "../allocateLead/filters";
 
 const salesFilters = ["All", "Pendings", "New Leads", "Follow Ups"];
 
@@ -24,9 +25,11 @@ export default function Sales() {
   const [filters, setFilters] = useState({
     divisions: [],
   });
+  const [searchValue, setSearchValue] = useState("");
 
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showUpdateHistoryModal, setShowUpdateHistoryModal] = useState(false);
+  const [leads, setLeads] = useState([]);
 
   // search for default date
   useEffect(() => {
@@ -45,7 +48,7 @@ export default function Sales() {
     try {
       if (!date) return null;
       const token = localStorage.getItem("authToken");
-      let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/leads/getLeads`;
+      let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/leads/getLeadsForSalesPanel`;
       const response = await fetch(API_URL, {
         method: "POST",
         headers: {
@@ -71,12 +74,33 @@ export default function Sales() {
   };
 
   // Fetch user roles using react-query
-  const { data: leads } = useQuery({
+  const { data } = useQuery({
     queryKey: ["salesLeads", date],
     queryFn: getLeads,
     retry: false,
     refetchOnWindowFocus: false,
   });
+
+  const filterTable = () => {
+    if (searchValue == "") {
+      setLeads(data);
+    }
+    const lowerSearchValue = searchValue?.toLowerCase();
+    const filtered = data?.filter((obj) =>
+      Object.values(obj).some((value) =>
+        value?.toString().toLowerCase().includes(lowerSearchValue)
+      )
+    );
+
+    setLeads(filtered);
+  };
+
+  useEffect(() => {
+    if (Array.isArray(data) && data?.length > 0) {
+      console.log("filtereing");
+      filterTable();
+    }
+  }, [searchValue, data?.length]);
 
   const getColumnsForSalesPanel = async () => {
     try {
@@ -116,7 +140,24 @@ export default function Sales() {
 
   const staticColumns = [];
 
-  const avoidCols = ["id"];
+  let updateBtn = ["Select"].map((key) => {
+    return {
+      Header: camelToTitle(key),
+      Cell: ({ row }) => (
+        <div className="flex justify-center">
+          <button
+            className="text-blue-500 font-semibold hover:underline"
+            onClick={() => {
+              setSelectedRows([row?.original]);
+              setShowLeadManager(true);
+            }}
+          >
+            Update
+          </button>
+        </div>
+      ),
+    };
+  });
 
   const columns = useMemo(() => {
     if (leads?.length > 0) {
@@ -166,7 +207,7 @@ export default function Sales() {
         };
       });
 
-      return [...dynamicCols, ...statiCols];
+      return [...dynamicCols, ...statiCols, ...updateBtn];
     } else {
       return [];
     }
@@ -176,61 +217,72 @@ export default function Sales() {
     ...new Set(Object.values(subDispositions).flat()),
   ];
 
-  const filterSalesLeads = () => {
-    if (!leads) return [];
-    const filteredLeads = leads?.filter((lead) => {
-      if (selectedFilter === "All") {
-        return true;
-      } else if (selectedFilter === "Pendings") {
-        return lead.disposition === "Not Open";
-      } else if (selectedFilter === "New Leads") {
-        if (
-          lead.disposition === "Not Open" &&
-          moment(lead.createdAt).isAfter(moment().startOf("day")) &&
-          moment(lead.createdAt).isBefore(moment().endOf("day"))
-        ) {
-          return true;
-        }
-      } else if (selectedFilter === "Follow Ups") {
-        return lead.disposition === "FollowUp";
-      }
-    });
+  // const filterSalesLeads = () => {
+  //   if (!leads) return [];
+  //   const filteredLeads = leads?.filter((lead) => {
+  //     if (selectedFilter === "All") {
+  //       return true;
+  //     } else if (selectedFilter === "Pendings") {
+  //       return lead.disposition === "Not Open";
+  //     } else if (selectedFilter === "New Leads") {
+  //       if (
+  //         lead.disposition === "Not Open" &&
+  //         moment(lead.createdAt).isAfter(moment().startOf("day")) &&
+  //         moment(lead.createdAt).isBefore(moment().endOf("day"))
+  //       ) {
+  //         return true;
+  //       }
+  //     } else if (selectedFilter === "Follow Ups") {
+  //       return lead.disposition === "FollowUp";
+  //     }
+  //   });
 
-    return filteredLeads;
-  };
+  //   return filteredLeads;
+  // };
 
   return (
     <div className="pt-4">
       <div className="px-4 mb-6">
-        <div className="flex gap-2 items-end rounded-md flex-wrap">
-          <div className="flex gap-2">
-            <div className="flex flex-col">
-              <span className="text-[12px] text-gray-500">From</span>
-              <input
-                type="date"
-                className="text-[12px] border border-gray-600 rounded px-2"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-              />
+        <div className="flex gap-1 flex-col rounded-md flex-wrap">
+          <div className="flex gap-2 items-end">
+            <div className="flex gap-2 items-end p-1 rounded bg-gray-300">
+              <div className="flex flex-col">
+                <span className="text-[12px] text-gray-500">From</span>
+                <input
+                  type="date"
+                  className="text-[12px] border border-gray-600 rounded px-2"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[12px] text-gray-500">To</span>
+                <input
+                  type="date"
+                  className="text-[12px] border border-gray-600 rounded px-2"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                />
+              </div>
+              <div className="flex ml-2">
+                <button
+                  onClick={handleSearchLeads}
+                  className="text-white bg-blue-500 px-2 py-1 rounded-md text-xs mt-auto"
+                >
+                  Search
+                </button>
+              </div>
             </div>
-            <div className="flex flex-col">
-              <span className="text-[12px] text-gray-500">To</span>
-              <input
-                type="date"
-                className="text-[12px] border border-gray-600 rounded px-2"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-              />
-            </div>
-            <div className="flex ml-2">
-              <button
-                onClick={handleSearchLeads}
-                className="text-white bg-blue-500 px-2 py-1 rounded-md text-xs mt-auto"
-              >
-                Search
-              </button>
-            </div>
+
+            <input
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              className="min-w-[160px] border border-gray-400 outline-blue-500 py-1 px-2 rounded"
+              placeholder="Enter to search table"
+            />
           </div>
+
+          <Filters setLeads={setLeads} originalData={data} leads={leads} />
           {/* <div className="flex items-center gap-1 md:gap-4 flex-wrap">
             <button
               onClick={() => setSelectedRows([])}
@@ -269,45 +321,16 @@ export default function Sales() {
             </button>
           </div> */}
         </div>
-
-        <div className="flex flex-1 gap-2 mt-2 flex-wrap w-full">
-          <MultiSelectDropDown label={"Dispositions"} options={dispositions} />
-          <MultiSelectDropDown
-            label={"Sub Dispositions"}
-            options={subDispositionOptions}
-          />
-          {salesFilters.map((filter, idx) => (
-            <button
-              key={idx.toString()}
-              onClick={() => setSelectedFilter(filter)}
-              className={`border text-nowrap rounded px-4 py-1 text-sm cursor-pointer ${
-                selectedFilter === filter ? "bg-colorPrimary" : "bg-white"
-              } ${
-                selectedFilter === filter
-                  ? "border-colorPrimary"
-                  : "border-gray-300"
-              } ${selectedFilter === filter ? "text-white" : "text-gray-600"}`}
-            >
-              {filter}
-            </button>
-          ))}
-          <button
-            disabled={!selectedRows.length || selectedRows.length > 1}
-            className={`rounded p-2 bg-colorPrimary text-white`}
-            onClick={() => setShowLeadManager(true)}
-          >
-            Lead manager
-          </button>
-        </div>
       </div>
       <CustomTable
-        data={filterSalesLeads() || []}
+        data={leads || []}
         uniqueDataKey={"leadId"}
-        selectedRows={selectedRows}
-        setSelectedRows={setSelectedRows}
+        selectedRows={[]}
+        setSelectedRows={() => {}}
         columns={columns}
         openModal={openModal}
         closeModal={() => setOpenModal(false)}
+        searchValue={searchValue}
       />
 
       {showUpdateModal && (

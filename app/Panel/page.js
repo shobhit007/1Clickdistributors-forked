@@ -92,8 +92,9 @@ const Page = () => {
   useEffect(() => {
     console.log("user details are", userDetails);
     if (userDetails?.hierarchy == "superAdmin") {
+      let commonPanels = ["dashboard"];
       let userPanels = panels.map((item) => item.panel);
-      setuserRoles(userPanels);
+      setuserRoles([...commonPanels, ...userPanels]);
       return;
     }
 
@@ -107,12 +108,13 @@ const Page = () => {
 
   useEffect(() => {
     if (userRoles?.length > 0) {
-      let previousComponent = localStorage.getItem("currentDisplayComponent");
-      if (previousComponent && userRoles.includes(previousComponent)) {
-        setDisplayComponent(previousComponent);
-      } else {
-        setDisplayComponent(userRoles[0]);
-      }
+      setDisplayComponent("dashboard");
+      // let previousComponent = localStorage.getItem("currentDisplayComponent");
+      // if (previousComponent && userRoles.includes(previousComponent)) {
+      //   setDisplayComponent(previousComponent);
+      // } else {
+      //   setDisplayComponent(userRoles[0]);
+      // }
     }
   }, [userRoles]);
 

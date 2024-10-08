@@ -69,15 +69,12 @@ const CustomTable = ({
           }
         }
       },
-      style: {
-        cursor: "pointer",
-        // color: "#fff",
-        background:
-          selectedRows?.filter((item) => item[uniqueKey] == row[uniqueKey])
-            ?.length > 0
-            ? "#0000002b"
-            : "#fff",
-      },
+      className: `cursor-pointer ${
+        selectedRows?.filter((item) => item[uniqueKey] == row[uniqueKey])
+          ?.length > 0
+          ? "bg-gray-200"
+          : "bg-white"
+      } hover:bg-gray-200`,
     };
   };
 
@@ -281,6 +278,7 @@ export default CustomTable;
 
 const HighlightText = ({ text, searchValue }) => {
   if (!searchValue) return <span>{text}</span>;
+  searchValue = searchValue?.toString();
 
   const lowerText = text?.toString().toLowerCase();
   const lowerSearchValue = searchValue.toLowerCase();
@@ -288,9 +286,11 @@ const HighlightText = ({ text, searchValue }) => {
 
   if (startIndex === -1) return <span>{text}</span>;
 
-  const beforeMatch = text.slice(0, startIndex);
-  const matchText = text.slice(startIndex, startIndex + searchValue.length);
-  const afterMatch = text.slice(startIndex + searchValue.length);
+  const beforeMatch = text?.toString()?.slice(0, startIndex);
+  const matchText = text
+    ?.toString()
+    ?.slice(startIndex, startIndex + searchValue.length);
+  const afterMatch = text?.toString()?.slice(startIndex + searchValue.length);
 
   return (
     <span>
