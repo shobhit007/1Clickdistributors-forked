@@ -132,7 +132,8 @@ const AllocateLeadModal = ({ data, onSubmit, loading }) => {
             <MultiLevelDropdown
               items={allTeamLeaders}
               onSelect={(e) => {
-                setSelectedSalesMember(e), setDropDownVisible(false);
+                setSelectedSalesMember(e);
+                setDropDownVisible(false);
               }}
             />
           </div>

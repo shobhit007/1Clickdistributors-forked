@@ -69,9 +69,10 @@ const page = () => {
       // console.log("data on login is", data);
       if (data.success && data.token) {
         queryClient.invalidateQueries();
-        dispatch(login({ email, token: data.token, role: data.role }));
+        dispatch(
+          login({ email, token: data.token, hierarchy: data.hierarchy })
+        );
         localStorage.setItem("authToken", data.token);
-        localStorage.setItem("role", data.role);
         localStorage.setItem("email", email);
         router.replace("/panel");
       } else {

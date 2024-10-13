@@ -12,6 +12,7 @@ import local from "next/font/local";
 import ShowDetails from "./showDetails";
 import ManualLeadForm from "../utills/ManualLeadForm";
 import Filters from "./filters";
+import Table from "../utills/Table";
 
 const index = () => {
   const [openModal, setOpenModal] = useState(false);
@@ -24,6 +25,7 @@ const index = () => {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [dateObjToSearch, setDateObjToSearch] = useState(null);
   const [formVisible, setFormVisible] = useState(false);
+  const [workModalVisible, setWorkModalVisible] = useState(false);
   const [leads, setLeads] = useState(null);
   const [searchValue, setSearchValue] = useState("");
 
@@ -253,6 +255,12 @@ const index = () => {
         >
           Create Manual Lead
         </button>
+        <button
+          onClick={() => setWorkModalVisible(true)}
+          className="rounded py-1 px-2 text-white bg-gray-400 hover:bg-gray-600"
+        >
+          Today work
+        </button>
       </div>
       <div className="flex items-center gap-4 px-2 flex-wrap my-2">
         <div className="flex gap-2 bg-gray-200 items-end py-1 px-3 rounded-md flex-wrap">
@@ -346,6 +354,142 @@ const index = () => {
             <ManualLeadForm onClose={() => setFormVisible(false)} />
           </div>
         </Modal>
+      )}
+
+      {workModalVisible && (
+        <Modal>
+          <WorkedLeads setWorkModalVisible={setWorkModalVisible} />
+        </Modal>
+      )}
+    </div>
+  );
+};
+
+const WorkedLeads = ({ setWorkModalVisible }) => {
+  const [search, setSearch] = useState("");
+  const [originalData, setOriginalData] = useState([]);
+  const [updatedData, setupdatedData] = useState([]);
+
+  const getAllUpdatedLeadsCount = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+      let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/leads/getUpdatedLeadsCount`;
+      const response = await fetch(API_URL, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      let result = await response.json();
+      if (result.success) {
+        result = result.data.map((item) => {
+          return {
+            ...item,
+            totalLeads: item?.leadCounts?.totalLeadsAssigned,
+            remainingLeads: item?.leadCounts?.remainingLeads,
+            updatedToday: item?.leadCounts?.leadsUpdatedToday,
+          };
+        });
+
+        return result;
+      } else {
+        return null;
+      }
+    } catch (error) {
+      console.log("error in getting leads", error.message);
+      return null;
+    }
+  };
+
+  const {
+    data: leadsStats,
+    refetch,
+    isLoading,
+  } = useQuery({
+    queryKey: ["LeadsStats"],
+    queryFn: getAllUpdatedLeadsCount,
+  });
+
+  useEffect(() => {
+    if (leadsStats) {
+      setOriginalData(leadsStats);
+      setupdatedData(leadsStats);
+    }
+  }, [leadsStats]);
+
+  useEffect(() => {
+    if (search === "") {
+      setupdatedData(originalData);
+    } else {
+      const filteredData = originalData.filter((item) =>
+        item.name.toLowerCase().includes(search.toLowerCase())
+      );
+      setupdatedData(filteredData);
+    }
+  }, [search, originalData]);
+
+  const columns = useMemo(
+    () => [
+      {
+        Header: "Name",
+        accessor: "name",
+      },
+      {
+        Header: "Hierarchy",
+        accessor: "hierarchy",
+      },
+      {
+        Header: "Total Leads",
+        accessor: "totalLeads",
+      },
+      {
+        Header: "Updated Today",
+        accessor: "updatedToday",
+      },
+      {
+        Header: "Remaining Leads",
+        accessor: "remainingLeads",
+      },
+    ],
+    []
+  );
+
+  return (
+    <div className="w-full h-[100vh] bg-white p-4 md:p-8 relative overflow-auto">
+      <button
+        className="absolute right-0 top-0 bg-red-600 text-white py-1 px-3 text-base"
+        onClick={() => setWorkModalVisible(false)}
+      >
+        close
+      </button>
+      {isLoading ? (
+        <div className="w-full h-full flex items-center justify-center">
+          <img src="/loader.gif" className="h-[60px] w-auto" alt="loading" />
+        </div>
+      ) : (
+        <div className="w-full">
+          <div className="w-full flex">
+            <input
+              type="text"
+              placeholder="Search Name"
+              className="border border-gray-300 rounded-md px-3 py-2 mr-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              onChange={(e) => {
+                // TODO: Implement search functionality
+                setSearch(e.target.value);
+              }}
+            />
+            <button
+              className="bg-colorPrimary text-white px-4 rounded"
+              onClick={refetch}
+            >
+              Refresh
+            </button>
+          </div>
+          <div className="w-full mt-4">
+            <Table data={updatedData} columns={columns} />
+          </div>
+        </div>
       )}
     </div>
   );

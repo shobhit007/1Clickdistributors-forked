@@ -162,7 +162,12 @@ export default function Sales() {
   const columns = useMemo(() => {
     if (leads?.length > 0) {
       let dynamicCols = assignedColumns?.map((key) => {
-        if (key == "assignedAt" || key == "createdAt" || key == "updatedAt") {
+        if (
+          key == "assignedAt" ||
+          key == "createdAt" ||
+          key == "updatedAt" ||
+          key === "followUpDate"
+        ) {
           return {
             Header: key,
             accessor: key,
