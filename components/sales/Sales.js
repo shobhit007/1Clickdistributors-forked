@@ -6,7 +6,11 @@ import { camelToTitle } from "../utills/commonFunctions";
 import Modal from "../utills/Modal";
 import UpdateLead from "./UpdateLead";
 import MultiSelectDropDown from "../uiCompoents/MultiSelectDropDown";
-import { dispositions, subDispositions } from "@/lib/data/commonData";
+import {
+  dispositions,
+  salesPanelColumns,
+  subDispositions,
+} from "@/lib/data/commonData";
 import { RiCloseCircleFill } from "react-icons/ri";
 import LeadManager from "../leadManager/index";
 import Filters from "../allocateLead/filters";
@@ -20,11 +24,7 @@ export default function Sales() {
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [date, setDate] = useState(null);
-  const [selectedFilter, setSelectedFilter] = useState("All");
   const [showLeadManager, setShowLeadManager] = useState(false);
-  const [filters, setFilters] = useState({
-    divisions: [],
-  });
   const [searchValue, setSearchValue] = useState("");
 
   const [showDetailsModal, setShowDetailsModal] = useState(false);
@@ -43,7 +43,6 @@ export default function Sales() {
     });
   }, []);
 
-  // get roles of the user
   const getLeads = async () => {
     try {
       if (!date) return null;
@@ -97,7 +96,6 @@ export default function Sales() {
 
   useEffect(() => {
     if (Array.isArray(data) && data?.length > 0) {
-      console.log("filtereing");
       filterTable();
     }
   }, [searchValue, data?.length]);
@@ -114,7 +112,6 @@ export default function Sales() {
         },
       });
       const data = await response.json();
-      console.log("data is", data);
       if (data.success && data.data) {
         return data.data;
       } else {
@@ -161,48 +158,64 @@ export default function Sales() {
 
   const columns = useMemo(() => {
     if (leads?.length > 0) {
-      let dynamicCols = assignedColumns?.map((key) => {
-        if (
-          key == "assignedAt" ||
-          key == "createdAt" ||
-          key == "updatedAt" ||
-          key === "followUpDate"
-        ) {
+      let dynamicCols = assignedColumns
+        ?.filter((item) => {
+          let arr = [
+            "assignedAt",
+            "createdAt",
+            "updatedAt",
+            "followUpDate",
+            "FollowUpDate",
+          ];
+
+          if (!arr.includes(item) && typeof item == "object") {
+            return false;
+          }
+          return true;
+        })
+        .map((key) => {
+          if (
+            key == "assignedAt" ||
+            key == "createdAt" ||
+            key == "updatedAt" ||
+            key == "followUpDate" ||
+            key == "FollowUpDate"
+          ) {
+            return {
+              Header: salesPanelColumns[key] || key,
+              accessor: key,
+              Cell: ({ value }) => {
+                return (
+                  value && (
+                    <p>
+                      {new Date(value?._seconds * 1000)?.toLocaleDateString()}
+                    </p>
+                  )
+                );
+              },
+              sortType: (rowA, rowB, columnId) => {
+                const dateA = rowA.values[columnId]?._seconds
+                  ? new Date(rowA.values[columnId]?._seconds * 1000)
+                  : null;
+                const dateB = rowB.values[columnId]?._seconds
+                  ? new Date(rowB.values[columnId]?._seconds * 1000)
+                  : null;
+
+                if (!dateA && !dateB) return 0; // Both dates are missing
+                if (!dateA) return 1; // dateA is missing, place it after dateB
+                if (!dateB) return -1; // dateB is missing, place it after dateA
+
+                return dateA > dateB ? 1 : -1; // Compare valid dates
+              },
+              id: key,
+            };
+          }
           return {
-            Header: key,
+            Header: salesPanelColumns[key] || camelToTitle(key),
             accessor: key,
-            Cell: ({ value }) => {
-              return (
-                value && (
-                  <p>
-                    {new Date(value?._seconds * 1000)?.toLocaleDateString()}
-                  </p>
-                )
-              );
-            },
-            sortType: (rowA, rowB, columnId) => {
-              const dateA = rowA.values[columnId]?._seconds
-                ? new Date(rowA.values[columnId]?._seconds * 1000)
-                : null;
-              const dateB = rowB.values[columnId]?._seconds
-                ? new Date(rowB.values[columnId]?._seconds * 1000)
-                : null;
-
-              if (!dateA && !dateB) return 0; // Both dates are missing
-              if (!dateA) return 1; // dateA is missing, place it after dateB
-              if (!dateB) return -1; // dateB is missing, place it after dateA
-
-              return dateA > dateB ? 1 : -1; // Compare valid dates
-            },
             id: key,
           };
-        }
-        return {
-          Header: camelToTitle(key),
-          accessor: key,
-          id: key,
-        };
-      });
+        });
 
       let statiCols = staticColumns.map((key) => {
         return {

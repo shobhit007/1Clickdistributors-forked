@@ -1,12 +1,24 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   MdArrowDownward,
   MdArrowDropDown,
   MdArrowDropUp,
 } from "react-icons/md";
 
-const MultiLevelDropdown = ({ items, level = 0, onSelect }) => {
+const MultiLevelDropdown = ({ items, level = 0, onSelect, allItems }) => {
   const [openItems, setOpenItems] = useState({});
+  const [searchText, setSearchText] = useState("");
+  const [filteredItems, setFilteredItems] = useState([]);
+
+  useEffect(() => {
+    if (searchText == "") {
+      setFilteredItems(allItems);
+    }
+    let filtered = allItems?.filter((item) =>
+      item?.name?.includes(searchText?.toLowerCase())
+    );
+    setFilteredItems(filtered);
+  }, [allItems, searchText]);
 
   const toggleOpen = (itemId) => {
     setOpenItems((prevOpenItems) => ({
@@ -15,54 +27,83 @@ const MultiLevelDropdown = ({ items, level = 0, onSelect }) => {
     }));
   };
 
-  console.log("openItems is", openItems);
   return (
     <ul style={{ margin: 0, padding: 0, paddingLeft: level * 10 }}>
-      {items.map((item) => (
-        <li key={item.id} style={{ listStyle: "none" }}>
-          <div
-            onClick={() => {
-              onSelect && onSelect(item);
-            }}
-            style={{
-              cursor: "pointer",
-              padding: "10px",
-              backgroundColor: "#fff",
-              borderBottom: "1px solid #ddd",
-            }}
-          >
-            {item.name}{" "}
-            {item.teamMembers && item.teamMembers.length > 0 ? (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  toggleOpen(item.id);
-                }}
-              >
-                {" "}
-                {openItems[item.id] ? (
-                  <MdArrowDropUp />
-                ) : (
-                  <MdArrowDropDown />
-                )}{" "}
-              </button>
-            ) : (
-              ""
-            )}
-          </div>
+      {level == 0 && (
+        <div className="w-full p-1 border border-gray-400 rounded">
+          <input
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+            className="outline-none w-full text-gray-700"
+            placeholder="Enter to search"
+          />
+        </div>
+      )}
 
-          {/* Nested Submenu (children) shown inline */}
-          {openItems[item.id] &&
-            item.teamMembers &&
-            item.teamMembers.length > 0 && (
-              <MultiLevelDropdown
-                items={item.teamMembers}
-                level={level + 1}
-                onSelect={onSelect}
-              />
-            )}
-        </li>
-      ))}
+      {searchText != "" ? (
+        filteredItems?.length > 0 ? (
+          filteredItems?.map((item) => {
+            return (
+              <li
+                onClick={() => onSelect && onSelect(item)}
+                className="p-1 my-1 hover:bg-gray-100 rounded cursor-pointer"
+              >
+                {item.name} ({item.department})
+              </li>
+            );
+          })
+        ) : (
+          <h1 className="text-gray-500 mt-4 w-full text-center">
+            No data for searched text
+          </h1>
+        )
+      ) : (
+        items.map((item) => (
+          <li key={item.id} style={{ listStyle: "none" }}>
+            <div
+              onClick={() => {
+                onSelect && onSelect(item);
+              }}
+              style={{
+                cursor: "pointer",
+                padding: "10px",
+                backgroundColor: "#fff",
+                borderBottom: "1px solid #ddd",
+              }}
+            >
+              {item.name}{" "}
+              {item.teamMembers && item.teamMembers.length > 0 ? (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleOpen(item.id);
+                  }}
+                >
+                  {" "}
+                  {openItems[item.id] ? (
+                    <MdArrowDropUp />
+                  ) : (
+                    <MdArrowDropDown />
+                  )}{" "}
+                </button>
+              ) : (
+                ""
+              )}
+            </div>
+
+            {/* Nested Submenu (children) shown inline */}
+            {openItems[item.id] &&
+              item.teamMembers &&
+              item.teamMembers.length > 0 && (
+                <MultiLevelDropdown
+                  items={item.teamMembers}
+                  level={level + 1}
+                  onSelect={onSelect}
+                />
+              )}
+          </li>
+        ))
+      )}
     </ul>
   );
 };

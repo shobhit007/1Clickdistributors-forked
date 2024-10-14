@@ -11,8 +11,25 @@ const AllocateLeadModal = ({ data, onSubmit, loading }) => {
   const [selectedSalesMember, setSelectedSalesMember] = useState(null);
   const [dropDownVisible, setDropDownVisible] = useState(false);
   const [subLevelToShow, setSubLevelToShow] = useState(null);
+  const [allSalesMembers, setAllSalesMembers] = useState([]);
 
-  const getAllTeamLeaders = async () => {
+  const flattenTeamMembers = (data) => {
+    let allMembers = [];
+
+    const extractMembers = (members) => {
+      members.forEach((member) => {
+        allMembers.push(member);
+        if (member.teamMembers && member.teamMembers.length > 0) {
+          extractMembers(member.teamMembers); // Recursively extract from nested teamMembers
+        }
+      });
+    };
+
+    extractMembers(data);
+    return allMembers;
+  };
+
+  const getallMembers = async () => {
     try {
       const token = localStorage.getItem("authToken");
       setGettingSalesMembers(true);
@@ -40,10 +57,19 @@ const AllocateLeadModal = ({ data, onSubmit, loading }) => {
     }
   };
 
-  const { data: allTeamLeaders, refetch } = useQuery({
-    queryKey: ["allTeamLeaders"],
-    queryFn: getAllTeamLeaders,
+  const { data: allMembers, refetch } = useQuery({
+    queryKey: ["allSalesMembers"],
+    queryFn: getallMembers,
   });
+
+  useEffect(() => {
+    if (!allMembers?.length) {
+      return;
+    }
+    const data = flattenTeamMembers(allMembers);
+    setAllSalesMembers(data);
+  }, [allMembers]);
+
   const onFormSubmit = () => {
     if (!selectedSalesMember || selectedSalesMember == "") {
       return toast.error("Please select sales member");
@@ -82,8 +108,8 @@ const AllocateLeadModal = ({ data, onSubmit, loading }) => {
             id="dropdown"
             className="absolute bottom-10 left-0 bg-gray-100 shadow-md shadow-gray-400 w-full p-2 rounded min-w-56 max-h-[55vh] z-30 overflow-auto"
           >
-            {Array.isArray(allTeamLeaders) &&
-              allTeamLeaders?.map((leader) => {
+            {Array.isArray(allMembers) &&
+              allMembers?.map((leader) => {
                 return (
                   <div className="border-b flex flex-col gap-1 border-b-gray-500 text-gray-600 py-1 cursor-pointer relative">
                     <div className="flex justify-between w-full">
@@ -127,14 +153,15 @@ const AllocateLeadModal = ({ data, onSubmit, loading }) => {
           </div>
         )} */}
 
-        {dropDownVisible && Array.isArray(allTeamLeaders) && (
+        {dropDownVisible && Array.isArray(allMembers) && (
           <div className="absolute bottom-10 left-0 bg-white shadow-md shadow-gray-400 min-w-[300px] max-w-[500px] p-2 rounded max-h-[55vh] z-30 overflow-auto">
             <MultiLevelDropdown
-              items={allTeamLeaders}
+              items={allMembers}
               onSelect={(e) => {
                 setSelectedSalesMember(e);
                 setDropDownVisible(false);
               }}
+              allItems={allSalesMembers}
             />
           </div>
         )}

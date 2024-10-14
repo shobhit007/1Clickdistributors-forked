@@ -3,6 +3,7 @@ import { MdClose } from "react-icons/md";
 import MultiSelectDropdown from "../uiCompoents/MultiSelectDropDown";
 import { dispositions, subDispositions } from "@/lib/data/commonData";
 import { MultiSelect } from "react-multi-select-component";
+import moment from "moment";
 
 /*
 "Not Open": 0,
@@ -40,10 +41,10 @@ const Filters = ({ setLeads, originalData, leads }) => {
       "Not Open": 0,
       Today_Followup: 0,
       "Call Back": 0,
-      Presentation_Followup: 0,
+      "Presentation-Followup": 0,
       Presentation: 0,
       Prospect: 0,
-      Prospect_Followup: 0,
+      "Prospect-Followup": 0,
       Deal_Done: 0,
       "Not Interested": 0,
     };
@@ -60,6 +61,20 @@ const Filters = ({ setLeads, originalData, leads }) => {
         filteredDispositionData.hasOwnProperty(lead.disposition)
       ) {
         filteredDispositionData[lead.disposition]++;
+      }
+
+      if (lead?.followUpDate) {
+        let followupdate = new Date(lead.followUpDate?._seconds * 1000);
+        if (moment(followupdate).isSame(moment(), "date")) {
+          filteredDispositionData.Today_Followup++;
+        }
+      }
+
+      if (
+        lead.subDisposition &&
+        filteredDispositionData.hasOwnProperty(lead.subDisposition)
+      ) {
+        filteredDispositionData[lead.subDisposition]++;
       }
     });
 
@@ -86,11 +101,26 @@ const Filters = ({ setLeads, originalData, leads }) => {
       "Prospect",
       "Not Interested",
     ];
+    let subDispositionFilter = ["Prospect-Followup", "Presentation-Followup"];
 
     if (filters?.btnFilter) {
       if (dispostionsFilter.includes(filters?.btnFilter)) {
         filtered = filtered.filter((item) => {
           return item.disposition == filters.btnFilter;
+        });
+      } else if (subDispositionFilter.includes(filters?.btnFilter)) {
+        filtered = filtered.filter((item) => {
+          return item.subDisposition == filters.btnFilter;
+        });
+      } else if (filters?.btnFilter == "Today_Followup") {
+        filtered = filtered?.filter((lead) => {
+          if (lead?.followUpDate) {
+            let followupdate = new Date(lead.followUpDate?._seconds * 1000);
+            if (moment(followupdate).isSame(moment(), "date")) {
+              return true;
+            }
+          }
+          return false;
         });
       } else {
         filtered = [];

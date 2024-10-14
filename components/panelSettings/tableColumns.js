@@ -86,7 +86,7 @@ const TableColumns = () => {
         2. Columns to show in sales panel
       </p>
       <div className="mt-2 flex gap-2 w-full flex-wrap">
-        {salesPanelColumns?.map((item) => {
+        {Object.keys(salesPanelColumns)?.map((item) => {
           return (
             <button
               onClick={() => handleList(item)}
@@ -97,7 +97,7 @@ const TableColumns = () => {
                   : "bg-transparent text-gray-600"
               } font-semibold`}
             >
-              {item}
+              {salesPanelColumns[item] || item}
             </button>
           );
         })}
