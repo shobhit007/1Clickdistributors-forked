@@ -49,6 +49,9 @@ const Filters = ({ setLeads, originalData, leads }) => {
       "Not Interested": 0,
     };
     originalData?.forEach((lead) => {
+      if (lead.disposition == "Call Back") {
+        console.log("call back for", lead.leadId);
+      }
       if (lead?.salesExecutive && !salesMembers[lead?.salesExecutive]) {
         salesMembers[lead?.salesExecutive] = {
           label: lead.salesExecutiveName,
@@ -79,7 +82,6 @@ const Filters = ({ setLeads, originalData, leads }) => {
     });
 
     setDispositionData(filteredDispositionData);
-
     let salesList = Object.values(salesMembers || {});
     setList({
       salesMembers: salesList,
@@ -92,8 +94,6 @@ const Filters = ({ setLeads, originalData, leads }) => {
     }
 
     let filtered = [...originalData];
-
-    let filteresKeys = Object.keys(filters);
     let dispostionsFilter = [
       "Call Back",
       "Presentation",
