@@ -9,6 +9,7 @@ const index = () => {
   const [selectedEndDate, setSelectedEndDate] = useState(null);
   const [date, setDate] = useState(null);
   const [userData, setUserData] = useState(null);
+  const [executiveWiseRecord, setExecutiveWiseRecord] = useState(null);
 
   useEffect(() => {
     let startD = moment().startOf("day").format("YYYY-MM-DD");
@@ -63,6 +64,8 @@ const index = () => {
   useEffect(() => {
     if (Array.isArray(data) && data.length > 0) {
       let obj = {};
+      let executiveWiseData = {};
+      const formattedData = {};
 
       data.forEach((lead) => {
         if (lead.disposition) {
@@ -70,8 +73,26 @@ const index = () => {
             obj[lead.disposition] = 0;
           }
           obj[lead.disposition]++;
+
+          const { salesExecutiveName, disposition } = lead;
+          if (!formattedData[salesExecutiveName]) {
+            formattedData[salesExecutiveName] = {
+              salesExecutiveName,
+              totalUpdates: 0,
+            };
+          }
+
+          formattedData[salesExecutiveName].totalUpdates++;
+
+          if (!formattedData[salesExecutiveName][disposition]) {
+            formattedData[salesExecutiveName][disposition] = 0;
+          }
+
+          formattedData[salesExecutiveName][disposition]++;
         }
       });
+
+      setExecutiveWiseRecord(formattedData);
       setUserData(obj);
     } else {
       setUserData(null);
@@ -137,6 +158,55 @@ const index = () => {
       {userData && (
         <div className="w-full flex justify-center h-[60vh]">
           <DataChart stats={userData} />
+        </div>
+      )}
+
+      {userData && executiveWiseRecord && (
+        <div className="w-full flex mt-5 justify-center">
+          <div className="overflow-x-auto w-[95%]">
+            <table className="min-w-full bg-white border-collapse border border-gray-300">
+              <thead>
+                <tr>
+                  <th className="border border-gray-300 px-4 py-2 text-left">
+                    Sales Executive Name
+                  </th>
+                  <th className="border border-gray-300 px-4 py-2 text-left">
+                    Total Updates
+                  </th>
+                  {Object.keys(userData).map((disposition) => (
+                    <th
+                      key={disposition}
+                      className="border border-gray-300 px-4 py-2 text-left"
+                    >
+                      {disposition}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {Object.values(executiveWiseRecord).map(
+                  (salesExecutive, index) => (
+                    <tr key={index} className="bg-white even:bg-gray-100">
+                      <td className="border border-gray-300 px-4 py-2">
+                        {salesExecutive.salesExecutiveName}
+                      </td>
+                      <td className="border border-gray-300 px-4 py-2">
+                        {salesExecutive.totalUpdates}
+                      </td>
+                      {Object.keys(userData).map((disposition) => (
+                        <td
+                          key={disposition}
+                          className="border border-gray-300 px-4 py-2"
+                        >
+                          {salesExecutive[disposition] || 0}
+                        </td>
+                      ))}
+                    </tr>
+                  )
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>
