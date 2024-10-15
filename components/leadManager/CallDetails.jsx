@@ -8,7 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
 import { authSelector } from "@/store/auth/selector";
 
-const CallDetails = ({ data: leadDetails, onClose }) => {
+const CallDetails = ({ data: leadDetails, onClose, fetchLeadsAgain }) => {
   const userData = useSelector(authSelector);
 
   const [editCallDetails, setEditCallDetails] = useState(false);
@@ -66,6 +66,7 @@ const CallDetails = ({ data: leadDetails, onClose }) => {
       const data = await response.json();
       if (data.success) {
         toast.success(data.message);
+        fetchLeadsAgain();
         onClose();
       } else {
         toast.error("Something went wrong");

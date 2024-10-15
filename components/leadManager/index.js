@@ -16,7 +16,7 @@ const tabs = [
   "Contract Details",
 ];
 
-export default function LeadManager({ onClose, lead }) {
+export default function LeadManager({ onClose, lead, fetchLeadsAgain }) {
   const [editCallDetails, setEditCallDetails] = useState(false);
   const { leadId } = lead;
 
@@ -80,7 +80,12 @@ export default function LeadManager({ onClose, lead }) {
           ) : (
             <div className="w-full h-full flex gap-2">
               {/* call details */}
-              <CallDetails data={data} onClose={onClose} refetch={refetch} />
+              <CallDetails
+                data={data}
+                onClose={onClose}
+                refetch={refetch}
+                fetchLeadsAgain={fetchLeadsAgain}
+              />
               {/* Tabs */}
               <div className="bg-white flex flex-1 border border-gray-200">
                 <Tabs data={data} refetch={refetch} />

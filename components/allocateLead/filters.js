@@ -18,7 +18,7 @@ import moment from "moment";
   }
 */
 
-const Filters = ({ setLeads, originalData, leads }) => {
+const Filters = ({ setLeads, originalData, leads, lockLeads }) => {
   const [selectedDisposition, setSelectedDisposition] = useState([]);
   const [selectedSubDisposition, setSelectedSubDisposition] = useState([]);
   const [filters, setFilters] = useState({
@@ -139,12 +139,46 @@ const Filters = ({ setLeads, originalData, leads }) => {
         (item) => !item.salesExecutive || item.salesExecutive == ""
       );
     }
+
+    if (lockLeads) {
+      // Filter leads based on follow-up counts greater than 0
+      filtered = filtered.filter((lead) => {
+        let followupCount = 0;
+        if (lead?.subDisposition === "Prospect-Followup") followupCount++;
+        if (lead?.subDisposition === "Presentation-Followup") followupCount++;
+        return followupCount > 0;
+      });
+    }
+
     setLeads(filtered);
   };
 
   useEffect(() => {
     filterLeads();
-  }, [selectedDisposition, selectedSubDisposition, filters, originalData]);
+  }, [
+    selectedDisposition,
+    selectedSubDisposition,
+    filters,
+    originalData,
+    lockLeads,
+  ]);
+
+  useEffect(() => {
+    if (lockLeads) {
+      // Set default selected follow-up button if count is greater than 0
+      if (dispositionData && dispositionData["Prospect-Followup"] > 0) {
+        setFilters((pre) => ({ ...pre, btnFilter: "Prospect-Followup" }));
+      } else if (
+        dispositionData &&
+        dispositionData["Presentation-Followup"] > 0
+      ) {
+        setFilters((pre) => ({ ...pre, btnFilter: "Presentation-Followup" }));
+      }
+    } else {
+      // Reset btnFilter if lockLeads is false
+      setFilters((pre) => ({ ...pre, btnFilter: null }));
+    }
+  }, [lockLeads, dispositionData]);
 
   const resetFilters = () => {
     setSelectedDisposition([]);
@@ -164,6 +198,7 @@ const Filters = ({ setLeads, originalData, leads }) => {
       <div className="w-full flex gap-2 flex-wrap h-fit items-end">
         <button
           onClick={resetFilters}
+          disabled={lockLeads}
           className="flex text-nowrap items-center gap-1 hover:bg-colorPrimary/20 bg-colorPrimary/10 px-3 py-[2px] rounded-md border border-colorPrimary text-colorPrimary font-semibold text-sm"
         >
           Reset filters
@@ -174,6 +209,7 @@ const Filters = ({ setLeads, originalData, leads }) => {
           onClick={() =>
             setFilters((pre) => ({ ...pre, unAllocated: !pre.unAllocated }))
           }
+          disabled={lockLeads}
           className={`py-[2px] text-nowrap text-sm px-3 border font-semibold rounded-md ${
             filters?.unAllocated
               ? "bg-colorPrimary  text-white"
@@ -194,6 +230,7 @@ const Filters = ({ setLeads, originalData, leads }) => {
               }
               labelledBy="SalesMembers"
               className=""
+              disabled={lockLeads}
             />
           </div>
         )}
@@ -202,6 +239,12 @@ const Filters = ({ setLeads, originalData, leads }) => {
         {dispositionData &&
           Object.keys(dispositionData).map((item) => (
             <button
+              disabled={
+                lockLeads &&
+                item !== "Prospect-Followup" &&
+                item !== "Presentation-Followup" &&
+                item !== "Today_Followup"
+              }
               className={`flex text-nowrap items-center gap-1 px-2 py-[2px] rounded-md border border-gray-400  font-semibold text-sm ${
                 filters?.btnFilter == item
                   ? "bg-blue-500 text-white"
