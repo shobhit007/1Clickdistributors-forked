@@ -26,6 +26,7 @@ const index = () => {
   const [dateObjToSearch, setDateObjToSearch] = useState(null);
   const [formVisible, setFormVisible] = useState(false);
   const [workModalVisible, setWorkModalVisible] = useState(false);
+  const [uploadModalVisible, setUploadVisible] = useState(false);
   const [leads, setLeads] = useState(null);
   const [searchValue, setSearchValue] = useState("");
 
@@ -256,11 +257,17 @@ const index = () => {
           Create Manual Lead
         </button>
         <button
+          onClick={() => setUploadVisible(true)}
+          className="rounded py-1 px-2 text-white bg-gray-400 hover:bg-gray-600"
+        >
+          Import Excel
+        </button>
+        {/* <button
           onClick={() => setWorkModalVisible(true)}
           className="rounded py-1 px-2 text-white bg-gray-400 hover:bg-gray-600"
         >
           Today work
-        </button>
+        </button> */}
       </div>
       <div className="flex items-center gap-4 px-2 flex-wrap my-2">
         <div className="flex gap-2 bg-gray-200 items-end py-1 px-3 rounded-md flex-wrap">
@@ -356,11 +363,98 @@ const index = () => {
         </Modal>
       )}
 
-      {workModalVisible && (
+      {/* {workModalVisible && (
         <Modal>
           <WorkedLeads setWorkModalVisible={setWorkModalVisible} />
         </Modal>
+      )} */}
+
+      {uploadModalVisible && (
+        <Modal>
+          <UploadExcelData onClose={() => setUploadVisible(false)} />
+        </Modal>
       )}
+    </div>
+  );
+};
+
+const UploadExcelData = ({ onClose }) => {
+  const [file, setFile] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const onChange = (e) => {
+    const file = e.target.files[0];
+    setFile(file);
+  };
+
+  const uploadExcelFile = async () => {
+    try {
+      if (!file) {
+        toast.error("Please select a file");
+        setLoading(false);
+        return;
+      }
+      setLoading(true);
+      let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/leads/importLeadsFromExcel`;
+      let token = localStorage.getItem("authToken");
+
+      // Create a FormData object to hold the file
+      const formData = new FormData();
+      formData.append("file", file); // Append the file to the FormData
+
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData, // Use FormData as the body
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        toast.success(result.message);
+        setLoading(false);
+        onClose();
+      } else {
+        toast.error(result.message);
+        setLoading(false);
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error("Something went wrong");
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="w-full max-w-80 bg-white border shadow-sm rounded relative px-4 pt-10 pb-6 overflow-hidden">
+      <button
+        className="bg-red-600 text-white text-base absolute top-0 right-0 px-4"
+        onClick={onClose}
+      >
+        close
+      </button>
+      <div>
+        <input
+          type="file"
+          accept=".xlsx, .xls"
+          onChange={onChange}
+          className="block w-full text-sm text-gray-500
+          file:mr-4 file:py-2 file:px-4
+          file:rounded-md file:border-0
+          file:text-sm file:font-semibold
+          file:bg-blue-50 file:text-blue-700
+          hover:file:bg-blue-100
+        "
+        />
+        <button
+          disabled={loading}
+          onClick={uploadExcelFile}
+          className="mt-8 w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
+        >
+          {loading ? "Uploading..." : "Upload Excel"}
+        </button>
+      </div>
     </div>
   );
 };

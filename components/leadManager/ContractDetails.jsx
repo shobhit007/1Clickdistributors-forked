@@ -1,8 +1,11 @@
 import { useState } from "react";
 import Modal from "../utills/Modal";
-import { AiOutlineClose, AiOutlinePlus } from "react-icons/ai";
-import moment from "moment";
-const ContractDetails = () => {
+import { AiOutlineClose } from "react-icons/ai";
+import { toast } from "react-toastify";
+
+const ContractDetails = ({ data }) => {
+  const leadData = data?.leadData;
+
   const [visible, setVisible] = useState(false);
 
   const onClose = () => setVisible(false);
@@ -13,28 +16,27 @@ const ContractDetails = () => {
         className={`bg-colorPrimary text-white py-2 px-4 rounded-md flex items-center gap-2`}
         onClick={() => setVisible(true)}
       >
-        <span>Raise PO</span>
+        <span>Raise PI</span>
       </button>
 
       {visible && (
         <Modal>
-          <POForm onClose={onClose} />
+          <PIForm onClose={onClose} leadData={leadData} />
         </Modal>
       )}
     </div>
   );
 };
 
-const POForm = ({ onClose }) => {
+const PIForm = ({ onClose, leadData }) => {
   const [formFields, setFormFields] = useState({
     address: "",
     gstNumber: "",
-    email: "",
-    phone: "",
     package: "",
     receivedAmount: "",
-    dueDate: moment().format("YYYY-MM-DDTHH:mm"),
-    invoiceDate: moment().format("YYYY-MM-DDTHH:mm"),
+    dueDate: "",
+    invoiceDate: "",
+    totalAmount: "",
   });
 
   const handleOnChange = (e) => {
@@ -42,11 +44,25 @@ const POForm = ({ onClose }) => {
     setFormFields((prev) => ({ ...prev, [name]: value }));
   };
 
-  console.log(formFields);
+  const handleSubmit = () => {
+    if (
+      !formFields.address ||
+      !formFields.gstNumber ||
+      !formFields.package ||
+      !formFields.receivedAmount ||
+      !formFields.dueDate ||
+      !formFields.invoiceDate ||
+      !formFields.totalAmount
+    ) {
+      toast.error("Please fill all the fields");
+      return;
+    }
+    console.log("Submitting form with data:", formFields);
+  };
 
   return (
     <div className="w-full h-full">
-      <div className="bg-white md:rounded p-4 h-full w-full md:w-96 md:h-[70vh] md:mx-auto md:translate-y-1/4 overflow-auto relative">
+      <div className="bg-white md:rounded p-4 h-full w-full md:w-[576px] md:h-[70vh] md:mx-auto md:translate-y-1/4 overflow-auto relative">
         <button
           onClick={onClose}
           className="absolute top-0 right-0 p-3 rounded bg-white hover:bg-gray-200"
@@ -54,160 +70,217 @@ const POForm = ({ onClose }) => {
           <AiOutlineClose className="text-xl text-black" />
         </button>
         <div className="w-full mt-4">
-          <h2 className="text-black text-xl font-semibold">Raise PO</h2>
+          <h2 className="text-black text-xl font-semibold">Raise PI</h2>
           <div className="mt-4 w-full">
             <div className="flex flex-col space-y-4">
               <div className="flex items-center gap-2">
-                <label
-                  htmlFor="companyName"
-                  className="block text-gray-700 font-semibold mb-2"
-                >
-                  Company Name:
-                </label>
-                <p className="text-base text-gray-700" id="companyName">
-                  Test
-                </p>
+                <LeftBox>
+                  <label
+                    htmlFor="companyName"
+                    className="block text-gray-700 font-semibold mb-2"
+                  >
+                    Company Name:
+                  </label>
+                </LeftBox>
+                <RightBox>
+                  <p className="text-base text-gray-700" id="companyName">
+                    {leadData?.company_name || "NA"}
+                  </p>
+                </RightBox>
               </div>
               <div className="flex items-center gap-2">
-                <label
-                  htmlFor="invoiceDate"
-                  className="block text-gray-700 font-semibold mb-2"
-                >
-                  Invoice Date:
-                </label>
-                <input
-                  type="datetime-local"
-                  id="invoiceDate"
-                  name="invoiceDate"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300"
-                  value={formFields.invoiceDate}
-                  onChange={handleOnChange}
-                />
+                <LeftBox>
+                  <label
+                    htmlFor="invoiceDate"
+                    className="block text-gray-700 font-semibold mb-2"
+                  >
+                    Invoice Date:
+                  </label>
+                </LeftBox>
+                <RightBox>
+                  <input
+                    type="datetime-local"
+                    id="invoiceDate"
+                    name="invoiceDate"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300"
+                    value={formFields.invoiceDate}
+                    onChange={handleOnChange}
+                  />
+                </RightBox>
               </div>
               <div className="flex items-center gap-2">
-                <label
-                  htmlFor="dueDate"
-                  className="block text-gray-700 font-semibold mb-2"
-                >
-                  Due Date:
-                </label>
-                <input
-                  type="datetime-local"
-                  id="dueDate"
-                  name="dueDate"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300"
-                  value={formFields.dueDate}
-                  onChange={handleOnChange}
-                />
+                <LeftBox>
+                  <label
+                    htmlFor="dueDate"
+                    className="block text-gray-700 font-semibold mb-2"
+                  >
+                    Due Date:
+                  </label>
+                </LeftBox>
+                <RightBox>
+                  <input
+                    type="datetime-local"
+                    id="dueDate"
+                    name="dueDate"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300"
+                    value={formFields.dueDate}
+                    onChange={handleOnChange}
+                  />
+                </RightBox>
               </div>
               <div className="flex items-center gap-2">
-                <label
-                  htmlFor="address"
-                  className="block text-gray-700 font-semibold mb-2"
-                >
-                  Address:
-                </label>
-                <input
-                  type="text"
-                  id="address"
-                  name="address"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300"
-                  value={formFields.address}
-                  onChange={handleOnChange}
-                />
+                <LeftBox>
+                  <label
+                    htmlFor="address"
+                    className="block text-gray-700 font-semibold mb-2"
+                  >
+                    Address:
+                  </label>
+                </LeftBox>
+                <RightBox>
+                  <input
+                    type="text"
+                    id="address"
+                    name="address"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300"
+                    value={formFields.address}
+                    onChange={handleOnChange}
+                  />
+                </RightBox>
               </div>
               <div className="flex items-center gap-2">
-                <label
-                  htmlFor="gstNumber"
-                  className="block text-gray-700 font-semibold mb-2"
-                >
-                  GST Number:
-                </label>
-                <input
-                  type="text"
-                  id="gstNumber"
-                  name="gstNumber"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300"
-                  value={formFields.gstNumber}
-                  onChange={handleOnChange}
-                />
+                <LeftBox>
+                  <label
+                    htmlFor="gstNumber"
+                    className="block text-gray-700 font-semibold mb-2"
+                  >
+                    GST Number:
+                  </label>
+                </LeftBox>
+                <RightBox>
+                  <input
+                    type="text"
+                    id="gstNumber"
+                    name="gstNumber"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300"
+                    value={formFields.gstNumber}
+                    onChange={handleOnChange}
+                  />
+                </RightBox>
               </div>
               <div className="flex items-center gap-2">
-                <label
-                  htmlFor="email"
-                  className="block text-gray-700 font-semibold mb-2"
-                >
-                  Email:
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300"
-                  value={formFields.email}
-                  onChange={handleOnChange}
-                />
+                <LeftBox>
+                  <label
+                    htmlFor="email"
+                    className="block text-gray-700 font-semibold mb-2"
+                  >
+                    Email:
+                  </label>
+                </LeftBox>
+                <RightBox>
+                  <RightBox>
+                    <p className="text-base text-gray-700" id="email">
+                      {leadData?.email || "NA"}
+                    </p>
+                  </RightBox>
+                </RightBox>
               </div>
               <div className="flex items-center gap-2">
-                <label
-                  htmlFor="phone"
-                  className="block text-gray-700 font-semibold mb-2"
-                >
-                  Phone:
-                </label>
-                <input
-                  type="tel"
-                  id="phone"
-                  name="phone"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300"
-                  value={formFields.phone}
-                  onChange={handleOnChange}
-                />
+                <LeftBox>
+                  <label
+                    htmlFor="phone"
+                    className="block text-gray-700 font-semibold mb-2"
+                  >
+                    Phone:
+                  </label>
+                </LeftBox>
+                <RightBox>
+                  <RightBox>
+                    <p className="text-base text-gray-700" id="phone">
+                      {leadData?.phone_number || "NA"}
+                    </p>
+                  </RightBox>
+                </RightBox>
               </div>
               <div className="flex items-center gap-2">
-                <label
-                  htmlFor="package"
-                  className="block text-gray-700 font-semibold mb-2"
-                >
-                  Package:
-                </label>
-                <input
-                  type="text"
-                  id="package"
-                  name="package"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300"
-                  value={formFields.package}
-                  onChange={handleOnChange}
-                />
+                <LeftBox>
+                  <label
+                    htmlFor="package"
+                    className="block text-gray-700 font-semibold mb-2"
+                  >
+                    Package:
+                  </label>
+                </LeftBox>
+                <RightBox>
+                  <input
+                    type="text"
+                    id="package"
+                    name="package"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300"
+                    value={formFields.package}
+                    onChange={handleOnChange}
+                  />
+                </RightBox>
               </div>
               <div className="flex items-center gap-2">
-                <label
-                  htmlFor="receivedAmount"
-                  className="block text-gray-700 font-semibold mb-2"
-                >
-                  Received Amount:
-                </label>
-                <input
-                  type="number"
-                  id="receivedAmount"
-                  name="receivedAmount"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300"
-                  value={formFields.receivedAmount}
-                  onChange={handleOnChange}
-                />
+                <LeftBox>
+                  <label
+                    htmlFor="receivedAmount"
+                    className="block text-gray-700 font-semibold mb-2"
+                  >
+                    Received Amount:
+                  </label>
+                </LeftBox>
+                <RightBox>
+                  <input
+                    type="number"
+                    id="receivedAmount"
+                    name="receivedAmount"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300"
+                    value={formFields.receivedAmount}
+                    onChange={handleOnChange}
+                  />
+                </RightBox>
               </div>
-              <button
-                className={`w-full bg-colorPrimary text-white py-2 px-4 rounded-md flex items-center justify-center mt-10`}
-                onClick={() => {}}
-              >
-                <span>Submit</span>
-              </button>
+              <div className="flex items-center gap-2">
+                <LeftBox>
+                  <label
+                    htmlFor="totalAmount"
+                    className="block text-gray-700 font-semibold mb-2"
+                  >
+                    Total Contract Value:
+                  </label>
+                </LeftBox>
+                <RightBox>
+                  <input
+                    type="number"
+                    id="totalAmount"
+                    name="totalAmount"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300"
+                    value={formFields.totalAmount}
+                    onChange={handleOnChange}
+                  />
+                </RightBox>
+              </div>
             </div>
+            <button
+              className={`w-full bg-colorPrimary text-white py-2 px-4 rounded-md mt-8`}
+              onClick={handleSubmit} // Updated to call handleSubmit
+            >
+              <span>Submit</span>
+            </button>
           </div>
         </div>
       </div>
     </div>
   );
+};
+
+const LeftBox = ({ children }) => {
+  return <div className="w-40 text-left">{children}</div>;
+};
+const RightBox = ({ children }) => {
+  return <div className="flex-1 text-left">{children}</div>;
 };
 
 export default ContractDetails;
