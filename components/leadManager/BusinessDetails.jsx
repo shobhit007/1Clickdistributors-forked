@@ -103,41 +103,41 @@ const BusinessDetails = ({ data }) => {
       </button>
       <div className="p-4">
         <div className="flex items-start gap-4">
-          <div className="w-40 text-left">
+          <LeftBox>
             <label
               htmlFor="companyName"
               className=" text-gray-700 font-semibold nowrap"
             >
               Company Name:
             </label>
-          </div>
-          <div className="flex-1 text-left">
+          </LeftBox>
+          <RightBox>
             <p className="text-base text-gray-700">{leadData?.company_name}</p>
-          </div>
+          </RightBox>
         </div>
         <div className="flex items-start gap-4 mt-4">
-          <div className="w-40 text-left">
+          <LeftBox>
             <label
               htmlFor="profileId"
               className=" text-gray-700 font-semibold nowrap"
             >
               Unique Profile Id:
             </label>
-          </div>
-          <div className="flex-1 text-left">
-            <p className="text-base text-gray-700">Test</p>
-          </div>
+          </LeftBox>
+          <RightBox>
+            <p className="text-base text-gray-700">{leadData?.profileId}</p>
+          </RightBox>
         </div>
         <div className="flex items-start gap-4 mt-4">
-          <div className="w-40 text-left">
+          <LeftBox>
             <label
               htmlFor="profileScore"
               className=" text-gray-700 font-semibold nowrap"
             >
               Profile Score:
             </label>
-          </div>
-          <div className="flex-1 text-left">
+          </LeftBox>
+          <RightBox>
             <select
               disabled={!edit}
               className={`border p-2 rounded-md border-gray-400 w-full md:w-full`}
@@ -151,46 +151,46 @@ const BusinessDetails = ({ data }) => {
                 </option>
               ))}
             </select>
-          </div>
+          </RightBox>
         </div>
         <div className="flex items-start gap-4 mt-4">
-          <div className="w-40 text-left">
+          <LeftBox>
             <label
               htmlFor="createdAt"
               className=" text-gray-700 font-semibold nowrap"
             >
               Lead Creation Date:
             </label>
-          </div>
-          <div className="flex-1 text-left">
+          </LeftBox>
+          <RightBox>
             <p className="text-base text-gray-700">
               {convertTimeStamp(leadData?.createdAt)}
             </p>
-          </div>
+          </RightBox>
         </div>
         <div className="flex items-start gap-4 mt-4">
-          <div className="w-40 text-left">
+          <LeftBox>
             <label
               htmlFor="source"
               className=" text-gray-700 font-semibold nowrap"
             >
               Lead Source:
             </label>
-          </div>
-          <div className="flex-1 text-left">
+          </LeftBox>
+          <RightBox>
             <p className="text-base text-gray-700">{leadData?.source}</p>
-          </div>
+          </RightBox>
         </div>
         <div className="flex items-start gap-4 mt-4">
-          <div className="w-40 text-left">
+          <LeftBox>
             <label
               htmlFor="profileStatus"
               className=" text-gray-700 font-semibold nowrap"
             >
               Profile Status:
             </label>
-          </div>
-          <div className="flex-1 text-left">
+          </LeftBox>
+          <RightBox>
             <input
               disabled={!edit}
               type="number"
@@ -203,18 +203,18 @@ const BusinessDetails = ({ data }) => {
                 "border border-gray-300 rounded-md focus:outline-none w-full"
               }`}
             />
-          </div>
+          </RightBox>
         </div>
         <div className="flex items-start gap-4 mt-4">
-          <div className="text-left w-40">
+          <LeftBox>
             <label
               htmlFor="aboutCompany"
               className=" text-gray-700 font-semibold nowrap"
             >
               About Company:
             </label>
-          </div>
-          <div className="flex-1">
+          </LeftBox>
+          <RightBox>
             <input
               disabled={!edit}
               type="text"
@@ -228,18 +228,18 @@ const BusinessDetails = ({ data }) => {
                 "border border-gray-300 rounded-md focus:outline-none w-full"
               }`}
             />
-          </div>
+          </RightBox>
         </div>
         <div className="flex items-start gap-4 mt-4">
-          <div className="text-left w-40">
+          <LeftBox>
             <label
               htmlFor="companyType"
               className=" text-gray-700 font-semibold nowrap"
             >
               Company Type:
             </label>
-          </div>
-          <div className="flex-1">
+          </LeftBox>
+          <RightBox>
             <input
               disabled={!edit}
               type="text"
@@ -253,18 +253,18 @@ const BusinessDetails = ({ data }) => {
                 "border border-gray-300 rounded-md focus:outline-none w-full"
               }`}
             />
-          </div>
+          </RightBox>
         </div>
         <div className="flex items-start gap-4 mt-4">
-          <div className="text-left w-40">
+          <LeftBox>
             <label
               htmlFor="establishYear"
               className=" text-gray-700 font-semibold nowrap"
             >
               Establishment Year:
             </label>
-          </div>
-          <div className="flex-1">
+          </LeftBox>
+          <RightBox>
             <input
               disabled={!edit}
               type="number"
@@ -278,18 +278,18 @@ const BusinessDetails = ({ data }) => {
                 "border border-gray-300 rounded-md focus:outline-none w-full"
               }`}
             />
-          </div>
+          </RightBox>
         </div>
         <div className="flex items-start gap-4 mt-4">
-          <div className="text-left w-40">
+          <LeftBox>
             <label
               htmlFor="businessNature"
               className=" text-gray-700 font-semibold nowrap"
             >
               Nature Of Business:
             </label>
-          </div>
-          <div className="flex-1">
+          </LeftBox>
+          <RightBox>
             <select
               disabled={!edit}
               className={`border p-2 rounded-md border-gray-400 w-full md:w-full`}
@@ -303,18 +303,18 @@ const BusinessDetails = ({ data }) => {
                 </option>
               ))}
             </select>
-          </div>
+          </RightBox>
         </div>
         <div className="flex items-start gap-4 mt-4">
-          <div className="text-left w-40">
+          <LeftBox>
             <label
               htmlFor="turnOver"
               className=" text-gray-700 font-semibold nowrap"
             >
               Turn Over:
             </label>
-          </div>
-          <div className="flex-1">
+          </LeftBox>
+          <RightBox>
             <input
               disabled={!edit}
               type="number"
@@ -328,33 +328,33 @@ const BusinessDetails = ({ data }) => {
                 "border border-gray-300 rounded-md focus:outline-none w-full"
               }`}
             />
-          </div>
+          </RightBox>
         </div>
         <div className="flex items-start gap-4 mt-4">
-          <div className="text-left w-40">
+          <LeftBox>
             <label
               htmlFor="city"
               className=" text-gray-700 font-semibold nowrap"
             >
               City:
             </label>
-          </div>
-          <div className="text-left flex-1">
+          </LeftBox>
+          <RightBox>
             <p className="text-base text-gray-800" id="city">
               {leadData?.city}
             </p>
-          </div>
+          </RightBox>
         </div>
         <div className="flex items-start gap-4 mt-4">
-          <div className="text-left w-40">
+          <LeftBox>
             <label
               htmlFor="state"
               className=" text-gray-700 font-semibold nowrap"
             >
               State:
             </label>
-          </div>
-          <div className="text-left flex-1">
+          </LeftBox>
+          <RightBox>
             <input
               disabled={!edit}
               type="text"
@@ -368,18 +368,18 @@ const BusinessDetails = ({ data }) => {
                 "border border-gray-300 rounded-md focus:outline-none w-full"
               }`}
             />
-          </div>
+          </RightBox>
         </div>
         <div className="flex items-start gap-4 mt-4">
-          <div className="text-left w-40">
+          <LeftBox>
             <label
               htmlFor="address"
               className=" text-gray-700 font-semibold nowrap"
             >
               Address:
             </label>
-          </div>
-          <div className="text-left flex-1">
+          </LeftBox>
+          <RightBox>
             <input
               disabled={!edit}
               type="text"
@@ -393,18 +393,18 @@ const BusinessDetails = ({ data }) => {
                 "border border-gray-300 rounded-md focus:outline-none w-full"
               }`}
             />
-          </div>
+          </RightBox>
         </div>
         <div className="flex items-start gap-4 mt-4">
-          <div className="text-left w-40">
+          <LeftBox>
             <label
               htmlFor="pincode"
               className=" text-gray-700 font-semibold nowrap"
             >
               Pincode:
             </label>
-          </div>
-          <div className="flex-1">
+          </LeftBox>
+          <RightBox>
             <input
               disabled={!edit}
               type="number"
@@ -418,18 +418,18 @@ const BusinessDetails = ({ data }) => {
                 "border border-gray-300 rounded-md focus:outline-none w-full"
               }`}
             />
-          </div>
+          </RightBox>
         </div>
         <div className="flex items-start gap-4 mt-4">
-          <div className="text-left w-40">
+          <LeftBox>
             <label
               htmlFor="country"
               className=" text-gray-700 font-semibold nowrap"
             >
               Country:
             </label>
-          </div>
-          <div className="flex-1">
+          </LeftBox>
+          <RightBox>
             <input
               disabled={!edit}
               type="text"
@@ -443,18 +443,18 @@ const BusinessDetails = ({ data }) => {
                 "border border-gray-300 rounded-md focus:outline-none w-full"
               }`}
             />
-          </div>
+          </RightBox>
         </div>
         <div className="flex items-start gap-4 mt-4">
-          <div className="w-40 text-left">
+          <LeftBox>
             <label
               htmlFor="gstNumber"
               className=" text-gray-700 font-semibold nowrap"
             >
               GST Number:
             </label>
-          </div>
-          <div className="flex-1">
+          </LeftBox>
+          <RightBox>
             <input
               disabled={!edit}
               type="text"
@@ -468,22 +468,22 @@ const BusinessDetails = ({ data }) => {
                 "border border-gray-300 rounded-md focus:outline-none w-full"
               }`}
             />
-          </div>
+          </RightBox>
         </div>
         <div className="flex items-start gap-4 mt-4">
-          <div className="text-left w-40">
+          <LeftBox>
             <label
               htmlFor="phone"
               className=" text-gray-700 font-semibold nowrap"
             >
               Phone Number:
             </label>
-          </div>
-          <div className="flex-1 text-left">
+          </LeftBox>
+          <RightBox>
             <p className="text-base text-gray-700" id="phone">
               {leadData?.phone_number}
             </p>
-          </div>
+          </RightBox>
         </div>
         <div className="flex items-start gap-4 mt-4">
           <LeftBox>
@@ -778,7 +778,11 @@ const LeftBox = ({ children }) => {
   return <div className="w-40 text-left">{children}</div>;
 };
 const RightBox = ({ children }) => {
-  return <div className="flex-1 text-left">{children}</div>;
+  return (
+    <div className="flex-1 text-left">
+      <div className="max-w-72">{children}</div>
+    </div>
+  );
 };
 
 export default BusinessDetails;

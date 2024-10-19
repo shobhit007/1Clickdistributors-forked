@@ -142,7 +142,7 @@ const Tabs = ({ data, refetch }) => {
         })}
       </div>
       <div className="w-full flex-1 overflow-auto relative">
-        <div className="w-full max-w-2xl">{renderTab(currentTab)}</div>
+        <div className="w-full">{renderTab(currentTab)}</div>
       </div>
     </div>
   );

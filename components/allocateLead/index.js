@@ -101,6 +101,7 @@ const index = () => {
         body: JSON.stringify({
           leads,
           salesMember: salesMember.id,
+          salesMemberName: salesMember.name,
         }),
       });
       setAllocatingLeads(false);

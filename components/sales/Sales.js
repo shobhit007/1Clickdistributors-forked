@@ -293,8 +293,6 @@ export default function Sales() {
     queryFn: getLockLeadsStatus,
   });
 
-  console.log("lockLeadStatus", lockLeadStatus);
-
   useEffect(() => {
     setLockLeads(lockLeadStatus);
   }, [lockLeadStatus]);

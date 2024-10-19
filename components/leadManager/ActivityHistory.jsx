@@ -2,12 +2,13 @@ import { useMemo } from "react";
 import Table from "../utills/Table";
 import { convertTimeStamp } from "@/lib/commonFunctions";
 
-const ActivityHistory = ({ data: leadData }) => {
-  const updatedData = leadData?.historyData?.map((item) => {
+const ActivityHistory = ({ data }) => {
+  const updatedData = data?.historyData?.map((item) => {
     return {
       ...item,
       followUpDate: convertTimeStamp(item?.followUpDate),
       updatedAt: convertTimeStamp(item?.updatedAt),
+      salesMemberName: data?.leadData?.salesMemberName || null,
     };
   });
 
@@ -28,6 +29,10 @@ const ActivityHistory = ({ data: leadData }) => {
       {
         Header: "Remarks",
         accessor: "remarks",
+      },
+      {
+        Header: "Sales Member",
+        accessor: "salesMemberName",
       },
     ],
     []
