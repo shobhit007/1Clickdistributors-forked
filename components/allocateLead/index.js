@@ -127,7 +127,7 @@ const index = () => {
     "assignedBy",
     "salesExecutive",
   ];
-  const avoidCols = ["id", "adType"];
+  const avoidCols = ["id", "adType", "your_mobile_number", "leadId"]; // Added fields to hide
 
   let checkMarkCol = ["Select"].map((key) => {
     return {
@@ -160,17 +160,40 @@ const index = () => {
           return true;
         })
         .map((key) => {
+          // Split key by underscore and capitalize the first letter of each part
+          const headerParts = key
+            .split("_")
+            .map((part) => part.charAt(0).toUpperCase() + part.slice(1));
+          const header = headerParts.join(" "); // Join parts with a space
+
+          if (key === "whats_is_your_requirement_?_write_in_brief") {
+            return {
+              Header: "Requirement",
+              accessor: key,
+              id: key,
+            };
+          }
+
           return {
-            Header: camelToTitle(key),
+            Header: header, // Use the modified header
             accessor: key,
             id: key,
           };
         });
 
+      const profileIdCol = dynamicCols.find(
+        (col) => col.accessor === "profileId"
+      );
+
+      if (profileIdCol) {
+        dynamicCols = dynamicCols.filter((col) => col.accessor !== "profileId");
+        dynamicCols.unshift(profileIdCol); // Add profileId to the first position
+      }
+
       let statiCols = staticColumns.map((key) => {
         if (key == "assignedAt" || key == "createdAt" || key == "updatedAt") {
           return {
-            Header: key,
+            Header: camelToTitle(key),
             accessor: key,
             Cell: ({ value }) => {
               return (
@@ -195,13 +218,6 @@ const index = () => {
 
               return dateA > dateB ? 1 : -1; // Compare valid dates
             },
-            id: key,
-          };
-        }
-        if (key == "salesExecutive") {
-          return {
-            Header: camelToTitle(key),
-            accessor: "salesExecutiveName",
             id: key,
           };
         }

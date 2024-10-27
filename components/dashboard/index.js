@@ -2,6 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import React, { useEffect, useState } from "react";
 import DataChart from "./dataChart";
 import moment from "moment";
+import { useSelector } from "react-redux";
+import { authSelector } from "@/store/auth/selector";
 
 const index = () => {
   const [loading, setLoading] = useState(false);
@@ -10,6 +12,10 @@ const index = () => {
   const [date, setDate] = useState(null);
   const [userData, setUserData] = useState(null);
   const [executiveWiseRecord, setExecutiveWiseRecord] = useState(null);
+  const [selectedMember, setSelectedMember] = useState("");
+  const [memberId, setMemberId] = useState("");
+
+  const currentLoggedInUser = useSelector(authSelector);
 
   useEffect(() => {
     let startD = moment().startOf("day").format("YYYY-MM-DD");
@@ -38,13 +44,14 @@ const index = () => {
         body: JSON.stringify({
           startDate: date.startDate,
           endDate: date.endDate,
+          memberId: memberId || null,
         }),
       });
 
       const data = await response.json();
       setLoading(false);
       if (data.success) {
-        return data.leads;
+        return data;
       } else {
         return null;
       }
@@ -57,24 +64,27 @@ const index = () => {
 
   // Fetch user roles using react-query
   const { data } = useQuery({
-    queryKey: ["userUpdateData", date],
+    queryKey: ["userUpdateData", date, memberId],
     queryFn: getUserDataForDashboard,
   });
 
+  // Process the fetched data
   useEffect(() => {
-    if (Array.isArray(data) && data.length > 0) {
-      let obj = {};
-      let executiveWiseData = {};
+    if (Array.isArray(data?.leads) && data.leads.length > 0) {
+      const dispositionCounts = {};
       const formattedData = {};
+      const membersData = data.membersData;
 
-      data.forEach((lead) => {
+      // Aggregate dispositions per sales executive
+      data.leads.forEach((lead) => {
         if (lead.disposition) {
-          if (!obj.hasOwnProperty([lead.disposition])) {
-            obj[lead.disposition] = 0;
-          }
-          obj[lead.disposition]++;
+          // Overall disposition counts
+          dispositionCounts[lead.disposition] =
+            (dispositionCounts[lead.disposition] || 0) + 1;
 
           const { salesExecutiveName, disposition } = lead;
+
+          // Initialize sales executive data if not present
           if (!formattedData[salesExecutiveName]) {
             formattedData[salesExecutiveName] = {
               salesExecutiveName,
@@ -82,22 +92,56 @@ const index = () => {
             };
           }
 
-          formattedData[salesExecutiveName].totalUpdates++;
+          // Increment total updates and specific disposition
+          formattedData[salesExecutiveName].totalUpdates += 1;
+          formattedData[salesExecutiveName][disposition] =
+            (formattedData[salesExecutiveName][disposition] || 0) + 1;
+        }
+      });
 
-          if (!formattedData[salesExecutiveName][disposition]) {
-            formattedData[salesExecutiveName][disposition] = 0;
-          }
+      // Aggregate dispositions for managers by adding their executives' data
+      Object.keys(formattedData).forEach((memberName) => {
+        const member = membersData.find((m) => m.name === memberName);
+        if (member?.hierarchy === "manager") {
+          // Find all executives under this manager
+          const managerExecutives = membersData.filter(
+            (m) => m.senior === member.id
+          );
+          const managerData = formattedData[memberName];
 
-          formattedData[salesExecutiveName][disposition]++;
+          // Initialize manager's dispositions if not present
+          const aggregatedDispositions = { ...managerData };
+
+          managerExecutives.forEach((executive) => {
+            const executiveData = formattedData[executive.name];
+            if (executiveData) {
+              // Iterate over each key in executiveData
+              Object.keys(executiveData).forEach((key) => {
+                if (key === "salesExecutiveName" || key === "totalUpdates") {
+                  // Skip non-disposition keys
+                  return;
+                }
+                // Add executive's disposition count to manager's dispositions
+                aggregatedDispositions[key] =
+                  (aggregatedDispositions[key] || 0) + executiveData[key];
+              });
+              // Add executive's total updates to manager's total updates
+              aggregatedDispositions.totalUpdates += executiveData.totalUpdates;
+            }
+          });
+
+          // Update the manager's data in formattedData
+          formattedData[memberName] = aggregatedDispositions;
         }
       });
 
       setExecutiveWiseRecord(formattedData);
-      setUserData(obj);
+      setUserData(dispositionCounts);
     } else {
       setUserData(null);
+      setExecutiveWiseRecord({});
     }
-  }, [data]);
+  }, [data?.leads, data?.membersData]);
 
   // const userData = {
   //   NI: 10,
@@ -113,6 +157,7 @@ const index = () => {
       startDate: selectedStartDate,
       endDate: selectedEndDate,
     });
+    setMemberId(selectedMember);
   };
 
   return (
@@ -142,6 +187,20 @@ const index = () => {
             onChange={(e) => setSelectedEndDate(e.target.value)}
           />
         </div>
+        {currentLoggedInUser?.hierarchy !== "executive" && (
+          <select
+            className="text-[12px] border border-gray-600 rounded px-2 py-1"
+            onChange={(e) => setSelectedMember(e.target.value)}
+            value={selectedMember}
+          >
+            <option value="">Select Name</option>
+            {data?.membersData?.map((member) => (
+              <option key={member.id} value={member.id}>
+                {member.name}
+              </option>
+            ))}
+          </select>
+        )}
         <button
           onClick={handleSetDate}
           className="text-white bg-blue-500 px-2 py-1 rounded-md text-xs"
@@ -150,7 +209,7 @@ const index = () => {
         </button>
       </div>
 
-      {!userData && (!data || data.length === 0) && !loading && (
+      {!userData && (!data?.leads || data?.leads?.length === 0) && !loading && (
         <h1 className="text-gray-600 font-semibold text-xl w-full text-center">
           Looks like no leads updated within selected time range
         </h1>

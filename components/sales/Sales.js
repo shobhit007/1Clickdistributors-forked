@@ -1,19 +1,14 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import moment from "moment";
 import { useQuery } from "@tanstack/react-query";
 import CustomTable from "../utills/customTable";
 import { camelToTitle } from "../utills/commonFunctions";
 import Modal from "../utills/Modal";
 import UpdateLead from "./UpdateLead";
-import MultiSelectDropDown from "../uiCompoents/MultiSelectDropDown";
-import {
-  dispositions,
-  salesPanelColumns,
-  subDispositions,
-} from "@/lib/data/commonData";
-import { RiCloseCircleFill } from "react-icons/ri";
+import { salesPanelColumns, subDispositions } from "@/lib/data/commonData";
 import LeadManager from "../leadManager/index";
 import Filters from "../allocateLead/filters";
+import panelContext from "@/lib/context/panelContext";
 
 const salesFilters = ["All", "Pendings", "New Leads", "Follow Ups"];
 
@@ -32,10 +27,13 @@ export default function Sales() {
   const [leads, setLeads] = useState([]);
   const [showFollowUp, setShowFollowUp] = useState(false);
   const [lockLeads, setLockLeads] = useState(false);
+  const [myData, setMyData] = useState(false);
+
+  const userDetails = useContext(panelContext);
 
   // search for default date
   useEffect(() => {
-    let startD = moment().subtract({ days: 3 }).format("YYYY-MM-DD");
+    let startD = moment().format("YYYY-MM-DD");
     let endD = moment().format("YYYY-MM-DD");
     setStartDate(startD);
     setEndDate(endD);
@@ -59,6 +57,7 @@ export default function Sales() {
         body: JSON.stringify({
           startDate: date.startDate,
           endDate: date.endDate,
+          myData,
         }),
       });
 
@@ -76,7 +75,7 @@ export default function Sales() {
 
   // Fetch user roles using react-query
   const { data, refetch: refetchLeads } = useQuery({
-    queryKey: ["salesLeads", date],
+    queryKey: ["salesLeads", date, myData],
     queryFn: getLeads,
     retry: false,
     refetchOnWindowFocus: false,
@@ -162,7 +161,7 @@ export default function Sales() {
     if (leads?.length > 0) {
       let dynamicCols = assignedColumns
         ?.filter((item) => {
-          let arr = ["assignedAt", "createdAt", "updatedAt", "followUpDate"];
+          let arr = ["assignedAt", "createdAt", "updatedAt"];
 
           if (!arr.includes(item) && typeof item == "object") {
             return false;
@@ -211,6 +210,19 @@ export default function Sales() {
             id: key,
           };
         });
+
+      // Remove leadId column
+      dynamicCols = dynamicCols.filter((col) => col.accessor !== "leadId"); // Remove leadId
+
+      // Add Profile Id column
+      const profileIdCol = {
+        Header: "Profile Id", // New column header
+        accessor: "profileId", // Assuming profileId is the correct accessor
+        id: "profileId",
+      };
+
+      // Move Profile Id to the second position
+      dynamicCols.splice(1, 0, profileIdCol); // Insert Profile Id at index 1
 
       let statiCols = staticColumns.map((key) => {
         return {
@@ -367,11 +379,24 @@ export default function Sales() {
             />
           </div>
 
+          <div className="w-full flex gap-4 mt-4">
+            <button
+              disabled={lockLeads}
+              className="text-white bg-blue-500 px-6 py-2 rounded-md text-base hover:opacity-80"
+              onClick={() => setMyData(true)}
+            >
+              My Data
+            </button>
+          </div>
+
           <Filters
             lockLeads={lockLeads}
             setLeads={setLeads}
             originalData={data}
             leads={leads}
+            userDetails={userDetails}
+            setMyData={setMyData}
+            myData={myData}
           />
           {/* <div className="flex items-center gap-1 md:gap-4 flex-wrap">
             <button

@@ -38,6 +38,35 @@ const CallDetails = ({ data: leadDetails, onClose, fetchLeadsAgain }) => {
     });
   };
 
+  // Work of today
+  const getLeadsUpdateCount = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+      let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/sales/getLeadsStatsToday`;
+      const response = await fetch(API_URL, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        return data;
+      } else {
+        return null;
+      }
+    } catch (error) {
+      console.log("error in updateLead", error.message);
+      return null;
+    }
+  };
+
+  const { data: leadsCount, refetch } = useQuery({
+    queryKey: ["todayUpdateLeadsCount"],
+    queryFn: getLeadsUpdateCount,
+  });
+
   const updateLeadStage = async () => {
     try {
       if (!fields.followUpDate || !fields.remarks) {
@@ -67,6 +96,7 @@ const CallDetails = ({ data: leadDetails, onClose, fetchLeadsAgain }) => {
       if (data.success) {
         toast.success(data.message);
         fetchLeadsAgain();
+        refetch();
         onClose();
       } else {
         toast.error("Something went wrong");
@@ -76,34 +106,6 @@ const CallDetails = ({ data: leadDetails, onClose, fetchLeadsAgain }) => {
       toast.error(error.message);
     }
   };
-
-  const getLeadsUpdateCount = async () => {
-    try {
-      const token = localStorage.getItem("authToken");
-      let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/sales/getLeadsStatsToday`;
-      const response = await fetch(API_URL, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      const data = await response.json();
-      if (data.success) {
-        return data;
-      } else {
-        return null;
-      }
-    } catch (error) {
-      console.log("error in updateLead", error.message);
-      return null;
-    }
-  };
-
-  const { data: leadsCount, refetch } = useQuery({
-    queryKey: ["todayUpdateLeadsCount"],
-    queryFn: getLeadsUpdateCount,
-  });
 
   return (
     <div className="bg-white w-[30%] max-w-[512px] border border-gray-200 overflow-auto p-2 relative">
@@ -115,7 +117,7 @@ const CallDetails = ({ data: leadDetails, onClose, fetchLeadsAgain }) => {
       </button>
 
       {/* show only for sales members */}
-      {userData?.hierarchy === "member" && (
+      {userData?.hierarchy === "executive" && (
         <LeadsCount leadsCount={leadsCount} refetch={refetch} />
       )}
 

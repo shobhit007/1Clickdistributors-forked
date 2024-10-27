@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { MdClose } from "react-icons/md";
-import MultiSelectDropdown from "../uiCompoents/MultiSelectDropDown";
-import { dispositions, subDispositions } from "@/lib/data/commonData";
 import { MultiSelect } from "react-multi-select-component";
 import moment from "moment";
 
@@ -18,7 +16,14 @@ import moment from "moment";
   }
 */
 
-const Filters = ({ setLeads, originalData, leads, lockLeads }) => {
+const Filters = ({
+  setLeads,
+  originalData,
+  lockLeads,
+  userDetails: currentUser,
+  setMyData,
+  myData,
+}) => {
   const [selectedDisposition, setSelectedDisposition] = useState([]);
   const [selectedSubDisposition, setSelectedSubDisposition] = useState([]);
   const [filters, setFilters] = useState({
@@ -31,6 +36,8 @@ const Filters = ({ setLeads, originalData, leads, lockLeads }) => {
   });
 
   const [dispositionData, setDispositionData] = useState(null);
+
+  const currentLoggedInUser = currentUser?.userDetails;
 
   useEffect(() => {
     if (!originalData) {
@@ -49,9 +56,6 @@ const Filters = ({ setLeads, originalData, leads, lockLeads }) => {
       "Not Interested": 0,
     };
     originalData?.forEach((lead) => {
-      if (lead.disposition == "Call Back") {
-        console.log("call back for", lead.leadId);
-      }
       if (lead?.salesExecutive && !salesMembers[lead?.salesExecutive]) {
         salesMembers[lead?.salesExecutive] = {
           label: lead.salesExecutiveName,
@@ -184,6 +188,9 @@ const Filters = ({ setLeads, originalData, leads, lockLeads }) => {
     setSelectedDisposition([]);
     setSelectedSubDisposition([]);
     setFilters({ unAllocated: false, salesMembers: [] });
+    if (myData) {
+      setMyData(false);
+    }
   };
 
   const onSelectButtonFilter = (item) => {
@@ -194,32 +201,9 @@ const Filters = ({ setLeads, originalData, leads, lockLeads }) => {
   };
 
   return (
-    <div className="flex flex-col gap-2 px-2 w-full h-fit my-2">
-      <div className="w-full flex gap-2 flex-wrap h-fit items-end">
-        <button
-          onClick={resetFilters}
-          disabled={lockLeads}
-          className="flex text-nowrap items-center gap-1 hover:bg-colorPrimary/20 bg-colorPrimary/10 px-3 py-[2px] rounded-md border border-colorPrimary text-colorPrimary font-semibold text-sm"
-        >
-          Reset filters
-          <MdClose className="text-colorPrimary text-lg" />
-        </button>
-
-        <button
-          onClick={() =>
-            setFilters((pre) => ({ ...pre, unAllocated: !pre.unAllocated }))
-          }
-          disabled={lockLeads}
-          className={`py-[2px] text-nowrap text-sm px-3 border font-semibold rounded-md ${
-            filters?.unAllocated
-              ? "bg-colorPrimary  text-white"
-              : "bg-white text-gray-500"
-          }`}
-        >
-          Unallocated leads
-        </button>
-
-        {list?.hasOwnProperty("salesMembers") && (
+    <div className="flex flex-col gap-2 w-full mt-4 mb-2 pl-4">
+      {list?.hasOwnProperty("salesMembers") &&
+        currentLoggedInUser?.hierarchy !== "executive" && (
           <div className="w-[180px] flex gap-[2px] flex-col">
             <span className="text-xs text-gray-400">SalesMembers</span>
             <MultiSelect
@@ -234,8 +218,35 @@ const Filters = ({ setLeads, originalData, leads, lockLeads }) => {
             />
           </div>
         )}
-      </div>
-      <div className="flex gap-2 items-end w-full overflow-auto scrollbar-hide">
+      <div className="flex gap-2 items-end w-full overflow-x-auto">
+        <button
+          onClick={resetFilters}
+          disabled={lockLeads}
+          className="flex text-nowrap items-center gap-1 hover:bg-colorPrimary/20 bg-colorPrimary/10 px-3 py-[2px] rounded-md border border-colorPrimary text-colorPrimary font-semibold text-sm"
+        >
+          Reset filters
+          <MdClose className="text-colorPrimary text-lg" />
+        </button>
+
+        {currentLoggedInUser?.hierarchy !== "executive" && (
+          <button
+            onClick={() =>
+              setFilters((pre) => ({
+                ...pre,
+                unAllocated: !pre.unAllocated,
+              }))
+            }
+            disabled={lockLeads}
+            className={`py-[2px] text-nowrap text-sm px-3 border font-semibold rounded-md ${
+              filters?.unAllocated
+                ? "bg-colorPrimary  text-white"
+                : "bg-white text-gray-500"
+            }`}
+          >
+            Unallocated leads
+          </button>
+        )}
+
         {dispositionData &&
           Object.keys(dispositionData).map((item) => (
             <button
