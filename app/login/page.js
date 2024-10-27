@@ -47,7 +47,6 @@ const page = () => {
     queryFn: getLoginPageImage,
   });
 
-
   
   const loginUser = async () => {
     try {
