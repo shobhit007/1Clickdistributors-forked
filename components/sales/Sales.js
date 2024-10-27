@@ -212,13 +212,25 @@ export default function Sales() {
         });
 
       // Remove leadId column
-      dynamicCols = dynamicCols.filter((col) => col.accessor !== "leadId"); // Remove leadId
+      dynamicCols = dynamicCols?.filter((col) => col.accessor !== "leadId"); // Remove leadId
 
       // Add Profile Id column
       const profileIdCol = {
         Header: "Profile Id", // New column header
-        accessor: "profileId", // Assuming profileId is the correct accessor
         id: "profileId",
+        Cell: ({ row }) => {
+          return (
+            <button
+              onClick={() => {
+                setSelectedRows([row?.original]);
+                setShowLeadManager(true);
+              }}
+              className="text-blue-500 font-semibold hover:underline"
+            >
+              {row?.original?.profileId}
+            </button>
+          );
+        },
       };
 
       // Move Profile Id to the second position

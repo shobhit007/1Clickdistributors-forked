@@ -90,8 +90,8 @@ const Page = () => {
   });
 
   useEffect(() => {
+    let commonPanels = ["dashboard"];
     if (userDetails?.hierarchy == "superAdmin") {
-      let commonPanels = ["dashboard"];
       let userPanels = panels.map((item) => item.panel);
       setuserRoles([...commonPanels, ...userPanels]);
       return;
@@ -101,7 +101,7 @@ const Page = () => {
       let userPanels = allUserRoles?.filter(
         (item) => item.id == userDetails?.hierarchy
       )?.[0]?.panels;
-      setuserRoles(userPanels);
+      setuserRoles([[...commonPanels, ...userPanels]]);
     }
   }, [userDetails]);
 

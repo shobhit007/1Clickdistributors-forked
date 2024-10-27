@@ -23,7 +23,7 @@ const Header = () => {
     setDisplayComponent,
     setPreviousComponent,
     setShowSidebar,
-    showSidebar
+    showSidebar,
   } = useContext(panelContext);
   const dispatch = useDispatch();
   const router = useRouter();
@@ -60,7 +60,10 @@ const Header = () => {
 
       {/* <img src="/logo.png" alt="logo" width={50} height={50} /> */}
       <div className="flex items-center gap-3">
-        <RiMenu2Fill onClick={()=>setShowSidebar(!showSidebar)} className="text-[35px] text-gray-600 cursor-pointer" />
+        <RiMenu2Fill
+          onClick={() => setShowSidebar(!showSidebar)}
+          className="text-[35px] text-gray-600 cursor-pointer"
+        />
         <div className="h-8 md:h-14 w-8 md:w-14 bg-colorPrimary rounded-full"></div>
       </div>
 
@@ -72,11 +75,13 @@ const Header = () => {
 
         <div className="hidden md:flex flex-col">
           <h1 className="text-base font-semibold capitalize">
-            Welcome, {userDetails?.name}
+            Welcome {userDetails?.name}
           </h1>
-          <h1 className="text-sm text-gray-500 capitalize">
-            ({userDetails?.hierarchy})
-          </h1>
+          {userDetails?.hierarchy && (
+            <h1 className="text-sm text-gray-500 capitalize">
+              ({userDetails?.hierarchy})
+            </h1>
+          )}
         </div>
 
         <div className="flex items-center gap-1">
