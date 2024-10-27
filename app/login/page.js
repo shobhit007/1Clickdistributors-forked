@@ -47,6 +47,8 @@ const page = () => {
     queryFn: getLoginPageImage,
   });
 
+
+  
   const loginUser = async () => {
     try {
       if (!email || email == "" || !password || password == "") {
