@@ -127,7 +127,13 @@ const index = () => {
     "assignedBy",
     "salesExecutive",
   ];
-  const avoidCols = ["id", "adType", "your_mobile_number", "leadId"]; // Added fields to hide
+  const avoidCols = [
+    "id",
+    "adType",
+    "your_mobile_number",
+    "leadId",
+    "salesExecutiveName",
+  ]; // Added fields to hide
 
   let checkMarkCol = ["Select"].map((key) => {
     return {
@@ -218,6 +224,14 @@ const index = () => {
 
               return dateA > dateB ? 1 : -1; // Compare valid dates
             },
+            id: key,
+          };
+        }
+
+        if (key == "salesExecutive") {
+          return {
+            Header: camelToTitle(key),
+            accessor: "salesExecutiveName",
             id: key,
           };
         }
