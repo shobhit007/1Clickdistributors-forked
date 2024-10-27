@@ -37,7 +37,7 @@ function* handleCheckAuthStatus({ payload }) {
 
       if (response.success && response.data) {
         yield put(login({ role, email, token, userDetails: response.data }));
-        router.push("/panel");
+        router.push("/board");
       } else if (
         !response.success &&
         response.message?.toLowerCase() == "jwt expired"
