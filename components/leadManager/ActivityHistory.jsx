@@ -1,39 +1,46 @@
-import moment from "moment";
+import { useMemo } from "react";
 import Table from "../utills/Table";
+import { convertTimeStamp } from "@/lib/commonFunctions";
 
-const columns = [
-  {
-    Header: "Last Updated",
-    accessor: "updatedAt",
-  },
-  {
-    Header: "Executive",
-    accessor: "executive",
-  },
-  {
-    Header: "Disposition",
-    accessor: "disposition",
-  },
-  {
-    Header: "Remarks",
-    accessor: "remarks",
-  },
-];
+const ActivityHistory = ({ data }) => {
+  const updatedData = data?.historyData?.map((item) => {
+    return {
+      ...item,
+      followUpDate: convertTimeStamp(item?.followUpDate),
+      updatedAt: convertTimeStamp(item?.updatedAt),
+      salesMemberName: data?.leadData?.salesMemberName || null,
+    };
+  });
 
-const data = [
-  {
-    updatedAt: moment().toLocaleString(),
-    executive: "Test",
-    disposition: "Not Open",
-    remarks:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Perspiciatis eos assumenda in voluptatibus dolorum ad sit vel ducimus tempora nam ipsa dicta aspernatur, aut saepe repudiandae provident natus itaque pariatur.",
-  },
-];
+  const columns = useMemo(
+    () => [
+      {
+        Header: "Call Back Date",
+        accessor: "followUpDate",
+      },
+      {
+        Header: "Disposition",
+        accessor: "disposition",
+      },
+      {
+        Header: "Sub-Disposition",
+        accessor: "subDisposition",
+      },
+      {
+        Header: "Remarks",
+        accessor: "remarks",
+      },
+      {
+        Header: "Sales Member",
+        accessor: "salesMemberName",
+      },
+    ],
+    []
+  );
 
-const ActivityHistory = () => {
   return (
     <div className="p-4">
-      <Table data={data} columns={columns} />
+      <Table data={updatedData} columns={columns} />
     </div>
   );
 };

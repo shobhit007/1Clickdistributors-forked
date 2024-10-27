@@ -90,7 +90,6 @@ const Page = () => {
   });
 
   useEffect(() => {
-    console.log("user details are", userDetails);
     if (userDetails?.hierarchy == "superAdmin") {
       let commonPanels = ["dashboard"];
       let userPanels = panels.map((item) => item.panel);

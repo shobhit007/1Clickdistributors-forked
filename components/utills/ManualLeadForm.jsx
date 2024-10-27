@@ -1,8 +1,10 @@
-import { useEffect, useState } from "react";
-import { MdClose } from "react-icons/md";
+import { useEffect, useState, useRef } from "react";
+import { MdClose, MdOutlineChevronRight } from "react-icons/md";
 import { useQuery } from "@tanstack/react-query";
 import { dispositions, subDispositions } from "@/lib/data/commonData";
 import { toast } from "react-toastify";
+import MultiLevelDropdown from "../allocateLead/multiLevelDropdown";
+import moment from "moment";
 
 const ManualLeadForm = ({ onClose }) => {
   // Initialize state for each form field
@@ -17,45 +19,44 @@ const ManualLeadForm = ({ onClose }) => {
     city: "",
     requirement: "",
     profileScore: "",
-    salesMember: "",
     disposition: dispositions[0],
     subDisposition: "",
     remarks: "",
+    followUpDate: "",
   });
+  const [selectedSalesMember, setSelectedSalesMember] = useState(null);
+  const [dropDownVisible, setDropDownVisible] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const getSalesMembers = async () => {
+  const getAllTeamLeaders = async () => {
     try {
       const token = localStorage.getItem("authToken");
-      let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/sales/getSalesMembers`;
+      let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/leads/getSalesTeamMembers`;
       const response = await fetch(API_URL, {
         method: "GET",
         headers: {
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
       });
       const data = await response.json();
-      return data.salesMembers;
+      if (data.success && data.data) {
+        return data.data;
+      } else {
+        toast.error(data.message || "couldn't find leaders");
+        return null;
+      }
     } catch (error) {
-      console.log("error in getting leads", error.message);
+      console.log("error in getting salesMembers", error.message);
+      toast.error(error.message);
       return null;
     }
   };
 
-  const { data: salesMembers } = useQuery({
-    queryKey: ["salesMembers"],
-    queryFn: getSalesMembers,
+  const { data: allTeamLeaders, refetch } = useQuery({
+    queryKey: ["allTeamMembers"],
+    queryFn: getAllTeamLeaders,
   });
-
-  // Set default salesMember once salesMembers are fetched
-  useEffect(() => {
-    if (salesMembers?.length > 0) {
-      setFormData((prevFormData) => ({
-        ...prevFormData,
-        salesMember: salesMembers[0].salesMemberId,
-      }));
-    }
-  }, [salesMembers]);
 
   useEffect(() => {
     setFormData((pre) => ({
@@ -74,10 +75,50 @@ const ManualLeadForm = ({ onClose }) => {
   };
 
   // Handle form submission
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
+    console.log("formData", formData, selectedSalesMember);
     setLoading(true);
+    // Check if all required fields are filled
+    if (
+      !formData.date ||
+      !formData.contactPerson ||
+      !formData.email ||
+      !formData.phone ||
+      !formData.city ||
+      !formData.requirement ||
+      !formData.disposition ||
+      !formData.subDisposition ||
+      !selectedSalesMember ||
+      !formData.followUpDate
+    ) {
+      toast.error("Please fill all required fields");
+      setLoading(false);
+      return;
+    }
 
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      toast.error("Please enter a valid email address");
+      setLoading(false);
+      return;
+    }
+
+    // Validate phone number (assuming 10 digits)
+    const phoneRegex = /^\d{10}$/;
+    if (!phoneRegex.test(formData.phone)) {
+      toast.error("Please enter a valid 10-digit phone number");
+      setLoading(false);
+      return;
+    }
+
+    // Add selectedSalesMember to formData
+    const updatedFormData = {
+      ...formData,
+      salesMember: selectedSalesMember,
+    };
+
+    // If all validations pass, proceed with form submission
     try {
       let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/leads/createdManualLead`;
       const response = await fetch(API_URL, {
@@ -86,7 +127,7 @@ const ManualLeadForm = ({ onClose }) => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("authToken")}`,
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(updatedFormData),
       });
 
       const result = await response.json();
@@ -104,6 +145,8 @@ const ManualLeadForm = ({ onClose }) => {
     }
   };
 
+  const toggleDropDown = () => setDropDownVisible((p) => !p);
+
   return (
     <div className="max-w-xl mx-auto p-6 bg-white shadow-md rounded-md mt-10">
       <div className="flex justify-end">
@@ -116,7 +159,7 @@ const ManualLeadForm = ({ onClose }) => {
         <h1 className="text-2xl font-bold mb-6 text-center">
           Create Manual Lead
         </h1>
-        <form onSubmit={handleSubmit} className="px-4">
+        <div className="px-4">
           {/* Date */}
           <div className="mb-4">
             <label
@@ -126,7 +169,7 @@ const ManualLeadForm = ({ onClose }) => {
               Date:
             </label>
             <input
-              type="date"
+              type="datetime-local"
               id="date"
               name="date"
               value={formData.date}
@@ -205,7 +248,7 @@ const ManualLeadForm = ({ onClose }) => {
               Phone:
             </label>
             <input
-              type="tel"
+              type="number"
               id="phone"
               name="phone"
               value={formData.phone}
@@ -223,7 +266,7 @@ const ManualLeadForm = ({ onClose }) => {
               htmlFor="altMobile"
               className="block text-gray-700 font-semibold mb-2"
             >
-              Alternate Phone:
+              {"Alternate Phone (Optional):"}
             </label>
             <input
               type="tel"
@@ -303,7 +346,7 @@ const ManualLeadForm = ({ onClose }) => {
               htmlFor="profileScore"
               className="block text-gray-700 font-semibold mb-2"
             >
-              Profile Score:
+              {"Profile Score (Optional):"}
             </label>
             <input
               type="text"
@@ -320,27 +363,52 @@ const ManualLeadForm = ({ onClose }) => {
           </div>
 
           {/* Allocated To */}
+          <div className="mb-4 flex gap-4 relative">
+            <div className="flex-1 text-left">
+              <label
+                htmlFor="salesMember"
+                className="block text-gray-700 font-semibold mb-2"
+              >
+                Allocated To:
+              </label>
+            </div>
+            <div className="flex-1 relative">
+              <button
+                className="w-full p-2 bg-gray-100 rounded"
+                onClick={toggleDropDown}
+              >
+                {selectedSalesMember ? selectedSalesMember?.name : "Select"}
+              </button>
+              {dropDownVisible && (
+                <div className="absolute right-0 bottom-full border left-0 mb-1">
+                  <MultiLevelDropdown
+                    items={allTeamLeaders}
+                    onSelect={(e) => {
+                      setSelectedSalesMember(e);
+                      setDropDownVisible(false);
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+
           <div className="mb-4">
             <label
-              htmlFor="salesMember"
+              htmlFor="followUpDate"
               className="block text-gray-700 font-semibold mb-2"
             >
-              Allocated To:
+              Next Call Back Date:
             </label>
-            <select
-              id="salesMember"
-              name="salesMember"
-              value={formData.salesMember}
+            <input
+              type="datetime-local"
+              id="followUpDate"
+              name="followUpDate"
+              value={formData.followUpDate}
               onChange={handleChange}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300 bg-white"
-            >
-              {salesMembers?.map((sm, i) => (
-                <option key={sm.salesMemberId} value={sm.salesMemberId}>
-                  {sm.name}
-                </option>
-              ))}
-            </select>
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300"
+            />
           </div>
 
           {/* Disposition */}
@@ -412,12 +480,12 @@ const ManualLeadForm = ({ onClose }) => {
 
           {/* Submit Button */}
           <button
-            type="submit"
+            onClick={handleSubmit}
             className="w-full bg-blue-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-blue-600 transition duration-300"
           >
             {loading ? "Submitting..." : "Submit"}
           </button>
-        </form>
+        </div>
       </div>
     </div>
   );

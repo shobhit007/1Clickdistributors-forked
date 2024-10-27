@@ -1,10 +1,9 @@
 import { useMemo, useState } from "react";
-import { AiOutlinePlus, AiOutlineClose } from "react-icons/ai";
+import { AiOutlinePlus, AiOutlineClose, AiOutlineDelete } from "react-icons/ai";
 import Modal from "../utills/Modal";
 import { toast } from "react-toastify";
 import Table from "../utills/Table";
 import { AiOutlineEdit } from "react-icons/ai";
-import { useQuery } from "@tanstack/react-query";
 
 const ProductDetails = ({ data: lead }) => {
   const { leadData } = lead;
@@ -27,9 +26,9 @@ const ProductDetails = ({ data: lead }) => {
       });
 
       const data = await response.json();
-      console.log("data", data);
       if (data.success) {
         toast.success(data.message);
+        setProducts([...products, data.product]);
       } else {
         toast.error("Something went wrong");
       }
@@ -39,17 +38,68 @@ const ProductDetails = ({ data: lead }) => {
     }
   };
 
-  const editProduct = (data) => {
-    console.log("data", data);
-    const newProducts = products.map((p) => {
-      if (p.id === data.id) {
-        return data;
+  const editProduct = async (data) => {
+    try {
+      console.log("data", data);
+      const token = localStorage.getItem("authToken");
+      let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/sales/updateProduct`;
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({ ...data, leadId: leadData?.leadId }),
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        setProductData({});
+        setEdit(false);
+        toast.success(result.message);
+        const updatedProducts = products.map((product) => {
+          if (product.id === result.product.id) {
+            return result.product;
+          }
+          return product;
+        });
+        setProducts(updatedProducts);
+      } else {
+        toast.error("Something went wrong");
       }
-      return p;
-    });
-    setProducts(newProducts);
-    setProductData({});
-    setEdit(false);
+    } catch (error) {
+      console.log("error in update product", error.message);
+      toast.error(error.message);
+    }
+  };
+
+  const deleteProduct = async (product) => {
+    try {
+      const token = localStorage.getItem("authToken");
+      let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/sales/deleteProduct`;
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({ id: product.id, leadId: leadData?.leadId }),
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        setEdit(false);
+        toast.success(result.message);
+        setProducts((pre) => {
+          return pre.filter((p) => p.id !== result.id);
+        });
+      } else {
+        toast.error("Something went wrong");
+      }
+    } catch (error) {
+      console.log("error in update product", error.message);
+      toast.error(error.message);
+    }
   };
 
   const handleEditProduct = (p) => {
@@ -60,10 +110,6 @@ const ProductDetails = ({ data: lead }) => {
 
   const columns = useMemo(
     () => [
-      {
-        Header: "ID",
-        accessor: "id",
-      },
       {
         Header: "Name",
         accessor: "name",
@@ -88,6 +134,13 @@ const ProductDetails = ({ data: lead }) => {
               >
                 <span>Edit</span>
                 <AiOutlineEdit className="text-white text-xl" />
+              </button>
+              <button
+                className="bg-red-500 text-white py-1 px-2 rounded-md flex items-center gap-2"
+                onClick={() => deleteProduct(row)}
+              >
+                <span>Edit</span>
+                <AiOutlineDelete className="text-white text-xl" />
               </button>
             </div>
           );
@@ -155,7 +208,8 @@ const AddProduct = ({ onClose, handleAddProduct, data, edit, editProduct }) => {
   };
 
   const handleEditProduct = () => {
-    editProduct(product);
+    console.log("product", data);
+    editProduct({ ...product, id: data.id });
     onClose();
   };
 

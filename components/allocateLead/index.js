@@ -12,6 +12,7 @@ import local from "next/font/local";
 import ShowDetails from "./showDetails";
 import ManualLeadForm from "../utills/ManualLeadForm";
 import Filters from "./filters";
+import Table from "../utills/Table";
 
 const index = () => {
   const [openModal, setOpenModal] = useState(false);
@@ -24,6 +25,8 @@ const index = () => {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [dateObjToSearch, setDateObjToSearch] = useState(null);
   const [formVisible, setFormVisible] = useState(false);
+  const [workModalVisible, setWorkModalVisible] = useState(false);
+  const [uploadModalVisible, setUploadVisible] = useState(false);
   const [leads, setLeads] = useState(null);
   const [searchValue, setSearchValue] = useState("");
 
@@ -98,6 +101,7 @@ const index = () => {
         body: JSON.stringify({
           leads,
           salesMember: salesMember.id,
+          salesMemberName: salesMember.name,
         }),
       });
       setAllocatingLeads(false);
@@ -123,7 +127,7 @@ const index = () => {
     "assignedBy",
     "salesExecutive",
   ];
-  const avoidCols = ["id", "adType"];
+  const avoidCols = ["id", "adType", "your_mobile_number", "leadId"]; // Added fields to hide
 
   let checkMarkCol = ["Select"].map((key) => {
     return {
@@ -156,17 +160,40 @@ const index = () => {
           return true;
         })
         .map((key) => {
+          // Split key by underscore and capitalize the first letter of each part
+          const headerParts = key
+            .split("_")
+            .map((part) => part.charAt(0).toUpperCase() + part.slice(1));
+          const header = headerParts.join(" "); // Join parts with a space
+
+          if (key === "whats_is_your_requirement_?_write_in_brief") {
+            return {
+              Header: "Requirement",
+              accessor: key,
+              id: key,
+            };
+          }
+
           return {
-            Header: camelToTitle(key),
+            Header: header, // Use the modified header
             accessor: key,
             id: key,
           };
         });
 
+      const profileIdCol = dynamicCols.find(
+        (col) => col.accessor === "profileId"
+      );
+
+      if (profileIdCol) {
+        dynamicCols = dynamicCols.filter((col) => col.accessor !== "profileId");
+        dynamicCols.unshift(profileIdCol); // Add profileId to the first position
+      }
+
       let statiCols = staticColumns.map((key) => {
         if (key == "assignedAt" || key == "createdAt" || key == "updatedAt") {
           return {
-            Header: key,
+            Header: camelToTitle(key),
             accessor: key,
             Cell: ({ value }) => {
               return (
@@ -191,13 +218,6 @@ const index = () => {
 
               return dateA > dateB ? 1 : -1; // Compare valid dates
             },
-            id: key,
-          };
-        }
-        if (key == "salesExecutive") {
-          return {
-            Header: camelToTitle(key),
-            accessor: "salesExecutiveName",
             id: key,
           };
         }
@@ -253,6 +273,18 @@ const index = () => {
         >
           Create Manual Lead
         </button>
+        <button
+          onClick={() => setUploadVisible(true)}
+          className="rounded py-1 px-2 text-white bg-gray-400 hover:bg-gray-600"
+        >
+          Import Excel
+        </button>
+        {/* <button
+          onClick={() => setWorkModalVisible(true)}
+          className="rounded py-1 px-2 text-white bg-gray-400 hover:bg-gray-600"
+        >
+          Today work
+        </button> */}
       </div>
       <div className="flex items-center gap-4 px-2 flex-wrap my-2">
         <div className="flex gap-2 bg-gray-200 items-end py-1 px-3 rounded-md flex-wrap">
@@ -346,6 +378,229 @@ const index = () => {
             <ManualLeadForm onClose={() => setFormVisible(false)} />
           </div>
         </Modal>
+      )}
+
+      {/* {workModalVisible && (
+        <Modal>
+          <WorkedLeads setWorkModalVisible={setWorkModalVisible} />
+        </Modal>
+      )} */}
+
+      {uploadModalVisible && (
+        <Modal>
+          <UploadExcelData onClose={() => setUploadVisible(false)} />
+        </Modal>
+      )}
+    </div>
+  );
+};
+
+const UploadExcelData = ({ onClose }) => {
+  const [file, setFile] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const onChange = (e) => {
+    const file = e.target.files[0];
+    setFile(file);
+  };
+
+  const uploadExcelFile = async () => {
+    try {
+      if (!file) {
+        toast.error("Please select a file");
+        setLoading(false);
+        return;
+      }
+      setLoading(true);
+      let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/leads/importLeadsFromExcel`;
+      let token = localStorage.getItem("authToken");
+
+      // Create a FormData object to hold the file
+      const formData = new FormData();
+      formData.append("file", file); // Append the file to the FormData
+
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData, // Use FormData as the body
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        toast.success(result.message);
+        setLoading(false);
+        onClose();
+      } else {
+        toast.error(result.message);
+        setLoading(false);
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error("Something went wrong");
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="w-full max-w-80 bg-white border shadow-sm rounded relative px-4 pt-10 pb-6 overflow-hidden">
+      <button
+        className="bg-red-600 text-white text-base absolute top-0 right-0 px-4"
+        onClick={onClose}
+      >
+        close
+      </button>
+      <div>
+        <input
+          type="file"
+          accept=".xlsx, .xls"
+          onChange={onChange}
+          className="block w-full text-sm text-gray-500
+          file:mr-4 file:py-2 file:px-4
+          file:rounded-md file:border-0
+          file:text-sm file:font-semibold
+          file:bg-blue-50 file:text-blue-700
+          hover:file:bg-blue-100
+        "
+        />
+        <button
+          disabled={loading}
+          onClick={uploadExcelFile}
+          className="mt-8 w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
+        >
+          {loading ? "Uploading..." : "Upload Excel"}
+        </button>
+      </div>
+    </div>
+  );
+};
+
+const WorkedLeads = ({ setWorkModalVisible }) => {
+  const [search, setSearch] = useState("");
+  const [originalData, setOriginalData] = useState([]);
+  const [updatedData, setupdatedData] = useState([]);
+
+  const getAllUpdatedLeadsCount = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+      let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/leads/getUpdatedLeadsCount`;
+      const response = await fetch(API_URL, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      let result = await response.json();
+      if (result.success) {
+        result = result.data.map((item) => {
+          return {
+            ...item,
+            totalLeads: item?.leadCounts?.totalLeadsAssigned,
+            remainingLeads: item?.leadCounts?.remainingLeads,
+            updatedToday: item?.leadCounts?.leadsUpdatedToday,
+          };
+        });
+
+        return result;
+      } else {
+        return null;
+      }
+    } catch (error) {
+      console.log("error in getting leads", error.message);
+      return null;
+    }
+  };
+
+  const {
+    data: leadsStats,
+    refetch,
+    isLoading,
+  } = useQuery({
+    queryKey: ["LeadsStats"],
+    queryFn: getAllUpdatedLeadsCount,
+  });
+
+  useEffect(() => {
+    if (leadsStats) {
+      setOriginalData(leadsStats);
+      setupdatedData(leadsStats);
+    }
+  }, [leadsStats]);
+
+  useEffect(() => {
+    if (search === "") {
+      setupdatedData(originalData);
+    } else {
+      const filteredData = originalData.filter((item) =>
+        item.name.toLowerCase().includes(search.toLowerCase())
+      );
+      setupdatedData(filteredData);
+    }
+  }, [search, originalData]);
+
+  const columns = useMemo(
+    () => [
+      {
+        Header: "Name",
+        accessor: "name",
+      },
+      {
+        Header: "Hierarchy",
+        accessor: "hierarchy",
+      },
+      {
+        Header: "Total Leads",
+        accessor: "totalLeads",
+      },
+      {
+        Header: "Updated Today",
+        accessor: "updatedToday",
+      },
+      {
+        Header: "Remaining Leads",
+        accessor: "remainingLeads",
+      },
+    ],
+    []
+  );
+
+  return (
+    <div className="w-full h-[100vh] bg-white p-4 md:p-8 relative overflow-auto">
+      <button
+        className="absolute right-0 top-0 bg-red-600 text-white py-1 px-3 text-base"
+        onClick={() => setWorkModalVisible(false)}
+      >
+        close
+      </button>
+      {isLoading ? (
+        <div className="w-full h-full flex items-center justify-center">
+          <img src="/loader.gif" className="h-[60px] w-auto" alt="loading" />
+        </div>
+      ) : (
+        <div className="w-full">
+          <div className="w-full flex">
+            <input
+              type="text"
+              placeholder="Search Name"
+              className="border border-gray-300 rounded-md px-3 py-2 mr-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              onChange={(e) => {
+                // TODO: Implement search functionality
+                setSearch(e.target.value);
+              }}
+            />
+            <button
+              className="bg-colorPrimary text-white px-4 rounded"
+              onClick={refetch}
+            >
+              Refresh
+            </button>
+          </div>
+          <div className="w-full mt-4">
+            <Table data={updatedData} columns={columns} />
+          </div>
+        </div>
       )}
     </div>
   );

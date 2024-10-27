@@ -3,7 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 const INITIAL_STATE = {
   authenticated: false,
   email: "",
-  role: null,
+  hierarchy: null,
   authenticationLoading: false,
   authenticationError: false,
   token: "",
@@ -26,7 +26,7 @@ const reducer = {
   login: (state, action) => {
     state.authenticated = true;
     state.email = action.payload.email;
-    state.role = action.payload.role;
+    state.hierarchy = action.payload.hierarchy;
     state.token = action.payload.token;
     state.userDetails = action.payload.userDetails;
     state.authenticationLoading = false;

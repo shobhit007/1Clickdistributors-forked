@@ -1,19 +1,14 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import moment from "moment";
 import { useQuery } from "@tanstack/react-query";
 import CustomTable from "../utills/customTable";
 import { camelToTitle } from "../utills/commonFunctions";
 import Modal from "../utills/Modal";
 import UpdateLead from "./UpdateLead";
-import MultiSelectDropDown from "../uiCompoents/MultiSelectDropDown";
-import {
-  dispositions,
-  salesPanelColumns,
-  subDispositions,
-} from "@/lib/data/commonData";
-import { RiCloseCircleFill } from "react-icons/ri";
+import { salesPanelColumns, subDispositions } from "@/lib/data/commonData";
 import LeadManager from "../leadManager/index";
 import Filters from "../allocateLead/filters";
+import panelContext from "@/lib/context/panelContext";
 
 const salesFilters = ["All", "Pendings", "New Leads", "Follow Ups"];
 
@@ -30,10 +25,15 @@ export default function Sales() {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showUpdateHistoryModal, setShowUpdateHistoryModal] = useState(false);
   const [leads, setLeads] = useState([]);
+  const [showFollowUp, setShowFollowUp] = useState(false);
+  const [lockLeads, setLockLeads] = useState(false);
+  const [myData, setMyData] = useState(false);
+
+  const userDetails = useContext(panelContext);
 
   // search for default date
   useEffect(() => {
-    let startD = moment().subtract({ days: 3 }).format("YYYY-MM-DD");
+    let startD = moment().format("YYYY-MM-DD");
     let endD = moment().format("YYYY-MM-DD");
     setStartDate(startD);
     setEndDate(endD);
@@ -57,6 +57,7 @@ export default function Sales() {
         body: JSON.stringify({
           startDate: date.startDate,
           endDate: date.endDate,
+          myData,
         }),
       });
 
@@ -73,8 +74,8 @@ export default function Sales() {
   };
 
   // Fetch user roles using react-query
-  const { data } = useQuery({
-    queryKey: ["salesLeads", date],
+  const { data, refetch: refetchLeads } = useQuery({
+    queryKey: ["salesLeads", date, myData],
     queryFn: getLeads,
     retry: false,
     refetchOnWindowFocus: false,
@@ -123,7 +124,7 @@ export default function Sales() {
     }
   };
 
-  const { data: assignedColumns, refetch } = useQuery({
+  const { data: assignedColumns } = useQuery({
     queryKey: ["assignedColumnsForSalesPanel"],
     queryFn: getColumnsForSalesPanel,
   });
@@ -160,13 +161,7 @@ export default function Sales() {
     if (leads?.length > 0) {
       let dynamicCols = assignedColumns
         ?.filter((item) => {
-          let arr = [
-            "assignedAt",
-            "createdAt",
-            "updatedAt",
-            "followUpDate",
-            "FollowUpDate",
-          ];
+          let arr = ["assignedAt", "createdAt", "updatedAt"];
 
           if (!arr.includes(item) && typeof item == "object") {
             return false;
@@ -178,8 +173,7 @@ export default function Sales() {
             key == "assignedAt" ||
             key == "createdAt" ||
             key == "updatedAt" ||
-            key == "followUpDate" ||
-            key == "FollowUpDate"
+            key == "followUpDate"
           ) {
             return {
               Header: salesPanelColumns[key] || key,
@@ -217,6 +211,19 @@ export default function Sales() {
           };
         });
 
+      // Remove leadId column
+      dynamicCols = dynamicCols.filter((col) => col.accessor !== "leadId"); // Remove leadId
+
+      // Add Profile Id column
+      const profileIdCol = {
+        Header: "Profile Id", // New column header
+        accessor: "profileId", // Assuming profileId is the correct accessor
+        id: "profileId",
+      };
+
+      // Move Profile Id to the second position
+      dynamicCols.splice(1, 0, profileIdCol); // Insert Profile Id at index 1
+
       let statiCols = staticColumns.map((key) => {
         return {
           Header: camelToTitle(key),
@@ -235,28 +242,100 @@ export default function Sales() {
     ...new Set(Object.values(subDispositions).flat()),
   ];
 
-  // const filterSalesLeads = () => {
-  //   if (!leads) return [];
-  //   const filteredLeads = leads?.filter((lead) => {
-  //     if (selectedFilter === "All") {
-  //       return true;
-  //     } else if (selectedFilter === "Pendings") {
-  //       return lead.disposition === "Not Open";
-  //     } else if (selectedFilter === "New Leads") {
-  //       if (
-  //         lead.disposition === "Not Open" &&
-  //         moment(lead.createdAt).isAfter(moment().startOf("day")) &&
-  //         moment(lead.createdAt).isBefore(moment().endOf("day"))
-  //       ) {
-  //         return true;
-  //       }
-  //     } else if (selectedFilter === "Follow Ups") {
-  //       return lead.disposition === "FollowUp";
-  //     }
-  //   });
+  const getFollowUps = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+      let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/sales/getFollowUpDates`;
+      const response = await fetch(API_URL, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await response.json();
+      if (data.success) {
+        return data.followUps;
+      } else {
+        return null;
+      }
+    } catch (error) {
+      console.log("error in getting roles", error.message);
+      return null;
+    }
+  };
 
-  //   return filteredLeads;
-  // };
+  const { data: followUps } = useQuery({
+    queryKey: ["getFollowUps"],
+    queryFn: getFollowUps,
+  });
+
+  useEffect(() => {
+    if (followUps && followUps.length > 0) {
+      setShowFollowUp(true);
+    }
+  }, [followUps]);
+
+  // Lock leads
+  const getLockLeadsStatus = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+      let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/sales/getLockLeadsStatus`;
+      const response = await fetch(API_URL, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await response.json();
+      if (data.success) {
+        return data.lockLeads;
+      } else {
+        return false;
+      }
+    } catch (error) {
+      console.log("error in getting roles", error.message);
+      return false;
+    }
+  };
+
+  const { data: lockLeadStatus, refetch: refetchLockLeads } = useQuery({
+    queryKey: ["lockLeadsStatus"],
+    queryFn: getLockLeadsStatus,
+  });
+
+  useEffect(() => {
+    setLockLeads(lockLeadStatus);
+  }, [lockLeadStatus]);
+
+  const updateLockLeadStatus = async (status) => {
+    try {
+      const token = localStorage.getItem("authToken");
+      let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/sales/updateLockLeadsStatus`;
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ lockLeads: status }),
+      });
+      const data = await response.json();
+      if (data.success) {
+        refetchLockLeads();
+      }
+    } catch (error) {
+      console.log("error in getting roles", error.message);
+    }
+  };
+
+  const fetchLeadsAgain = async () => {
+    if (lockLeads) {
+      await updateLockLeadStatus(false);
+      refetchLeads();
+    }
+  };
 
   return (
     <div className="pt-4">
@@ -300,7 +379,25 @@ export default function Sales() {
             />
           </div>
 
-          <Filters setLeads={setLeads} originalData={data} leads={leads} />
+          <div className="w-full flex gap-4 mt-4">
+            <button
+              disabled={lockLeads}
+              className="text-white bg-blue-500 px-6 py-2 rounded-md text-base hover:opacity-80"
+              onClick={() => setMyData(true)}
+            >
+              My Data
+            </button>
+          </div>
+
+          <Filters
+            lockLeads={lockLeads}
+            setLeads={setLeads}
+            originalData={data}
+            leads={leads}
+            userDetails={userDetails}
+            setMyData={setMyData}
+            myData={myData}
+          />
           {/* <div className="flex items-center gap-1 md:gap-4 flex-wrap">
             <button
               onClick={() => setSelectedRows([])}
@@ -395,8 +492,69 @@ export default function Sales() {
         <LeadManager
           onClose={() => setShowLeadManager(false)}
           lead={selectedRows[0]}
+          fetchLeadsAgain={fetchLeadsAgain}
         />
+      )}
+
+      {showFollowUp && (
+        <Modal>
+          <FollowUpModal
+            followUps={followUps}
+            setShowFollowUp={setShowFollowUp}
+            setLockLeads={setLockLeads}
+            updateLockLeadStatus={updateLockLeadStatus}
+          />
+        </Modal>
       )}
     </div>
   );
 }
+
+const FollowUpModal = ({
+  followUps,
+  setShowFollowUp,
+  setLockLeads,
+  updateLockLeadStatus,
+}) => {
+  useEffect(() => {
+    followUps.forEach((followUp) => {
+      const followUpTime = new Date(
+        followUp.followUpDate._seconds * 1000
+      ).getTime();
+      const currentTime = new Date().getTime();
+      const delay = followUpTime - currentTime;
+
+      console.log("delay", delay);
+
+      if (delay > 0) {
+        setTimeout(async () => {
+          alert(`Follow-up reminder for: ${followUp?.full_name}`);
+          await updateLockLeadStatus(true);
+        }, delay);
+      }
+    });
+  }, [followUps]);
+
+  const closeModal = () => {
+    setShowFollowUp(false);
+  };
+
+  return (
+    <div className="bg-white rounded-lg shadow-lg w-11/12 max-w-md p-6">
+      <h2 className="text-xl font-semibold mb-4">Today's Follow-Up Leads</h2>
+      <p className="text-gray-700 mb-6">
+        You have <span className="font-bold">{followUps?.length}</span>{" "}
+        follow-up lead
+        {followUps?.length !== 1 ? "s" : ""} for today.
+      </p>
+      <div className="flex justify-end">
+        <button
+          onClick={closeModal}
+          className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  );
+};
