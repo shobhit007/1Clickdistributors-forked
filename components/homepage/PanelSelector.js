@@ -38,7 +38,7 @@ const PanelSelector = () => {
   return (
     <motion.div
       initial={{ width: 0, opacity: 0 }}
-      animate={{ width: "400px", opacity: 1 }}
+      animate={{ width: "270px", opacity: 1 }}
       exit={{ width: 0, opacity: 0 }}
       transition={{ duration: 0.2 }}
       ref={sidebarRef}

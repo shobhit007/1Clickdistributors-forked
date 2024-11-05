@@ -69,8 +69,12 @@ const CallDetails = ({ data: leadDetails, onClose, fetchLeadsAgain }) => {
 
   const updateLeadStage = async () => {
     try {
-      if (!fields.followUpDate || !fields.remarks) {
+      if (!fields.followUpDate) {
         toast.error("Please select follow up date");
+        return;
+      }
+      if (!fields.remarks) {
+        toast.error("Please Enter Remarks");
         return;
       }
       const body = {

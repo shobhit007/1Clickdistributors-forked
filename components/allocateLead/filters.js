@@ -201,7 +201,7 @@ const Filters = ({
   };
 
   return (
-    <div className="flex flex-col gap-2 w-full mt-4 mb-2 pl-4">
+    <div className="flex flex-col gap-2 w-full mt-4 mb-2 pl-2">
       {list?.hasOwnProperty("salesMembers") &&
         currentLoggedInUser?.hierarchy !== "executive" && (
           <div className="w-[180px] flex gap-[2px] flex-col">

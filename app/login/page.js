@@ -89,11 +89,11 @@ const page = () => {
 
   return (
     <div className="w-[98vw] h-[100vh] flex items-center justify-center">
-      <div className="imgComponent hidden sm:block sm:w-[70%] h-full bg-gray-200">
+      <div className="imgComponent hidden sm:flex items-center justify-center sm:w-[70%] h-full bg-gray-200">
         {!isLoading && (
           <img
             src={loginPageImage || "/loginbg.jpg"}
-            className="w-full h-full bg-cover"
+            className="w-full h-full bg-cover bg-center"
           />
         )}
       </div>

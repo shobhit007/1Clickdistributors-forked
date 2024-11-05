@@ -145,9 +145,9 @@ const index = () => {
       />
 
       <div className="flex mt-3 items-center justify-center">
-        <div className="flex border border-gray-400 items-center">
+        <div className="flex border border-gray-400 items-center max-w-[98vw]">
           <select
-            className="py-1 px-3  border-gray-400 outline-none h-auto border-r"
+            className="py-1 px-3 w-fit md:w-auto  border-gray-400 outline-none h-auto border-r"
             onChange={(e) => setSearchBy(e.target.value)}
           >
             {searchByField?.map((field) => (
@@ -169,7 +169,7 @@ const index = () => {
             }}
           >
             <input
-              className="py-1 px-3 rounded-md  border-gray-400 outline-none"
+              className="py-1 px-3 rounded-md w-[150px] md:w-auto  border-gray-400 outline-none"
               type="text"
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}

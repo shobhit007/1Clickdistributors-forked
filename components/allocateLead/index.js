@@ -280,7 +280,6 @@ const index = () => {
   return (
     <div className="py-1 px-2">
       <div className="flex items-center gap-4">
-        <button onClick={refetchLeads}>Refetch</button>
         <button
           onClick={() => setFormVisible(true)}
           className="rounded py-1 px-2 text-white bg-gray-400 hover:bg-gray-600"

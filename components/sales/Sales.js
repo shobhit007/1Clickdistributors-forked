@@ -28,6 +28,7 @@ export default function Sales() {
   const [showFollowUp, setShowFollowUp] = useState(false);
   const [lockLeads, setLockLeads] = useState(false);
   const [myData, setMyData] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const userDetails = useContext(panelContext);
 
@@ -46,6 +47,7 @@ export default function Sales() {
   const getLeads = async () => {
     try {
       if (!date) return null;
+      setLoading(true);
       const token = localStorage.getItem("authToken");
       let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/leads/getLeadsForSalesPanel`;
       const response = await fetch(API_URL, {
@@ -62,12 +64,14 @@ export default function Sales() {
       });
 
       const data = await response.json();
+      setLoading(false);
       if (data.success) {
         return data.leads;
       } else {
         return null;
       }
     } catch (error) {
+      setLoading(false);
       console.log("error in getting roles", error.message);
       return null;
     }
@@ -345,15 +349,15 @@ export default function Sales() {
   const fetchLeadsAgain = async () => {
     if (lockLeads) {
       await updateLockLeadStatus(false);
-      refetchLeads();
     }
+    refetchLeads();
   };
 
   return (
     <div className="pt-4">
-      <div className="px-4 mb-6">
+      <div className="px-1 mb-6">
         <div className="flex gap-1 flex-col rounded-md flex-wrap">
-          <div className="flex gap-2 items-end">
+          <div className="flex gap-2 items-end flex-wrap">
             <div className="flex gap-2 items-end p-1 rounded bg-gray-300">
               <div className="flex flex-col">
                 <span className="text-[12px] text-gray-500">From</span>
@@ -389,12 +393,9 @@ export default function Sales() {
               className="min-w-[160px] border border-gray-400 outline-blue-500 py-1 px-2 rounded"
               placeholder="Enter to search table"
             />
-          </div>
-
-          <div className="w-full flex gap-4 mt-4">
             <button
               disabled={lockLeads}
-              className="text-white bg-blue-500 px-6 py-2 rounded-md text-base hover:opacity-80"
+              className="text-white bg-blue-500 px-6 py-1 rounded-md text-base hover:opacity-80"
               onClick={() => setMyData(true)}
             >
               My Data
@@ -449,6 +450,22 @@ export default function Sales() {
           </div> */}
         </div>
       </div>
+
+      {loading && (
+        <div className="w-full flex flex-col items-center justify-center mt-3">
+          <img src="/loader.gif" className="h-[30px] w-auto" alt="loading" />
+          <p className="text-xl font-bold text-gray-500 mt-3">
+            Loading leads... please wait
+          </p>
+        </div>
+      )}
+
+      {!loading && leads?.length == 0 && (
+        <div className="w-full flex flex-col items-center justify-center mt-3">
+          <p className="text-xl font-bold text-gray-500 mt-3">No Leads Found</p>
+        </div>
+      )}
+
       <CustomTable
         data={leads || []}
         uniqueDataKey={"leadId"}
