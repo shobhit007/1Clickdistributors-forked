@@ -5,6 +5,7 @@ import {
   failedToAuthenticate,
   login,
   setAuthStatus,
+  setLogoutPopup,
 } from "./authReducer";
 import { validateToken } from "./api";
 
@@ -33,7 +34,6 @@ function* handleCheckAuthStatus({ payload }) {
 
     if (token) {
       const response = yield call(validateToken, token);
-      console.log("response on check auth status", checkAuthStatus);
 
       if (response.success && response.data) {
         yield put(login({ role, email, token, userDetails: response.data }));
@@ -42,21 +42,21 @@ function* handleCheckAuthStatus({ payload }) {
         !response.success &&
         response.message?.toLowerCase() == "jwt expired"
       ) {
-        yield put(failedToAuthenticate({ error: "Token expired" }));
-        toast?.error("Your token has expired. we are logging you out.");
-        router.push("/login");
+        yield put(failedToAuthenticate({ error: "Your session has expired" }));
+        yield put(setLogoutPopup(true));
+        // toast?.error("Your token has expired. we are logging you out.");
       } else {
         yield put(
           failedToAuthenticate({ error: "Token could not be verified" })
         );
-        toast?.error(
-          "Your token could not be verified. we are logging you out."
-        );
-        router.push("/login");
+        setLogoutPopup(true);
+        // toast?.error(
+        //   "Your token could not be verified. we are logging you out."
+        // );
       }
     } else {
       yield put(failedToAuthenticate({ error: "Token not found" }));
-      router.push("/login");
+      setLogoutPopup(true);
     }
   } catch (error) {
     console.log("error in handleCheckAuthStatus saga is", error.message);

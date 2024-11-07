@@ -8,6 +8,7 @@ const INITIAL_STATE = {
   authenticationError: false,
   token: "",
   userDetails: null,
+  logoutPopup: false,
 };
 
 const reducer = {
@@ -38,6 +39,9 @@ const reducer = {
     state.authenticationLoading = false;
     state.authenticationError = action.payload.error;
   },
+  setLogoutPopup: (state, action) => {
+    state.logoutPopup = action.payload;
+  },
 };
 
 const authSlice = createSlice({
@@ -53,5 +57,6 @@ export const {
   login,
   checkAuthStatus,
   failedToAuthenticate,
+  setLogoutPopup,
 } = authSlice.actions;
 export const authReducer = authSlice.reducer;

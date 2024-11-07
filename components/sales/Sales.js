@@ -23,7 +23,6 @@ export default function Sales() {
   const [searchValue, setSearchValue] = useState("");
 
   const [showDetailsModal, setShowDetailsModal] = useState(false);
-  const [showUpdateHistoryModal, setShowUpdateHistoryModal] = useState(false);
   const [leads, setLeads] = useState([]);
   const [showFollowUp, setShowFollowUp] = useState(false);
   const [lockLeads, setLockLeads] = useState(false);
@@ -483,21 +482,6 @@ export default function Sales() {
             onClose={() => setShowUpdateModal(false)}
             leads={selectedRows}
           />
-        </Modal>
-      )}
-      {showUpdateHistoryModal && (
-        <Modal>
-          <div className="p-3 w-[90vw] sm:w-[65vw] md:w-[50vw] bg-white lg:w-[35vw] rounded-md h-[80vh] overflow-auto relative">
-            <MdClose
-              className="text-red-600 absolute top-1 right-1 text-xl cursor-pointer"
-              onClick={() => setShowUpdateHistoryModal(false)}
-            />
-
-            <LeadUpdateHistory
-              leadId={selectedRows[0]?.leadId}
-              close={() => setShowUpdateHistoryModal(false)}
-            />
-          </div>
         </Modal>
       )}
 
