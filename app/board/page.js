@@ -101,7 +101,7 @@ const Page = () => {
       let userPanels = allUserRoles?.filter(
         (item) => item.id == userDetails?.hierarchy
       )?.[0]?.panels;
-      setuserRoles([[...commonPanels, ...userPanels]]);
+      setuserRoles([...commonPanels, ...userPanels]);
     }
   }, [userDetails]);
 
