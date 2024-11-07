@@ -77,12 +77,12 @@ const Filters = ({
         }
       }
 
-      if (
-        lead.subDisposition &&
-        filteredDispositionData.hasOwnProperty(lead.subDisposition)
-      ) {
-        filteredDispositionData[lead.subDisposition]++;
-      }
+      // if (
+      //   lead.subDisposition &&
+      //   filteredDispositionData.hasOwnProperty(lead.subDisposition)
+      // ) {
+      //   filteredDispositionData[lead.subDisposition]++;
+      // }
     });
 
     setDispositionData(filteredDispositionData);
