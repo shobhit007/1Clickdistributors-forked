@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { MdArrowDropUp, MdArrowRight } from "react-icons/md";
 import { toast } from "react-toastify";
 import MultiLevelDropdown from "./multiLevelDropdown";
@@ -12,6 +12,30 @@ const AllocateLeadModal = ({ data, onSubmit, loading }) => {
   const [dropDownVisible, setDropDownVisible] = useState(false);
   const [subLevelToShow, setSubLevelToShow] = useState(null);
   const [allSalesMembers, setAllSalesMembers] = useState([]);
+  const componentRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropDownVisible) {
+        console.log("handle now");
+        if (
+          componentRef.current &&
+          !componentRef.current.contains(event.target)
+        ) {
+          setDropDownVisible(false);
+        }
+      }
+      // Check if click is outside of the component
+    }
+
+    // Add event listener
+    document.addEventListener("click", handleClickOutside);
+
+    // Remove event listener on cleanup
+    return () => {
+      document.removeEventListener("click", handleClickOutside);
+    };
+  }, [dropDownVisible]);
 
   const flattenTeamMembers = (data) => {
     let allMembers = [];
@@ -103,7 +127,51 @@ const AllocateLeadModal = ({ data, onSubmit, loading }) => {
             <MdArrowRight className="text-2xl" id="dropdown-icon" />
           )}
         </button>
-        {/* {dropDownVisible && (
+
+        {dropDownVisible && Array.isArray(allMembers) && (
+          <div
+            ref={componentRef}
+            className="absolute bottom-10 left-0 bg-white shadow-md shadow-gray-400 min-w-[300px] max-w-[500px] p-2 rounded max-h-[55vh] z-30 overflow-auto"
+          >
+            <MultiLevelDropdown
+              items={allMembers}
+              onSelect={(e) => {
+                setSelectedSalesMember(e);
+                setDropDownVisible(false);
+              }}
+              allItems={allSalesMembers}
+            />
+          </div>
+        )}
+      </div>
+
+      <button
+        disabled={loading}
+        className={`text-white px-3 bg-colorPrimary py-[2px] rounded-md disabled:bg-colorPrimary/40 ${
+          loading ? "animate-pulse" : ""
+        }`}
+        onClick={onFormSubmit}
+      >
+        {loading ? "Allocating..." : "Allocate now"}
+      </button>
+      {/* <button
+        className={`text-white px-3 bg-colorPrimary py-[2px] rounded-md disabled:bg-colorPrimary/40 ${
+          loading ? "animate-pulse" : ""
+        }`}
+        onClick={refetch}
+      >
+        refetch
+      </button> */}
+
+      {/* <MultiLevelDropdown /> */}
+    </div>
+  );
+};
+
+export default AllocateLeadModal;
+
+{
+  /* {dropDownVisible && (
           <div
             id="dropdown"
             className="absolute bottom-10 left-0 bg-gray-100 shadow-md shadow-gray-400 w-full p-2 rounded min-w-56 max-h-[55vh] z-30 overflow-auto"
@@ -151,43 +219,5 @@ const AllocateLeadModal = ({ data, onSubmit, loading }) => {
                 );
               })}
           </div>
-        )} */}
-
-        {dropDownVisible && Array.isArray(allMembers) && (
-          <div className="absolute bottom-10 left-0 bg-white shadow-md shadow-gray-400 min-w-[300px] max-w-[500px] p-2 rounded max-h-[55vh] z-30 overflow-auto">
-            <MultiLevelDropdown
-              items={allMembers}
-              onSelect={(e) => {
-                setSelectedSalesMember(e);
-                setDropDownVisible(false);
-              }}
-              allItems={allSalesMembers}
-            />
-          </div>
-        )}
-      </div>
-
-      <button
-        disabled={loading}
-        className={`text-white px-3 bg-colorPrimary py-[2px] rounded-md disabled:bg-colorPrimary/40 ${
-          loading ? "animate-pulse" : ""
-        }`}
-        onClick={onFormSubmit}
-      >
-        {loading ? "Allocating..." : "Allocate now"}
-      </button>
-      <button
-        className={`text-white px-3 bg-colorPrimary py-[2px] rounded-md disabled:bg-colorPrimary/40 ${
-          loading ? "animate-pulse" : ""
-        }`}
-        onClick={refetch}
-      >
-        refetch
-      </button>
-
-      {/* <MultiLevelDropdown /> */}
-    </div>
-  );
-};
-
-export default AllocateLeadModal;
+        )} */
+}

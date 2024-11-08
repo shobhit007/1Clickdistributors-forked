@@ -96,6 +96,10 @@ const ManageUsers = () => {
     }
   };
 
+  const altNames = {
+    seniorName: "Reporting Manager",
+    hierarchy: "Designation",
+  };
   const columns = useMemo(() => {
     let cols = [
       "name",
@@ -151,6 +155,13 @@ const ManageUsers = () => {
               />
             </div>
           ),
+        };
+      }
+
+      if (altNames.hasOwnProperty(key)) {
+        return {
+          Header: altNames[key],
+          accessor: key,
         };
       }
       if (key == "edit") {

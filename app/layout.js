@@ -89,7 +89,7 @@ const App = ({ children }) => {
 
   return (
     <React.Fragment>
-      <CustomizedLayout>{children}</CustomizedLayout>;
+      <CustomizedLayout>{children}</CustomizedLayout>
       {visible && (
         <Modal>
           <div className="bg-white rounded-md shadow-sm p-8">

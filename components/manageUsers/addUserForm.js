@@ -87,7 +87,7 @@ const AdduserForm = ({ close, refetchUsers, allUsers }) => {
       return toast.error("Please choose department of user");
     }
     if (!data?.hierarchy || data.hierarchy == "") {
-      return toast.error("Please choose hierarchy of user");
+      return toast.error("Please choose Designation of user");
     }
     try {
       let body = { ...data };
@@ -203,7 +203,7 @@ const AdduserForm = ({ close, refetchUsers, allUsers }) => {
       <div className="flex flex-col w-full gap-1">
         <span className={`${spanStyle}`}>
           {/* <MdOutlineMailOutline /> */}
-          Select Hierarchy
+          Select Designation
         </span>
         <select
           className={`border p-1 rounded-md border-gray-400`}
@@ -211,7 +211,7 @@ const AdduserForm = ({ close, refetchUsers, allUsers }) => {
           value={data.hierarchy}
           onChange={handleInputChange}
         >
-          <option>Select Hierarchy</option>
+          <option>Select</option>
           {panelRoles
             .filter((item) => item.department == data.department)?.[0]
             ?.hierarchy.map((item) => (

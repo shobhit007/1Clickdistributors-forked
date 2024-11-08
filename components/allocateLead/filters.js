@@ -52,7 +52,7 @@ const Filters = ({
       Presentation: 0,
       Prospect: 0,
       "Prospect-Followup": 0,
-      Deal_Done: 0,
+      "Deal Done": 0,
       "Not Interested": 0,
     };
     originalData?.forEach((lead) => {
@@ -104,6 +104,7 @@ const Filters = ({
       "Not Open",
       "Prospect",
       "Not Interested",
+      "Deal Done",
     ];
     let subDispositionFilter = ["Prospect-Followup", "Presentation-Followup"];
 

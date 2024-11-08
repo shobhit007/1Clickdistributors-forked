@@ -33,7 +33,7 @@ export default function Sales() {
 
   // search for default date
   useEffect(() => {
-    let startD = moment().format("YYYY-MM-DD");
+    let startD = moment().startOf("month").format("YYYY-MM-DD");
     let endD = moment().format("YYYY-MM-DD");
     setStartDate(startD);
     setEndDate(endD);
