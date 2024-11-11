@@ -13,6 +13,7 @@ import ShowDetails from "./showDetails";
 import ManualLeadForm from "../utills/ManualLeadForm";
 import Filters from "./filters";
 import Table from "../utills/Table";
+import { IoCloudDownloadOutline } from "react-icons/io5";
 
 const index = () => {
   const [openModal, setOpenModal] = useState(false);
@@ -477,13 +478,24 @@ const UploadExcelData = ({ onClose }) => {
           hover:file:bg-blue-100
         "
         />
-        <button
-          disabled={loading}
-          onClick={uploadExcelFile}
-          className="mt-8 w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
-        >
-          {loading ? "Uploading..." : "Upload Excel"}
-        </button>
+        <div className="flex gap-2 mt-8">
+          <span className="block px-4 py-2 rounded bg-blue-500 hover:bg-blue-600 text-white font-semibold">
+            <a
+              href="/dummy_data.xlsx"
+              download="1click_dummy.xlsx"
+              className="flex gap-1 items-center"
+            >
+              Download <IoCloudDownloadOutline />
+            </a>
+          </span>
+          <button
+            disabled={loading}
+            onClick={uploadExcelFile}
+            className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
+          >
+            {loading ? "Uploading..." : "Upload Excel"}
+          </button>
+        </div>
       </div>
     </div>
   );
