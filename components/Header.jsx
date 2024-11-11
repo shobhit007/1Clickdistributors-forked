@@ -64,7 +64,11 @@ const Header = () => {
           onClick={() => setShowSidebar(!showSidebar)}
           className="text-[28px] text-gray-600 cursor-pointer"
         />
-        <img src="/1Click_Logo_v1.png" alt="logo" className="h-[40px] w-auto select-none" />
+        <img
+          src="/logo.png"
+          alt="logo"
+          className="h-[40px] w-auto select-none"
+        />
         {/* <div className="h-8 md:h-14 w-8 md:w-14 bg-colorPrimary rounded-full"></div> */}
       </div>
 
