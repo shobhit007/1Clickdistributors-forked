@@ -47,7 +47,6 @@ const page = () => {
     queryFn: getLoginPageImage,
   });
 
-  
   const loginUser = async () => {
     try {
       if (!email || email == "" || !password || password == "") {
@@ -103,8 +102,12 @@ const page = () => {
 
         <div className="flex flex-col items-center justify-center w-full bg-white p-5">
           {/* Logo section */}
-          <div className="w-full p-4 flex md:hidden justify-center">
-            <div className="h-[180px] w-[180px] rounded-full bg-blue-500"></div>
+          <div className="w-full p-4 flex justify-center">
+            {/* <div className="h-[180px] w-[180px] rounded-full bg-blue-500"></div> */}
+            <img
+              src="/logo.png"
+              className="w-[180px] h-auto object-contain filter drop-shadow-[0_4px_4px_rgba(0,0,0,0.3)]"
+            />
           </div>
 
           <div className="flex flex-col w-full gap-1">

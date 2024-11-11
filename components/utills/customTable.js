@@ -185,7 +185,7 @@ const CustomTable = ({
                   {row.cells.map((cell) => (
                     <td
                       {...cell.getCellProps()}
-                      className="px-2 whitespace-nowrap text-[12px] min-w-[80px] max-w-[250px] border border-gray-500 overflow-auto scrollbar-none"
+                      className="px-2 whitespace-nowrap text-[12px] min-w-[80px] max-w-[290px] border border-gray-500 overflow-auto scrollbar-none"
                     >
                       {cell.value && typeof cell.value != "object" ? (
                         <HighlightText

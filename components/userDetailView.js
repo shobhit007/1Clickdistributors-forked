@@ -1,14 +1,20 @@
 import panelContext from "@/lib/context/panelContext";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import React, { useContext, useEffect, useState } from "react";
-import { FaArrowCircleLeft } from "react-icons/fa";
+import { useQueryClient } from "@tanstack/react-query";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { storage } from "/lib/firebase";
+import React, { useContext, useEffect, useRef, useState } from "react";
+import { FaArrowCircleLeft, FaUser } from "react-icons/fa";
 import { toast } from "react-toastify";
+import UserProfile from "@/app/users/[id]/page";
 
 const UserDetailView = ({ close }) => {
   const [loading, setLoading] = useState(false);
   const [isEditable, setIsEditable] = useState(false);
   const [user, setuser] = useState(false);
   const [showResetPasswordView, setShowResetPasswordView] = useState(false);
+  const [userImageLink, setUserImageLink] = useState(false);
+  const [file, setFile] = useState(null);
+
   const [otpData, setOtpData] = useState({
     otp: "",
     otpToken: "",
@@ -19,6 +25,57 @@ const UserDetailView = ({ close }) => {
   const { userDetails } = useContext(panelContext);
   const queryClient = useQueryClient();
 
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    setUserImageLink(userDetails?.userImageLink || null);
+  }, [userDetails]);
+
+  const handleUpload = async () => {
+    try {
+      if (!file) {
+        toast.error("No file selected");
+        return { success: false };
+      }
+
+      // Reference to Firebase storage
+      const storageRef = ref(storage, `userImages/${userDetails?.id}.jpg`);
+      const uploadTask = uploadBytesResumable(storageRef, file);
+
+      // Wrap the upload process in a promise
+      return new Promise((resolve, reject) => {
+        uploadTask.on(
+          "state_changed",
+          (snapshot) => {
+            const progress =
+              (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            console.log(`Upload is ${progress}% done`);
+          },
+          (error) => {
+            // Handle upload error
+            toast.error("File upload failed: " + error.message);
+            reject({ success: false });
+          },
+          async () => {
+            try {
+              const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+              console.log("Download URL:", downloadURL);
+              resolve({ success: true, downloadURL });
+            } catch (apiError) {
+              toast.error("Error uploading image: " + apiError.message);
+              reject({ success: false });
+            }
+          }
+        );
+      });
+    } catch (error) {
+      // General error handling
+      console.error("Error during upload process:", error);
+      toast.error("Error during upload: " + error.message);
+      return { success: false };
+    }
+  };
+
   const saveUpdatedData = async () => {
     try {
       const body = {
@@ -27,6 +84,19 @@ const UserDetailView = ({ close }) => {
       };
 
       setLoading(true);
+      if (file) {
+        console.log("has file uploading...");
+        const ress = await handleUpload();
+        console.log("ress is", ress);
+        if (ress?.success) {
+          body.userImageLink = ress.downloadURL;
+        } else {
+          throw new Error(ress.message || "Could not upload profile picture");
+        }
+      }
+      console.log("body is", body);
+      setLoading(false);
+
       const token = localStorage.getItem("authToken");
       const API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/auth/updateUser`;
       const res = await fetch(API_URL, {
@@ -49,14 +119,9 @@ const UserDetailView = ({ close }) => {
     } catch (err) {
       setLoading(false);
       console.log(err);
-      toast.error("Error sending OTP. Please try again.");
+      toast.error(err.message || "Something went wrong");
     }
   };
-
-  // const { data, refetch } = useQuery({
-  //   queryKey: ["userDetail"],
-  //   queryFn: getUserDetails,
-  // });
 
   useEffect(() => {
     if (userDetails) {
@@ -95,7 +160,7 @@ const UserDetailView = ({ close }) => {
         setOtpData((pre) => ({ ...pre, otpToken: data.otpToken }));
         toast.success("OTP sent successfully!");
       } else {
-        toast.error(data.message);
+        toast.error(data?.message);
       }
       setOtpData((pre) => ({ ...pre, otpLoading: false }));
     } catch (err) {
@@ -169,6 +234,18 @@ const UserDetailView = ({ close }) => {
     } catch (err) {
       console.log(err);
       toast.error("Error sending OTP. Please try again.");
+    }
+  };
+
+  const onChangeImage = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const url = URL.createObjectURL(file);
+      setFile(file);
+      setUserImageLink(url);
+    } else {
+      setFile(null);
+      setUserImageLink(UserProfile?.userImageLink || null);
     }
   };
 
@@ -293,6 +370,53 @@ const UserDetailView = ({ close }) => {
           </button>
         )}
       </div>
+
+      <div className="w-full flex flex-col justify-center items-center">
+        <div className="h-[80px] overflow-hidden w-[80px] rounded-full border border-gray-500 flex items-center justify-center">
+          {userImageLink ? (
+            <img
+              src={userImageLink}
+              className="h-[80px] w-[80px] object-cover"
+            />
+          ) : (
+            <FaUser style={{ color: "gray", fontSize: 32 }} />
+          )}
+        </div>
+
+        <div className="flex gap-3 items-center justify-center">
+          <button
+            disabled={loading || !isEditable}
+            onClick={() => {
+              if (inputRef?.current) {
+                inputRef.current.click();
+              }
+            }}
+            className="text-blue-500 underline text-xs disabled:text-blue-200"
+          >
+            Change picture
+          </button>
+
+          {file && (
+            <button
+              onClick={() => {
+                setFile(null);
+                setUserImageLink(userDetails?.userImageLink || "");
+              }}
+              className="text-blue-500 underline text-xs"
+            >
+              Cancel
+            </button>
+          )}
+        </div>
+        <input
+          type="file"
+          className="text-sm ml-1 w-fit hidden"
+          accept="image/*"
+          ref={inputRef}
+          onChange={onChangeImage}
+        />
+      </div>
+
       <div className="flex flex-col px-2 gap-3 mt-3">
         <div className="w-full flex flex-col gap-1">
           <span className="text-lg font-semibold text-gray-500 ml-1">Name</span>
