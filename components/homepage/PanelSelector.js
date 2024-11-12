@@ -2,6 +2,33 @@ import panelContext from "@/lib/context/panelContext";
 import React, { useContext, useEffect, useRef } from "react";
 import { MdClose } from "react-icons/md";
 import { motion } from "framer-motion"; // Import framer-motion
+import { MdHowToVote } from "react-icons/md";
+import { LuLayoutPanelTop } from "react-icons/lu";
+import { FaUsersRays } from "react-icons/fa6";
+import { GiSettingsKnobs } from "react-icons/gi";
+import { RxDashboard } from "react-icons/rx";
+import { RiListSettingsFill } from "react-icons/ri";
+
+const getIcons = (panelName, selected) => {
+  console.log("panel name is", panelName);
+  let d6521f = { color: selected ? "#fff" : "#d6521f", fontSize: 22 };
+  switch (panelName) {
+    case "allocate_leads":
+      return <MdHowToVote style={d6521f} />;
+    case "sales_panel":
+      return <LuLayoutPanelTop style={d6521f} />;
+    case "manage_users":
+      return <FaUsersRays style={d6521f} />;
+    case "roles_and_permissions":
+      return <GiSettingsKnobs style={d6521f} />;
+    case "dashboard":
+      return <RxDashboard style={d6521f} />;
+    case "panel_settings":
+      return <RiListSettingsFill style={d6521f} />;
+    default:
+      break;
+  }
+};
 
 const PanelSelector = () => {
   const {
@@ -38,13 +65,13 @@ const PanelSelector = () => {
   return (
     <motion.div
       initial={{ width: 0, opacity: 0 }}
-      animate={{ width: "270px", opacity: 1 }}
+      animate={{ width: "300px", opacity: 1 }}
       exit={{ width: 0, opacity: 0 }}
       transition={{ duration: 0.2 }}
       ref={sidebarRef}
       className="h-[100vh] fixed z-50 top-0 left-0 flex flex-col bg-white shadow-md gap-2 py-2 scrollbar-thin"
     >
-      <div className="flex flex-col relative gap-3 w-full px-2 pt-12">
+      <div className="flex flex-col relative w-full pt-12">
         <button
           className="text-white text-3xl cursor-pointer absolute top-0 right-0 bg-red-500 py-1 px-2"
           onClick={() => setShowSidebar(false)}
@@ -55,10 +82,10 @@ const PanelSelector = () => {
           userRoles?.map((permission) => (
             <div
               key={permission} // Add key for better performance
-              className={`h-auto py-3 px-2 w-full rounded-md cursor-pointer flex items-center ${
+              className={`h-auto py-3 px-2 w-full border-b border-gray-300 cursor-pointer flex items-center gap-2 ${
                 displayComponent === permission
                   ? "bg-colorPrimary text-white"
-                  : "bg-gray-200 text-gray-600 hover:bg-gray-300"
+                  : " text-gray-600 hover:bg-gray-300"
               }`}
               onClick={() => {
                 setDisplayComponent(permission);
@@ -66,6 +93,7 @@ const PanelSelector = () => {
                 localStorage.setItem("currentDisplayComponent", permission);
               }}
             >
+              {getIcons(permission, displayComponent === permission)}
               <p className="text-sm font-semibold capitalize text-nowrap">
                 {formatString(permission)}
               </p>
@@ -76,6 +104,10 @@ const PanelSelector = () => {
             <p>You have no panels to access any panel</p>
           </div>
         )}
+      </div>
+
+      <div className="absolute bottom-0 w-full flex items-center justify-center pb-3">
+        <img src="/flatLogo.png" className="w-[250px] h-auto" />
       </div>
     </motion.div>
   );

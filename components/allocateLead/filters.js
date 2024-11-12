@@ -163,6 +163,54 @@ const Filters = ({
       });
     }
 
+    // sort the data by hot lead and updated at
+    if (filters?.btnFilter) {
+      if (filters?.btnFilter == "Not Open") {
+        console.log("is not open soring in desc");
+        filtered = filtered.sort((a, b) => {
+          // Check if either object has source 'facebook'
+          if (
+            a.subDisposition?.toLowerCase() === "facebook" &&
+            b.subDisposition?.toLowerCase() !== "facebook"
+          ) {
+            return -1; // a comes before b
+          }
+          if (
+            a.subDisposition?.toLowerCase() !== "facebook" &&
+            b.subDisposition?.toLowerCase() === "facebook"
+          ) {
+            return 1; // b comes before a
+          }
+
+          // If both have source 'facebook', sort by createdAt in descending order
+          if (
+            a.subDisposition?.toLowerCase() === "facebook" &&
+            b.subDisposition?.toLowerCase() === "facebook"
+          ) {
+            return (
+              new Date(b.createdAt?._seconds * 1000) -
+              new Date(a.createdAt?._seconds * 1000)
+            ); // Descending order
+          }
+
+          // Otherwise, keep original order or apply any additional sorting criteria
+          return 0;
+        });
+      } else {
+        filtered = filtered.sort((a, b) => {
+          // If updatedAt is missing, assign a default date (e.g., nulls come at the end)
+          const dateA = a.updatedAt
+            ? new Date(a.updatedAt?._seconds * 1000)
+            : new Date(0); // Epoch time as the oldest date
+          const dateB = b.updatedAt
+            ? new Date(b.updatedAt?._seconds * 1000)
+            : new Date(0);
+
+          return dateA - dateB;
+        });
+      }
+    }
+
     setLeads(filtered);
   };
 
@@ -244,42 +292,56 @@ const Filters = ({
         </button>
 
         {!isSalesPanel && currentLoggedInUser?.hierarchy !== "executive" && (
-          <button
-            onClick={() =>
-              setFilters((pre) => ({
-                ...pre,
-                unAllocated: !pre.unAllocated,
-              }))
-            }
-            disabled={lockLeads}
-            className={`py-[2px] text-nowrap text-sm px-1 border font-semibold rounded-md ${
-              filters?.unAllocated
-                ? "bg-colorPrimary  text-white"
-                : "bg-colorPrimary/20  text-gray-500"
-            }`}
-          >
-            Unallocated leads{" "}
-            {unallocatedLeadsCount && <span>({unallocatedLeadsCount})</span>}
-          </button>
+          <div className="flex flex-col relative w-auto">
+            <button
+              onClick={() =>
+                setFilters((pre) => ({
+                  ...pre,
+                  unAllocated: !pre.unAllocated,
+                }))
+              }
+              disabled={lockLeads}
+              className={`py-[2px] text-nowrap text-sm px-1 border font-semibold rounded-md ${
+                filters?.unAllocated
+                  ? "bg-colorPrimary  text-white"
+                  : "bg-colorPrimary/20  text-gray-500"
+              }`}
+            >
+              Unallocated leads{" "}
+              {unallocatedLeadsCount && <span>({unallocatedLeadsCount})</span>}
+            </button>
+
+            {filters?.unAllocated && (
+              <span className="w-full p-[1px] mt-[2px] bg-colorPrimary"></span>
+            )}
+          </div>
         )}
 
         {dispositionData &&
           Object.keys(dispositionData).map((item) => (
-            <button
-              disabled={
-                lockLeads &&
-                item !== "Prospect-Followup" &&
-                item !== "Presentation-Followup" &&
-                item !== "Today_Followup"
-              }
-              style={getBtnSyle(item)}
-              className={`flex text-nowrap items-center gap-1 px-1 py-[2px] text-sm ${
-                filters?.btnFilter == item ? "scale-105" : ""
-              }`}
-              onClick={() => onSelectButtonFilter(item)}
-            >
-              {item?.split("_").join(" ")} ({dispositionData[item]})
-            </button>
+            <div className="flex flex-col relative w-auto">
+              <button
+                disabled={
+                  lockLeads &&
+                  item !== "Prospect-Followup" &&
+                  item !== "Presentation-Followup" &&
+                  item !== "Today_Followup"
+                }
+                style={getBtnSyle(item)}
+                className={`flex text-nowrap items-center gap-1 px-1  text-sm ${
+                  filters?.btnFilter == item ? "" : "py-[2px]"
+                }`}
+                onClick={() => onSelectButtonFilter(item)}
+              >
+                {item?.split("_").join(" ")} ({dispositionData[item]})
+              </button>
+              {filters?.btnFilter == item && (
+                <span
+                  className="w-full p-[1px] mt-[2px] h-[5%]"
+                  style={getBtnSyle(item)}
+                ></span>
+              )}
+            </div>
           ))}
       </div>
     </div>

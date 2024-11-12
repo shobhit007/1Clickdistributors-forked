@@ -73,7 +73,7 @@ const index = () => {
   useEffect(() => {
     let start = moment()
       .startOf("day")
-      .subtract({ days: 1 })
+      .subtract({ days: 4 })
       .format("YYYY-MM-DD");
     let end = moment().endOf("day").format("YYYY-MM-DD");
     setSelectedStartDate(start);
@@ -128,6 +128,7 @@ const index = () => {
     "assignedBy",
     "salesExecutive",
     "remarks",
+    
   ];
   const avoidCols = [
     "id",
@@ -176,7 +177,7 @@ const index = () => {
 
           if (key === "whats_is_your_requirement_?_write_in_brief") {
             return {
-              Header: "Requirement",
+              Header: "Query",
               accessor: key,
               id: key,
             };
