@@ -65,7 +65,7 @@ const Header = () => {
           className="text-[28px] text-gray-600 cursor-pointer"
         />
         <img
-          src="/logo.png"
+          src="/flatLogo.png"
           alt="logo"
           className="h-[40px] w-auto select-none"
         />
