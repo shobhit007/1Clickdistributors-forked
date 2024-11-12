@@ -128,10 +128,11 @@ const CustomTable = ({
   }, [searchValue]);
 
   const getCellStyle = (name) => {
-    const color = cellColors[name];
+    const cellName = name === "Followup" ? "FollowUp" : name;
+    const color = cellColors[cellName];
 
     return {
-      backgroundColor: color,
+      backgroundColor: color || "#2A80B9",
       color: "white",
     };
   };

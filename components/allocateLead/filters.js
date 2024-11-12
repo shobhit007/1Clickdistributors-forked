@@ -20,7 +20,6 @@ import { cellColors } from "@/lib/data/commonData";
 const Filters = ({
   setLeads,
   originalData,
-  lockLeads,
   userDetails: currentUser,
   setMyData,
   myData,
@@ -51,12 +50,14 @@ const Filters = ({
       "Not Open": 0,
       Today_Followup: 0,
       "Call Back": 0,
-      "Presentation-Followup": 0,
       Presentation: 0,
       Prospect: 0,
-      "Prospect-Followup": 0,
       "Deal Done": 0,
       "Not Interested": 0,
+    };
+    let filteredSubDispositionData = {
+      "Prospect-Followup": 0,
+      "Presentation-Followup": 0,
     };
     originalData?.forEach((lead) => {
       if (!lead.salesExecutive) {
@@ -77,6 +78,13 @@ const Filters = ({
         filteredDispositionData[lead.disposition]++;
       }
 
+      if (
+        lead.subDisposition &&
+        filteredSubDispositionData.hasOwnProperty(lead.subDisposition)
+      ) {
+        filteredSubDispositionData[lead.subDisposition]++;
+      }
+
       if (lead?.followUpDate) {
         let followupdate = new Date(lead.followUpDate?._seconds * 1000);
         if (moment(followupdate).isSame(moment(), "date")) {
@@ -92,7 +100,10 @@ const Filters = ({
       // }
     });
 
-    setDispositionData(filteredDispositionData);
+    setDispositionData({
+      ...filteredDispositionData,
+      ...filteredSubDispositionData,
+    });
     setUnallocatedLeadsCount(unallocatedLeads);
     let salesList = Object.values(salesMembers || {});
     setList({
@@ -153,16 +164,6 @@ const Filters = ({
       );
     }
 
-    if (lockLeads) {
-      // Filter leads based on follow-up counts greater than 0
-      filtered = filtered.filter((lead) => {
-        let followupCount = 0;
-        if (lead?.subDisposition === "Prospect-Followup") followupCount++;
-        if (lead?.subDisposition === "Presentation-Followup") followupCount++;
-        return followupCount > 0;
-      });
-    }
-
     // sort the data by hot lead and updated at
     if (filters?.btnFilter) {
       if (filters?.btnFilter == "Not Open") {
@@ -216,27 +217,7 @@ const Filters = ({
 
   useEffect(() => {
     filterLeads();
-  }, [
-    selectedDisposition,
-    selectedSubDisposition,
-    filters,
-    originalData,
-    lockLeads,
-  ]);
-
-  useEffect(() => {
-    if (lockLeads) {
-      // Set default selected follow-up button if count is greater than 0
-      if (dispositionData && dispositionData["Prospect-Followup"] > 0) {
-        setFilters((pre) => ({ ...pre, btnFilter: "Prospect-Followup" }));
-      } else if (
-        dispositionData &&
-        dispositionData["Presentation-Followup"] > 0
-      ) {
-        setFilters((pre) => ({ ...pre, btnFilter: "Presentation-Followup" }));
-      }
-    }
-  }, [lockLeads, dispositionData]);
+  }, [selectedDisposition, selectedSubDisposition, filters, originalData]);
 
   const resetFilters = () => {
     setSelectedDisposition([]);
@@ -277,14 +258,12 @@ const Filters = ({
               }
               labelledBy="SalesMembers"
               className=""
-              disabled={lockLeads}
             />
           </div>
         )}
       <div className="flex gap-[6px] items-end w-full overflow-x-auto">
         <button
           onClick={resetFilters}
-          disabled={lockLeads}
           className="flex text-nowrap items-center gap-1 hover:bg-colorPrimary/20 bg-colorPrimary/10 px-1 py-[2px] rounded-md border border-colorPrimary text-colorPrimary font-semibold text-sm"
         >
           Reset filters
@@ -292,56 +271,40 @@ const Filters = ({
         </button>
 
         {!isSalesPanel && currentLoggedInUser?.hierarchy !== "executive" && (
-          <div className="flex flex-col relative w-auto">
-            <button
-              onClick={() =>
-                setFilters((pre) => ({
-                  ...pre,
-                  unAllocated: !pre.unAllocated,
-                }))
-              }
-              disabled={lockLeads}
-              className={`py-[2px] text-nowrap text-sm px-1 border font-semibold rounded-md ${
-                filters?.unAllocated
-                  ? "bg-colorPrimary  text-white"
-                  : "bg-colorPrimary/20  text-gray-500"
-              }`}
-            >
-              Unallocated leads{" "}
-              {unallocatedLeadsCount && <span>({unallocatedLeadsCount})</span>}
-            </button>
-
-            {filters?.unAllocated && (
-              <span className="w-full p-[1px] mt-[2px] bg-colorPrimary"></span>
-            )}
-          </div>
+          <button
+            onClick={() =>
+              setFilters((pre) => ({
+                ...pre,
+                unAllocated: !pre.unAllocated,
+              }))
+            }
+            className={`py-[2px] text-nowrap text-sm px-1 border font-semibold rounded-md ${
+              filters?.unAllocated
+                ? "bg-colorPrimary  text-white"
+                : "bg-colorPrimary/20  text-gray-500"
+            }`}
+          >
+            Unallocated leads{" "}
+            {unallocatedLeadsCount && <span>({unallocatedLeadsCount})</span>}
+          </button>
         )}
 
         {dispositionData &&
           Object.keys(dispositionData).map((item) => (
-            <div className="flex flex-col relative w-auto">
-              <button
-                disabled={
-                  lockLeads &&
-                  item !== "Prospect-Followup" &&
-                  item !== "Presentation-Followup" &&
-                  item !== "Today_Followup"
-                }
-                style={getBtnSyle(item)}
-                className={`flex text-nowrap items-center gap-1 px-1  text-sm ${
-                  filters?.btnFilter == item ? "" : "py-[2px]"
-                }`}
-                onClick={() => onSelectButtonFilter(item)}
-              >
-                {item?.split("_").join(" ")} ({dispositionData[item]})
-              </button>
-              {filters?.btnFilter == item && (
-                <span
-                  className="w-full p-[1px] mt-[2px] h-[5%]"
-                  style={getBtnSyle(item)}
-                ></span>
-              )}
-            </div>
+            <button
+              // disabled={
+              //   item !== "Prospect-Followup" &&
+              //   item !== "Presentation-Followup" &&
+              //   item !== "Today_Followup"
+              // }
+              style={getBtnSyle(item)}
+              className={`flex text-nowrap items-center gap-1 px-1 py-[2px] text-sm ${
+                filters?.btnFilter == item ? "scale-105" : ""
+              }`}
+              onClick={() => onSelectButtonFilter(item)}
+            >
+              {item?.split("_").join(" ")} ({dispositionData[item]})
+            </button>
           ))}
       </div>
     </div>
