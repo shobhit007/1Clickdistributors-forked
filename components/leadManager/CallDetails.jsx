@@ -7,8 +7,9 @@ import { convertTimeStamp } from "@/lib/commonFunctions";
 import { useQuery } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
 import { authSelector } from "@/store/auth/selector";
+import Modal from "../utills/Modal";
 
-const CallDetails = ({ data: leadDetails, onClose, fetchLeadsAgain }) => {
+const CallDetails = ({ data: leadDetails, refetchLead }) => {
   const userData = useSelector(authSelector);
 
   const [editCallDetails, setEditCallDetails] = useState(false);
@@ -25,10 +26,6 @@ const CallDetails = ({ data: leadDetails, onClose, fetchLeadsAgain }) => {
       subDisposition: subDispositions[pre.disposition][0],
     }));
   }, [fields.disposition]);
-
-  const toggleEditCallDetails = () => {
-    setEditCallDetails(!editCallDetails);
-  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -69,14 +66,20 @@ const CallDetails = ({ data: leadDetails, onClose, fetchLeadsAgain }) => {
 
   const updateLeadStage = async () => {
     try {
-      if (!fields.followUpDate) {
-        toast.error("Please select follow up date");
-        return;
-      }
       if (!fields.remarks) {
         toast.error("Please Enter Remarks");
         return;
       }
+
+      if (
+        fields.disposition !== "Not Interested" &&
+        fields.disposition !== "Become Distributor" &&
+        !fields.followUpDate
+      ) {
+        toast.error("Please select follow up date");
+        return;
+      }
+
       const body = {
         leadId: leadDetails?.leadData?.leadId,
         followUpDate: fields.followUpDate,
@@ -99,9 +102,14 @@ const CallDetails = ({ data: leadDetails, onClose, fetchLeadsAgain }) => {
       const data = await response.json();
       if (data.success) {
         toast.success(data.message);
-        fetchLeadsAgain();
-        refetch();
-        onClose();
+        refetchLead();
+        setEditCallDetails(false);
+        setFields({
+          disposition: "Not Open",
+          subDisposition: "Hot Lead",
+          followUpDate: "",
+          remarks: "",
+        });
       } else {
         toast.error("Something went wrong");
       }
@@ -113,29 +121,22 @@ const CallDetails = ({ data: leadDetails, onClose, fetchLeadsAgain }) => {
 
   return (
     <div className="bg-white w-[30%] max-w-[512px] border border-gray-200 overflow-auto p-2 relative">
-      <button
-        className="bg-gray-200 absolute right-0 top-0 py-1 px-2"
-        onClick={toggleEditCallDetails}
-      >
-        <MdEdit className="text-gray-700 text-3xl" />
-      </button>
-
       {/* show only for sales members */}
       {userData?.hierarchy === "executive" && (
         <LeadsCount leadsCount={leadsCount} refetch={refetch} />
       )}
 
       <div>
-        <h2 className="font-normal text-gray-700 text-center text-2xl mt-4">
+        <h2 className="font-normal text-gray-700 text-center text-2xl mt-2">
           Call Details
         </h2>
 
-        <div className="mt-4 p-4">
+        <div className="mt-2 p-4">
           <div className="flex items-start gap-2">
             <div className="flex-1 text-left">
               <label
                 htmlFor="name"
-                className=" text-gray-700 font-semibold nowrap"
+                className="text-sm text-gray-700 font-semibold nowrap"
               >
                 Name:
               </label>
@@ -146,11 +147,11 @@ const CallDetails = ({ data: leadDetails, onClose, fetchLeadsAgain }) => {
               </p>
             </div>
           </div>
-          <div className="flex items-start gap-2 mt-4">
+          <div className="flex items-start gap-2 mt-2">
             <div className="flex-1 text-left">
               <label
                 htmlFor="companyName"
-                className=" text-gray-700 font-semibold nowrap"
+                className=" text-sm text-gray-700 font-semibold nowrap"
               >
                 Company Name:
               </label>
@@ -161,30 +162,12 @@ const CallDetails = ({ data: leadDetails, onClose, fetchLeadsAgain }) => {
               </p>
             </div>
           </div>
-          {/* <div className="flex items-start gap-2 mt-4">
-          <label
-            htmlFor="designation"
-            className=" text-gray-700 font-semibold nowrap"
-          >
-            Designation:
-          </label>
-          <select
-            disabled={!editCallDetails}
-            className={`border p-2 rounded-md border-gray-400 w-full`}
-            name={"designation"}
-          >
-            {designations?.map((designantion, idx) => (
-              <option key={idx.toString()} value={designantion}>
-                {designantion}
-              </option>
-            ))}
-          </select>
-        </div> */}
-          <div className="flex items-start gap-2 mt-4">
+
+          <div className="flex items-start gap-2 mt-2">
             <div className="flex-1 text-left">
               <label
                 htmlFor="phone"
-                className=" text-gray-700 font-semibold nowrap"
+                className=" text-sm text-gray-700 font-semibold nowrap"
               >
                 Contact Number:
               </label>
@@ -196,11 +179,11 @@ const CallDetails = ({ data: leadDetails, onClose, fetchLeadsAgain }) => {
               </p>
             </div>
           </div>
-          <div className="flex items-start gap-2 mt-4">
+          <div className="flex items-start gap-2 mt-2">
             <div className="flex-1 text-left">
               <label
                 htmlFor="altPhone"
-                className=" text-gray-700 font-semibold nowrap"
+                className=" text-sm text-gray-700 font-semibold nowrap"
               >
                 Alt Contact Number:
               </label>
@@ -211,11 +194,11 @@ const CallDetails = ({ data: leadDetails, onClose, fetchLeadsAgain }) => {
               </p>
             </div>
           </div>
-          <div className="flex items-start gap-2 mt-4">
+          <div className="flex items-start gap-2 mt-2">
             <div className="flex-1 text-left">
               <label
                 htmlFor="city"
-                className=" text-gray-700 font-semibold nowrap"
+                className=" text-sm text-gray-700 font-semibold nowrap"
               >
                 City:
               </label>
@@ -226,11 +209,11 @@ const CallDetails = ({ data: leadDetails, onClose, fetchLeadsAgain }) => {
               </p>
             </div>
           </div>
-          <div className="flex items-start gap-2 mt-4">
+          <div className="flex items-start gap-2 mt-2">
             <div className="flex-1 text-left">
               <label
                 htmlFor="requirement"
-                className=" text-gray-700 font-semibold nowrap"
+                className=" text-sm text-gray-700 font-semibold nowrap"
               >
                 Requirement:
               </label>
@@ -243,74 +226,41 @@ const CallDetails = ({ data: leadDetails, onClose, fetchLeadsAgain }) => {
               </p>
             </div>
           </div>
-          <div className="flex items-start gap-2 mt-4">
+          <div className="flex items-start gap-2 mt-2">
             <div className="flex-1 text-left">
               <label
                 htmlFor="disposition"
-                className=" text-gray-700 font-semibold nowrap"
+                className=" text-sm text-gray-700 font-semibold nowrap"
               >
                 Disposition:
               </label>
             </div>
             <div className="flex-1 text-left">
-              {editCallDetails ? (
-                <select
-                  className={`border p-2 rounded-md border-gray-400 w-full max-w-72`}
-                  name="disposition"
-                  id="disposition"
-                  value={fields.disposition}
-                  onChange={handleChange}
-                >
-                  {dispositions?.map((disposition, idx) => (
-                    <option key={idx.toString()} value={disposition}>
-                      {disposition}
-                    </option>
-                  ))}
-                </select>
-              ) : (
-                <p className="text-base text-gray-700">
-                  {leadDetails?.leadData?.disposition || "NA"}
-                </p>
-              )}
+              <p className="text-base text-gray-700">
+                {leadDetails?.leadData?.disposition || "NA"}
+              </p>
             </div>
           </div>
-          <div className="flex items-start gap-2 mt-4">
+          <div className="flex items-start gap-2 mt-2">
             <div className="flex-1 text-left">
               <label
                 htmlFor="subDisposition"
-                className=" text-gray-700 font-semibold nowrap"
+                className=" text-sm text-gray-700 font-semibold nowrap"
               >
                 Sub-Disposition:
               </label>
             </div>
             <div className="flex-1 text-left">
-              {editCallDetails ? (
-                <select
-                  className={`border p-2 rounded-md border-gray-400 w-full max-w-72`}
-                  name="subDisposition"
-                  value={fields.subDisposition}
-                  onChange={handleChange}
-                >
-                  {subDispositions[fields.disposition]?.map(
-                    (subDisposition, idx) => (
-                      <option key={idx.toString()} value={subDisposition}>
-                        {subDisposition}
-                      </option>
-                    )
-                  )}
-                </select>
-              ) : (
-                <p className="text-base text-gray-700">
-                  {leadDetails?.leadData?.subDisposition || "NA"}
-                </p>
-              )}
+              <p className="text-base text-gray-700">
+                {leadDetails?.leadData?.subDisposition || "NA"}
+              </p>
             </div>
           </div>
-          <div className="flex items-start gap-2 mt-4">
+          <div className="flex items-start gap-2 mt-2">
             <div className="flex-1 text-left">
               <label
                 htmlFor="lastCallBackDate"
-                className=" text-gray-700 font-semibold nowrap"
+                className=" text-sm text-gray-700 font-semibold nowrap"
               >
                 Last Call Back Date:
               </label>
@@ -325,71 +275,153 @@ const CallDetails = ({ data: leadDetails, onClose, fetchLeadsAgain }) => {
               </p>
             </div>
           </div>
-          <div className="flex items-start gap-2 mt-4">
+          <div className="flex items-start gap-2 mt-2">
             <div className="flex-1 text-left">
               <label
                 htmlFor="followUpDate"
-                className=" text-gray-700 font-semibold nowrap"
+                className=" text-sm text-gray-700 font-semibold nowrap"
               >
                 Next Call Back Date:
               </label>
             </div>
             <div className="flex-1 text-left">
-              {editCallDetails ? (
-                <input
-                  type="datetime-local"
-                  id="followUpDate"
-                  name="followUpDate"
-                  className={`flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none`}
-                  onChange={handleChange}
-                />
-              ) : (
-                <p className="text-base text-gray-700">
-                  {leadDetails?.leadData?.followUpDate
-                    ? convertTimeStamp(leadDetails?.leadData.followUpDate)
-                    : "NA"}
-                </p>
-              )}
+              <p className="text-base text-gray-700">
+                {leadDetails?.leadData?.followUpDate
+                  ? convertTimeStamp(leadDetails?.leadData.followUpDate)
+                  : "NA"}
+              </p>
             </div>
           </div>
-          <div className="mt-4 flex gap-4">
+          <div className="mt-2 flex gap-4">
             <div className="min-w-fit text-left">
               <label
                 htmlFor="remarks"
-                className=" text-gray-700 font-semibold nowrap"
+                className=" text-sm text-gray-700 font-semibold nowrap"
               >
                 Remarks:
               </label>
             </div>
             <div className="flex-1 items-start justify-start">
-              {editCallDetails ? (
-                <input
-                  disabled={!editCallDetails}
-                  id="remarks"
-                  name="remarks"
-                  value={fields.remarks}
-                  className="w-full mt-2 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300"
-                  placeholder="Enter Remarks"
-                  onChange={handleChange}
-                />
-              ) : (
-                <p className="text-base text-gray-700">
-                  {leadDetails?.leadData?.remarks || "NA"}
-                </p>
-              )}
+              <p className="text-base text-gray-700">
+                {leadDetails?.leadData?.remarks || "NA"}
+              </p>
             </div>
           </div>
           <button
-            disabled={!editCallDetails}
-            className={`mt-8 bg-colorPrimary text-white p-2 rounded-md w-full ${
-              editCallDetails ? "opacity-100" : "opacity-70"
-            }`}
-            onClick={updateLeadStage}
+            className={`mt-8 bg-colorPrimary text-white p-2 rounded-md w-full`}
+            onClick={() => setEditCallDetails(true)}
           >
-            Submit
+            Update
           </button>
         </div>
       </div>
+      {editCallDetails && (
+        <Modal>
+          <div className="bg-white w-full max-w-lg border border-gray-200 overflow-auto py-2 px-6 relative">
+            <button
+              className="absolute right-0 top-0 bg-red-600 text-white text-sm px-3 py-1"
+              onClick={() => setEditCallDetails(false)}
+            >
+              close
+            </button>
+
+            <div className="mt-4">
+              {/* Remarks Textarea */}
+              <div className="mb-4">
+                <label
+                  htmlFor="remarks"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Remarks
+                </label>
+                <textarea
+                  name="remarks"
+                  id="remarks"
+                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
+                  rows="4"
+                  placeholder="Enter your remarks here"
+                  value={fields.remarks}
+                  onChange={handleChange}
+                />
+              </div>
+
+              {/* Row for Disposition, Sub-disposition, and Follow-up Date */}
+              <div className="flex flex-wrap -mx-2">
+                {/* Disposition Select */}
+                <div className="w-full md:w-1/3 px-2 mb-4 md:mb-0">
+                  <label
+                    htmlFor="disposition"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Disposition
+                  </label>
+                  <select
+                    name="disposition"
+                    id="disposition"
+                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
+                    value={fields.disposition}
+                    onChange={handleChange}
+                  >
+                    {dispositions.map((disposition) => (
+                      <option key={disposition} value={disposition}>
+                        {disposition}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Sub-disposition Select */}
+                <div className="w-full md:w-1/3 px-2 mb-4 md:mb-0">
+                  <label
+                    htmlFor="subDisposition"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Sub-disposition
+                  </label>
+                  <select
+                    name="subDisposition"
+                    id="subDisposition"
+                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
+                    value={fields.subDisposition}
+                    onChange={handleChange}
+                  >
+                    {subDispositions[fields.disposition].map((subDis) => (
+                      <option key={subDis} value={subDis}>
+                        {subDis}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Follow-up Date Input */}
+                <div className="w-full md:w-1/3 px-2">
+                  <label
+                    htmlFor="followUpDate"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Follow-up Date
+                  </label>
+                  <input
+                    name="followUpDate"
+                    type="datetime-local"
+                    id="followUpDate"
+                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
+                    onChange={handleChange}
+                  />
+                </div>
+                <div className="mt-6 flex w-full justify-end">
+                  <button
+                    onClick={updateLeadStage}
+                    className="w-full py-2 px-4 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    Submit
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 };

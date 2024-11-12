@@ -16,8 +16,7 @@ const tabs = [
   "Contract Details",
 ];
 
-export default function LeadManager({ onClose, lead, fetchLeadsAgain }) {
-  const [editCallDetails, setEditCallDetails] = useState(false);
+export default function LeadManager({ onClose, lead }) {
   const { leadId } = lead;
 
   const getLeadDetails = async () => {
@@ -45,13 +44,9 @@ export default function LeadManager({ onClose, lead, fetchLeadsAgain }) {
   };
 
   const { data, refetch, isLoading } = useQuery({
-    queryKey: ["leadHistoryData", leadId],
+    queryKey: ["fetchLeadDetails", leadId],
     queryFn: getLeadDetails,
   });
-
-  const toggleEditCallDetails = () => {
-    setEditCallDetails(!editCallDetails);
-  };
 
   return (
     <Modal>
@@ -83,8 +78,7 @@ export default function LeadManager({ onClose, lead, fetchLeadsAgain }) {
               <CallDetails
                 data={data}
                 onClose={onClose}
-                refetch={refetch}
-                fetchLeadsAgain={fetchLeadsAgain}
+                refetchLead={refetch}
               />
               {/* Tabs */}
               <div className="bg-white flex flex-1 border border-gray-200">
