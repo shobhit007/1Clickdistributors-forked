@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { MdClose } from "react-icons/md";
 import { MultiSelect } from "react-multi-select-component";
 import moment from "moment";
+import { cellColors } from "@/lib/data/commonData";
 
 /*
 "Not Open": 0,
@@ -23,9 +24,11 @@ const Filters = ({
   userDetails: currentUser,
   setMyData,
   myData,
+  isSalesPanel,
 }) => {
   const [selectedDisposition, setSelectedDisposition] = useState([]);
   const [selectedSubDisposition, setSelectedSubDisposition] = useState([]);
+  const [unallocatedLeadsCount, setUnallocatedLeadsCount] = useState(null);
   const [filters, setFilters] = useState({
     unAllocated: false,
     salesMembers: [],
@@ -36,7 +39,6 @@ const Filters = ({
   });
 
   const [dispositionData, setDispositionData] = useState(null);
-
   const currentLoggedInUser = currentUser?.userDetails;
 
   useEffect(() => {
@@ -44,6 +46,7 @@ const Filters = ({
       return;
     }
     let salesMembers = {};
+    let unallocatedLeads = 0;
     let filteredDispositionData = {
       "Not Open": 0,
       Today_Followup: 0,
@@ -56,6 +59,10 @@ const Filters = ({
       "Not Interested": 0,
     };
     originalData?.forEach((lead) => {
+      if (!lead.salesExecutive) {
+        unallocatedLeads++;
+      }
+
       if (lead?.salesExecutive && !salesMembers[lead?.salesExecutive]) {
         salesMembers[lead?.salesExecutive] = {
           label: lead.salesExecutiveName,
@@ -86,6 +93,7 @@ const Filters = ({
     });
 
     setDispositionData(filteredDispositionData);
+    setUnallocatedLeadsCount(unallocatedLeads);
     let salesList = Object.values(salesMembers || {});
     setList({
       salesMembers: salesList,
@@ -179,9 +187,6 @@ const Filters = ({
       ) {
         setFilters((pre) => ({ ...pre, btnFilter: "Presentation-Followup" }));
       }
-    } else {
-      // Reset btnFilter if lockLeads is false
-      setFilters((pre) => ({ ...pre, btnFilter: null }));
     }
   }, [lockLeads, dispositionData]);
 
@@ -199,6 +204,15 @@ const Filters = ({
       return setFilters((pre) => ({ ...pre, btnFilter: null }));
     }
     setFilters((pre) => ({ ...pre, btnFilter: item }));
+  };
+
+  const getBtnSyle = (name) => {
+    let color = cellColors[name];
+
+    return {
+      backgroundColor: color,
+      color: "white",
+    };
   };
 
   return (
@@ -219,17 +233,17 @@ const Filters = ({
             />
           </div>
         )}
-      <div className="flex gap-2 items-end w-full overflow-x-auto">
+      <div className="flex gap-[6px] items-end w-full overflow-x-auto">
         <button
           onClick={resetFilters}
           disabled={lockLeads}
-          className="flex text-nowrap items-center gap-1 hover:bg-colorPrimary/20 bg-colorPrimary/10 px-3 py-[2px] rounded-md border border-colorPrimary text-colorPrimary font-semibold text-sm"
+          className="flex text-nowrap items-center gap-1 hover:bg-colorPrimary/20 bg-colorPrimary/10 px-1 py-[2px] rounded-md border border-colorPrimary text-colorPrimary font-semibold text-sm"
         >
           Reset filters
-          <MdClose className="text-colorPrimary text-lg" />
+          <MdClose className="text-colorPrimary text-base" />
         </button>
 
-        {currentLoggedInUser?.hierarchy !== "executive" && (
+        {!isSalesPanel && currentLoggedInUser?.hierarchy !== "executive" && (
           <button
             onClick={() =>
               setFilters((pre) => ({
@@ -238,13 +252,14 @@ const Filters = ({
               }))
             }
             disabled={lockLeads}
-            className={`py-[2px] text-nowrap text-sm px-3 border font-semibold rounded-md ${
+            className={`py-[2px] text-nowrap text-sm px-1 border font-semibold rounded-md ${
               filters?.unAllocated
                 ? "bg-colorPrimary  text-white"
-                : "bg-white text-gray-500"
+                : "bg-colorPrimary/20  text-gray-500"
             }`}
           >
-            Unallocated leads
+            Unallocated leads{" "}
+            {unallocatedLeadsCount && <span>({unallocatedLeadsCount})</span>}
           </button>
         )}
 
@@ -257,14 +272,13 @@ const Filters = ({
                 item !== "Presentation-Followup" &&
                 item !== "Today_Followup"
               }
-              className={`flex text-nowrap items-center gap-1 px-2 py-[2px] rounded-md border border-gray-400  font-semibold text-sm ${
-                filters?.btnFilter == item
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-600/10 text-gray-500 hover:bg-gray-600/20"
+              style={getBtnSyle(item)}
+              className={`flex text-nowrap items-center gap-1 px-1 py-[2px] text-sm ${
+                filters?.btnFilter == item ? "scale-105" : ""
               }`}
               onClick={() => onSelectButtonFilter(item)}
             >
-              {item?.split("_").join(" ")} {dispositionData[item]}
+              {item?.split("_").join(" ")} ({dispositionData[item]})
             </button>
           ))}
       </div>

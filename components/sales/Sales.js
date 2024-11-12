@@ -389,12 +389,12 @@ export default function Sales() {
             <input
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
-              className="min-w-[160px] border border-gray-400 outline-blue-500 py-1 px-2 rounded"
+              className="min-w-[160px] border border-gray-400 outline-blue-500 py-1 px-2 rounded text-sm"
               placeholder="Enter to search table"
             />
             <button
               disabled={lockLeads}
-              className="text-white bg-blue-500 px-6 py-1 rounded-md text-base hover:opacity-80"
+              className="text-white bg-blue-500 px-6 py-1 rounded-md text-sm hover:opacity-80"
               onClick={() => setMyData(true)}
             >
               My Data
@@ -409,44 +409,8 @@ export default function Sales() {
             userDetails={userDetails}
             setMyData={setMyData}
             myData={myData}
+            isSalesPanel={true}
           />
-          {/* <div className="flex items-center gap-1 md:gap-4 flex-wrap">
-            <button
-              onClick={() => setSelectedRows([])}
-              disabled={!selectedRows.length}
-              className={`text-nowrap rounded px-3 py-1 text-sm flex gap-2 items-center ${
-                selectedRows.length > 0 ? "bg-colorPrimary" : "bg-gray-400"
-              } text-white`}
-            >
-              Unselect All {selectedRows?.length > 0 ? selectedRows.length : ""}
-              <RiCloseCircleFill />
-            </button>
-            <button
-              onClick={() => setShowDetailsModal(true)}
-              disabled={selectedRows.length != 1}
-              className={`rounded text-nowrap px-3 py-1 text-sm ${
-                selectedRows.length === 1 ? "bg-colorPrimary" : "bg-gray-400"
-              } text-white`}
-            >
-              View Details
-            </button>
-            <button
-              disabled={!selectedRows.length}
-              className={`rounded text-nowrap px-3 py-1 text-sm ${
-                selectedRows.length > 0 ? "bg-colorPrimary" : "bg-gray-400"
-              } text-white`}
-              onClick={() => setShowUpdateModal(true)}
-            >
-              Update
-            </button>
-            <button
-              disabled={selectedRows?.length != 1}
-              className={`rounded text-nowrap px-3 py-1 text-sm bg-colorPrimary disabled:bg-gray-400 text-white`}
-              onClick={() => setShowUpdateHistoryModal(true)}
-            >
-              Update History
-            </button>
-          </div> */}
         </div>
       </div>
 

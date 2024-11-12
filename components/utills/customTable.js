@@ -11,6 +11,7 @@ import { camelToTitle } from "./commonFunctions";
 import ColumnOrderControl from "./columnOrderControl";
 import { MdClose } from "react-icons/md";
 import Modal from "./Modal";
+import { cellColors } from "@/lib/data/commonData";
 
 // Default UI for filtering
 const DefaultColumnFilter = ({
@@ -84,7 +85,7 @@ const CustomTable = ({
       data: tableData,
       defaultColumn,
       autoResetFilters: false,
-      initialState: { pageIndex: 0, pageSize: 20 },
+      initialState: { pageIndex: 0, pageSize: 50 },
     },
     useFilters,
     useGlobalFilter,
@@ -126,8 +127,18 @@ const CustomTable = ({
     setGlobalFilter(searchValue);
   }, [searchValue]);
 
+  const getCellStyle = (name) => {
+    const color = cellColors[name];
+
+    return {
+      backgroundColor: color,
+      color: "white",
+    };
+  };
+
+  const wrapUpCols = ["Requirement"];
   return (
-    <div className="mx-auto h-full flex flex-col justify-between">
+    <div className="h-[85vh] flex flex-col justify-between">
       {openModal && (
         <Modal>
           <div className="h-[70vh] p-4  min-w-[90vw] md:min-w-[25vw] bg-white rounded-md pt-9 relative">
@@ -144,18 +155,18 @@ const CustomTable = ({
           </div>
         </Modal>
       )}
-      <div className="h-[90%] overflow-auto">
+      <div className="overflow-auto h-[90%]">
         <table
           {...getTableProps()}
-          className="min-w-full divide-y divide-gray-200"
+          className="min-w-full divide-y mt-1 divide-gray-200"
         >
-          <thead className="bg-gray-200 ">
+          <thead className="bg-blue-100">
             {headerGroups.map((headerGroup) => (
               <tr {...headerGroup.getHeaderGroupProps()}>
                 {headerGroup.headers.map((column) => (
                   <th
                     {...column.getHeaderProps(column.getSortByToggleProps())}
-                    className="p-2 cursor-pointer w-fit"
+                    className="p-2 cursor-pointer w-fit min-w-[150px] max-w-[200px]"
                   >
                     <div className="flex flex-col">
                       <div className="flex gap-2 px-2 text-sm">
@@ -185,16 +196,30 @@ const CustomTable = ({
                   {row.cells.map((cell) => (
                     <td
                       {...cell.getCellProps()}
-                      className="px-2 whitespace-nowrap text-[12px] min-w-[80px] max-w-[290px] border border-gray-500 overflow-auto scrollbar-none"
+                      style={
+                        cell?.column?.Header == "Disposition"
+                          ? getCellStyle(cell.value)
+                          : {}
+                      }
+                      className="whitespace-nowrap px-2 text-[12px] min-w-[150px] max-w-[270px] border border-gray-500 overflow-hidden text-gray-700"
                     >
-                      {cell.value && typeof cell.value != "object" ? (
-                        <HighlightText
-                          text={cell.value || ""}
-                          searchValue={searchValue}
-                        />
-                      ) : (
-                        cell.render("Cell") // Use default render function for other columns
-                      )}
+                      <div
+                        className={`${
+                          wrapUpCols?.includes(cell?.column?.Header)
+                            ? "w-[260px] text-wrap"
+                            : ""
+                        }`}
+                        onClick={() => console.log("cell is", cell)}
+                      >
+                        {cell.value && typeof cell.value != "object" ? (
+                          <HighlightText
+                            text={cell.value || ""}
+                            searchValue={searchValue}
+                          />
+                        ) : (
+                          cell.render("Cell") // Use default render function for other columns
+                        )}
+                      </div>
                     </td>
                   ))}
                 </tr>
@@ -205,7 +230,7 @@ const CustomTable = ({
       </div>
 
       {data?.length > 9 && (
-        <div className="pagination flex gap-3 mt-5 py-1 h-[10%] justify-center items-center bg-blue-200 flex-wrap">
+        <div className="pagination flex gap-3 py-1 h-[10%] justify-center items-center bg-blue-200 flex-wrap">
           <div className="flex gap-2 items-center">
             <button
               className="h-[2rem] cursor-pointer border-2 border-slate-500 flex items-center justify-center px-1 font-semibold "
@@ -262,7 +287,7 @@ const CustomTable = ({
               setPageSize(Number(e.target.value));
             }}
           >
-            {[10, 20, 30, 40, 50].map((pageSize) => (
+            {[50, 70, 90, 120].map((pageSize) => (
               <option key={pageSize} value={pageSize}>
                 Show {pageSize}
               </option>
@@ -293,7 +318,7 @@ const HighlightText = ({ text, searchValue }) => {
   const afterMatch = text?.toString()?.slice(startIndex + searchValue.length);
 
   return (
-    <span>
+    <span className="">
       {beforeMatch}
       <span style={{ backgroundColor: "orange" }}>{matchText}</span>
       {afterMatch}

@@ -73,7 +73,7 @@ const index = () => {
   useEffect(() => {
     let start = moment()
       .startOf("day")
-      .subtract({ days: 4 })
+      .subtract({ days: 1 })
       .format("YYYY-MM-DD");
     let end = moment().endOf("day").format("YYYY-MM-DD");
     setSelectedStartDate(start);
@@ -127,6 +127,7 @@ const index = () => {
     "createdAt",
     "assignedBy",
     "salesExecutive",
+    "remarks",
   ];
   const avoidCols = [
     "id",
