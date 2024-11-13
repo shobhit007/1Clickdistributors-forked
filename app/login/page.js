@@ -97,19 +97,26 @@ const page = () => {
         )}
       </div>
 
-      <div className="flex flex-col justify-center h-full items-center w-full sm:w-[30%] rounded-md ">
+      <div className="flex relative flex-col justify-center h-full items-center w-full sm:w-[30%] rounded-md ">
         {/* login component */}
+        {/* Logo section */}
+        <div className="w-full p-4 absolute left-0 top-4 flex justify-start">
+          {/* <div className="h-[180px] w-[180px] rounded-full bg-blue-500"></div> */}
+          <img
+            src="/expendico.png"
+            className="w-[180px] h-auto object-contain filter"
+          />
+        </div>
 
-        <div className="flex flex-col items-center justify-center w-full bg-white p-5">
-          {/* Logo section */}
-          <div className="w-full p-4 flex justify-center">
-            {/* <div className="h-[180px] w-[180px] rounded-full bg-blue-500"></div> */}
-            <img
-              src="/logo.png"
-              className="w-[180px] h-auto object-contain filter drop-shadow-[0_4px_4px_rgba(0,0,0,0.3)]"
-            />
-          </div>
-          <form action={"#"} className="w-full">
+        <div className="flex relative flex-col items-center justify-center w-full bg-white p-5">
+          <h2 className="text-lg md:text-2xl text-gray-800 font-bold">
+            Welcome to 1Clickdistributors
+          </h2>
+          <p className="text-sm md:text-base text-gray-600 font-semibold">
+            Today is your best Day
+          </p>
+
+          <form action={"#"} className="w-full mt-4 md:mt-12">
             <div className="flex flex-col w-full gap-1">
               <span className="text-slate-600 font-semibold text-base flex items-center gap-1">
                 <MdOutlineMailOutline />
@@ -117,10 +124,11 @@ const page = () => {
               </span>
               <input
                 type="email"
+                placeholder="Enter Email"
                 name="current-password"
                 autocomplete="current-password"
                 required={true}
-                className="w-full rounded-md border border-gray-300 p-1"
+                className="w-full p-1 bg-gray-200 border-b-2 border-b-gray-300 focus:outline-none focus:border-b-blue-400"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
@@ -129,25 +137,26 @@ const page = () => {
               <span className="text-slate-600 font-semibold text-base flex items-center gap-1">
                 <MdOutlinePassword /> Enter your password
               </span>
-              <div className="flex justify-between items-center border border-gray-300 p-1 rounded-md">
+              <div className="flex justify-between items-center  bg-gray-200">
                 <input
                   type={showPassword ? "text" : "password"}
                   required={true}
                   name="password"
+                  placeholder="Enter Password"
                   autocomplete="password"
-                  className="rounded-md flex flex-1 outline-none"
+                  className="flex flex-1 bg-transparent p-1 border-b-2 border-b-gray-300 focus:outline-none focus:border-b-blue-400"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
                 {showPassword ? (
                   <FaRegEyeSlash
                     onClick={() => setShowPassword(false)}
-                    className="text-slate-600 cursor-pointer"
+                    className="text-slate-600 cursor-pointer mr-2"
                   />
                 ) : (
                   <MdOutlineRemoveRedEye
                     onClick={() => setShowPassword(true)}
-                    className="text-slate-600 cursor-pointer"
+                    className="text-slate-600 cursor-pointer mr-2"
                   />
                 )}
               </div>

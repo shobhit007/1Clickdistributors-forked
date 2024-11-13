@@ -14,7 +14,7 @@ const ManualLeadForm = ({ onClose }) => {
     companyName: "",
     contactPerson: "",
     phone: "",
-    altPhone: "",
+    mobileNumber: "",
     email: "",
     city: "",
     requirement: "",
@@ -76,7 +76,6 @@ const ManualLeadForm = ({ onClose }) => {
 
   // Handle form submission
   const handleSubmit = async () => {
-    console.log("formData", formData, selectedSalesMember);
     setLoading(true);
     // Check if all required fields are filled
     if (
@@ -116,6 +115,7 @@ const ManualLeadForm = ({ onClose }) => {
     const updatedFormData = {
       ...formData,
       salesMember: selectedSalesMember,
+      phone: `+91${formData.phone}`,
     };
 
     // If all validations pass, proceed with form submission
@@ -245,7 +245,7 @@ const ManualLeadForm = ({ onClose }) => {
               htmlFor="phone"
               className="block text-gray-700 font-semibold mb-2"
             >
-              Phone:
+              Default phone:
             </label>
             <input
               type="number"
@@ -263,16 +263,16 @@ const ManualLeadForm = ({ onClose }) => {
           {/* Alt Mobile */}
           <div className="mb-4">
             <label
-              htmlFor="altMobile"
+              htmlFor="mobileNumber"
               className="block text-gray-700 font-semibold mb-2"
             >
-              {"Alternate Phone (Optional):"}
+              {"Mobile Number (Optional):"}
             </label>
             <input
               type="tel"
-              id="altPhone"
-              name="altPhone"
-              value={formData.altPhone}
+              id="mobileNumber"
+              name="mobileNumber"
+              value={formData.mobileNumber}
               onChange={handleChange}
               pattern="[0-9]{10}"
               placeholder="Enter 10-digit alternative mobile number"
