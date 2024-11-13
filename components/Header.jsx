@@ -49,7 +49,7 @@ const Header = () => {
   };
 
   return (
-    <div className="bg-gray-200 px-2 py-1 md:py-1 flex justify-between w-full items-center ">
+    <div className="bg-[#cae9ff] px-2 py-1 md:py-1 flex justify-between w-full items-center ">
       {showUserDetailsPopup && (
         <Modal>
           <div className="w-[95vw] md:[50vw] lg:[40vw] xl:w-[28vw] h-[85vh] p-2 bg-white relative rounded-md overflow-hidden">
@@ -66,7 +66,7 @@ const Header = () => {
       )}
 
       <div className="flex items-center gap-3">
-        <button className="p-1 bg-white/60 rounded-md">
+        <button className="p-1 bg-white/30 rounded-md">
           <IoIosArrowForward
             onClick={() => setShowSidebar(!showSidebar)}
             className="text-[36px] text-gray-600 cursor-pointer"

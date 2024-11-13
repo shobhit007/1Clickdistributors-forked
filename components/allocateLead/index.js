@@ -128,7 +128,6 @@ const index = () => {
     "assignedBy",
     "salesExecutive",
     "remarks",
-    
   ];
   const avoidCols = [
     "id",
@@ -304,8 +303,8 @@ const index = () => {
       </div>
       <div className="flex items-center gap-4 px-2 flex-wrap my-2">
         <div className="flex gap-2 bg-gray-200 items-end py-1 px-3 rounded-md flex-wrap">
-          <div className="flex flex-col">
-            <span className="text-[12px] text-gray-500">From</span>
+          <div className="flex flex-row items-center gap-1">
+            <span className="text-[12px] text-gray-600">From</span>
             <input
               type="date"
               className="text-[12px] border border-gray-600 rounded px-2"
@@ -313,8 +312,8 @@ const index = () => {
               onChange={(e) => setSelectedStartDate(e.target.value)}
             />
           </div>
-          <div className="flex flex-col">
-            <span className="text-[12px] text-gray-500">To</span>
+          <div className="flex flex-row items-center gap-1">
+            <span className="text-[12px] text-gray-600">To</span>
             <input
               type="date"
               className="text-[12px] border border-gray-600 rounded px-2"
