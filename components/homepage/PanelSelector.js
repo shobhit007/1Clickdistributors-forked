@@ -8,6 +8,9 @@ import { FaUsersRays } from "react-icons/fa6";
 import { GiSettingsKnobs } from "react-icons/gi";
 import { RxDashboard } from "react-icons/rx";
 import { RiListSettingsFill } from "react-icons/ri";
+import { panelNames } from "@/lib/data/commonData";
+import { FaChartBar } from "react-icons/fa";
+
 
 const getIcons = (panelName, selected) => {
   console.log("panel name is", panelName);
@@ -16,7 +19,7 @@ const getIcons = (panelName, selected) => {
     case "allocate_leads":
       return <MdHowToVote style={d6521f} />;
     case "sales_panel":
-      return <LuLayoutPanelTop style={d6521f} />;
+      return <FaChartBar style={d6521f} />;
     case "manage_users":
       return <FaUsersRays style={d6521f} />;
     case "roles_and_permissions":
@@ -40,6 +43,12 @@ const PanelSelector = () => {
   } = useContext(panelContext);
 
   const formatString = (string) => {
+    let name = panelNames[string];
+
+    if (name) {
+      return name;
+    }
+
     let arr = string?.split("_");
     return arr?.join(" ");
   };
@@ -82,7 +91,7 @@ const PanelSelector = () => {
           userRoles?.map((permission) => (
             <div
               key={permission} // Add key for better performance
-              className={`h-auto py-3 px-2 w-full border-b border-gray-300 cursor-pointer flex items-center gap-2 ${
+              className={`h-auto py-3 px-2 w-full border-b border-gray-300 cursor-pointer flex items-center gap-4 ${
                 displayComponent === permission
                   ? "bg-colorPrimary text-white"
                   : " text-gray-600 hover:bg-gray-300"

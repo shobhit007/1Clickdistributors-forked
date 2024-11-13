@@ -136,7 +136,13 @@ const CustomTable = ({
     };
   };
 
-  const wrapUpCols = ["Requirement"];
+  const wrapUpCols = [
+    "Requirement",
+    "whats_is_your_requirement_?_write_in_brief",
+    "Query",
+    "remarks",
+    "Remarks",
+  ];
   return (
     <div className="h-[85vh] flex flex-col justify-between">
       {openModal && (
@@ -155,7 +161,7 @@ const CustomTable = ({
           </div>
         </Modal>
       )}
-      <div className="overflow-auto h-[90%]">
+      <div className="overflow-auto h-[90%] scrollbar-thin">
         <table
           {...getTableProps()}
           className="min-w-full divide-y mt-1 divide-gray-200"
@@ -201,7 +207,7 @@ const CustomTable = ({
                           ? getCellStyle(cell.value)
                           : {}
                       }
-                      className="whitespace-nowrap px-2 text-[12px] min-w-[150px] max-w-[270px] border border-gray-500 overflow-hidden text-gray-700"
+                      className="whitespace-nowrap px-2 text-[12px] min-w-[150px] max-w-[280px] border border-gray-300 overflow-auto text-gray-700 scrollbar-thin"
                     >
                       <div
                         className={`${

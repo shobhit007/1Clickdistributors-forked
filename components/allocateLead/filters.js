@@ -328,7 +328,7 @@ const Filters = ({
                   item !== "Today_Followup"
                 }
                 style={getBtnSyle(item)}
-                className={`flex text-nowrap items-center gap-1 px-1  text-sm ${
+                className={`flex text-nowrap items-center gap-1 px-1 rounded  text-sm ${
                   filters?.btnFilter == item ? "" : "py-[2px]"
                 }`}
                 onClick={() => onSelectButtonFilter(item)}

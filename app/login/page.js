@@ -97,7 +97,7 @@ const page = () => {
         )}
       </div>
 
-      <div className="flex flex-col justify-center h-full items-center w-full sm:w-[30%] bg-[#ff98500a] rounded-md ">
+      <div className="flex flex-col justify-center h-full items-center w-full sm:w-[30%] rounded-md ">
         {/* login component */}
 
         <div className="flex flex-col items-center justify-center w-full bg-white p-5">
@@ -109,55 +109,61 @@ const page = () => {
               className="w-[180px] h-auto object-contain filter drop-shadow-[0_4px_4px_rgba(0,0,0,0.3)]"
             />
           </div>
-
-          <div className="flex flex-col w-full gap-1">
-            <span className="text-slate-600 font-semibold text-base flex items-center gap-1">
-              <MdOutlineMailOutline />
-              Enter your email
-            </span>
-            <input
-              type="email"
-              required={true}
-              className="w-full rounded-md border border-gray-300 p-1"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-          <div className="flex flex-col w-full gap-1 mt-3">
-            <span className="text-slate-600 font-semibold text-base flex items-center gap-1">
-              <MdOutlinePassword /> Enter your password
-            </span>
-            <div className="flex justify-between items-center border border-gray-300 p-1 rounded-md">
+          <form action={"#"} className="w-full">
+            <div className="flex flex-col w-full gap-1">
+              <span className="text-slate-600 font-semibold text-base flex items-center gap-1">
+                <MdOutlineMailOutline />
+                Enter your email
+              </span>
               <input
-                type={showPassword ? "text" : "password"}
+                type="email"
+                name="current-password"
+                autocomplete="current-password"
                 required={true}
-                className="rounded-md flex flex-1 outline-none"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                className="w-full rounded-md border border-gray-300 p-1"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
               />
-              {showPassword ? (
-                <FaRegEyeSlash
-                  onClick={() => setShowPassword(false)}
-                  className="text-slate-600 cursor-pointer"
-                />
-              ) : (
-                <MdOutlineRemoveRedEye
-                  onClick={() => setShowPassword(true)}
-                  className="text-slate-600 cursor-pointer"
-                />
-              )}
             </div>
-          </div>
+            <div className="flex flex-col w-full gap-1 mt-3">
+              <span className="text-slate-600 font-semibold text-base flex items-center gap-1">
+                <MdOutlinePassword /> Enter your password
+              </span>
+              <div className="flex justify-between items-center border border-gray-300 p-1 rounded-md">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  required={true}
+                  name="password"
+                  autocomplete="password"
+                  className="rounded-md flex flex-1 outline-none"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+                {showPassword ? (
+                  <FaRegEyeSlash
+                    onClick={() => setShowPassword(false)}
+                    className="text-slate-600 cursor-pointer"
+                  />
+                ) : (
+                  <MdOutlineRemoveRedEye
+                    onClick={() => setShowPassword(true)}
+                    className="text-slate-600 cursor-pointer"
+                  />
+                )}
+              </div>
+            </div>
 
-          <button
-            onClick={loginUser}
-            disabled={loading}
-            className={`w-full bg-colorPrimary disabled:bg-colorPrimary/50 text-white p-1 rounded-md mt-6 ${
-              loading ? "animate-pulse" : ""
-            }`}
-          >
-            {loading ? "Logging in..." : "Login"}
-          </button>
+            <button
+              type="submit"
+              onClick={loginUser}
+              disabled={loading}
+              className={`w-full bg-colorPrimary disabled:bg-colorPrimary/50 text-white p-1 rounded-md mt-6 ${
+                loading ? "animate-pulse" : ""
+              }`}
+            >
+              {loading ? "Logging in..." : "Login"}
+            </button>
+          </form>
 
           <Link
             href={`/reset-password`}

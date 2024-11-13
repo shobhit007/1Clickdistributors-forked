@@ -14,6 +14,7 @@ import { MdSearch } from "react-icons/md";
 import { useQueryClient } from "@tanstack/react-query";
 import { RiMenu2Fill } from "react-icons/ri";
 import Image from "next/image";
+import { IoIosArrowForward } from "react-icons/io";
 
 const Header = () => {
   const queryClient = useQueryClient();
@@ -42,6 +43,11 @@ const Header = () => {
     setDisplayComponent("globalSearch");
   };
 
+  const refreshPanel = () => {
+    queryClient.invalidateQueries();
+    setDisplayComponent("dashboard");
+  };
+
   return (
     <div className="bg-gray-200 px-2 py-1 md:py-1 flex justify-between w-full items-center ">
       {showUserDetailsPopup && (
@@ -60,15 +66,19 @@ const Header = () => {
       )}
 
       <div className="flex items-center gap-3">
-        <RiMenu2Fill
-          onClick={() => setShowSidebar(!showSidebar)}
-          className="text-[28px] text-gray-600 cursor-pointer"
-        />
-        <img
-          src="/flatLogo.png"
-          alt="logo"
-          className="h-[40px] w-auto select-none"
-        />
+        <button className="p-1 bg-white/60 rounded-md">
+          <IoIosArrowForward
+            onClick={() => setShowSidebar(!showSidebar)}
+            className="text-[36px] text-gray-600 cursor-pointer"
+          />
+        </button>
+        <button onClick={refreshPanel}>
+          <img
+            src="/flatLogo.png"
+            alt="logo"
+            className="h-[40px] w-auto select-none"
+          />
+        </button>
         {/* <div className="h-8 md:h-14 w-8 md:w-14 bg-colorPrimary rounded-full"></div> */}
       </div>
 
