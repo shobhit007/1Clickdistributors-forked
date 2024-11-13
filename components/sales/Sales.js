@@ -291,6 +291,8 @@ export default function Sales() {
     }
   }, [followUps]);
 
+  console.log("followups", followUps);
+
   // Lock leads
   const getLockLeadsStatus = async () => {
     try {
@@ -346,9 +348,6 @@ export default function Sales() {
   };
 
   const fetchLeadsAgain = async () => {
-    if (lockLeads) {
-      await updateLockLeadStatus(false);
-    }
     refetchLeads();
   };
 
@@ -393,7 +392,6 @@ export default function Sales() {
               placeholder="Enter to search table"
             />
             <button
-              disabled={lockLeads}
               className="text-white bg-blue-500 px-6 py-1 rounded-md text-sm hover:opacity-80"
               onClick={() => setMyData(true)}
             >
@@ -402,7 +400,6 @@ export default function Sales() {
           </div>
 
           <Filters
-            lockLeads={lockLeads}
             setLeads={setLeads}
             originalData={data}
             leads={leads}
@@ -487,12 +484,7 @@ export default function Sales() {
   );
 }
 
-const FollowUpModal = ({
-  followUps,
-  setShowFollowUp,
-  setLockLeads,
-  updateLockLeadStatus,
-}) => {
+const FollowUpModal = ({ followUps, setShowFollowUp }) => {
   useEffect(() => {
     followUps.forEach((followUp) => {
       const followUpTime = new Date(
@@ -501,12 +493,9 @@ const FollowUpModal = ({
       const currentTime = new Date().getTime();
       const delay = followUpTime - currentTime;
 
-      console.log("delay", delay);
-
       if (delay > 0) {
         setTimeout(async () => {
           alert(`Follow-up reminder for: ${followUp?.full_name}`);
-          await updateLockLeadStatus(true);
         }, delay);
       }
     });
