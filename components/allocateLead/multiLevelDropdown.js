@@ -15,7 +15,7 @@ const MultiLevelDropdown = ({ items, level = 0, onSelect, allItems }) => {
       setFilteredItems(allItems);
     }
     let filtered = allItems?.filter((item) =>
-      item?.name?.includes(searchText?.toLowerCase())
+      item?.name?.toLowerCase()?.includes(searchText?.toLowerCase())
     );
     setFilteredItems(filtered);
   }, [allItems, searchText]);

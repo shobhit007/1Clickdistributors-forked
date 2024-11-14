@@ -14,28 +14,28 @@ const AllocateLeadModal = ({ data, onSubmit, loading }) => {
   const [allSalesMembers, setAllSalesMembers] = useState([]);
   const componentRef = useRef(null);
 
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (dropDownVisible) {
-        console.log("handle now");
-        if (
-          componentRef.current &&
-          !componentRef.current.contains(event.target)
-        ) {
-          setDropDownVisible(false);
-        }
-      }
-      // Check if click is outside of the component
-    }
+  // useEffect(() => {
+  //   function handleClickOutside(event) {
+  //     if (dropDownVisible) {
+  //       console.log("handle now");
+  //       if (
+  //         componentRef.current &&
+  //         !componentRef.current.contains(event.target)
+  //       ) {
+  //         setDropDownVisible(false);
+  //       }
+  //     }
+  //     // Check if click is outside of the component
+  //   }
 
-    // Add event listener
-    document.addEventListener("click", handleClickOutside);
+  //   // Add event listener
+  //   document.addEventListener("click", handleClickOutside);
 
-    // Remove event listener on cleanup
-    return () => {
-      document.removeEventListener("click", handleClickOutside);
-    };
-  }, [dropDownVisible]);
+  //   // Remove event listener on cleanup
+  //   return () => {
+  //     document.removeEventListener("click", handleClickOutside);
+  //   };
+  // }, [dropDownVisible]);
 
   const flattenTeamMembers = (data) => {
     let allMembers = [];

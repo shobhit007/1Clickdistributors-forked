@@ -161,7 +161,7 @@ const index = () => {
   };
 
   return (
-    <div className="w-full h-[95vh] overflow-auto p-3">
+    <div className="w-full h-auto p-3 pb-10">
       {loading && (
         <div className="w-full flex justify-center my-1">
           <img src="/loader.gif" className="h-12 w-auto" />

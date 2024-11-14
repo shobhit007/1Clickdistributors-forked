@@ -146,7 +146,7 @@ const ManageUsers = () => {
         return {
           Header: "Active",
           Cell: ({ row }) => (
-            <div className="p-2">
+            <div className="w-full flex justify-center">
               <Toggle
                 toggle={row.original?.isActive ? true : false}
                 handleClick={() =>
