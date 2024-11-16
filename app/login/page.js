@@ -97,54 +97,41 @@ const page = () => {
         )}
       </div>
 
-      <div className="flex relative flex-col justify-center h-full items-center w-full sm:w-[30%] rounded-md ">
-        {/* login component */}
-        {/* Logo section */}
-        <div className="w-full p-4 absolute left-0 top-4 flex justify-start">
-          {/* <div className="h-[180px] w-[180px] rounded-full bg-blue-500"></div> */}
+      <div className="flex relative justify-center h-full items-center w-full sm:w-[30%]">
+        {/* <div className="w-full"> */}
+        {/* </div>\  */}
+        <div className="flex relative flex-col items-start justify-start w-full bg-white">
           <img
             src="/expendico.png"
-            className="w-[180px] h-auto object-contain filter"
+            className="w-40 h-auto object-contain filter mb-4 lg:mb-6 -translate-x-4"
           />
-        </div>
-
-        <div className="flex relative flex-col items-center justify-center w-full bg-white p-5">
-          <h2 className="text-lg md:text-2xl text-gray-800 font-bold">
+          <h2 className="text-lg md:text-[1.5rem] text-black">
             Welcome to 1Clickdistributors
           </h2>
-          <p className="text-sm md:text-base text-gray-600 font-semibold">
-            Today is your best Day
+          <p className="text-sm md:text-base text-gray-500 mt-2 font-semibold">
+            &ldquo;Today is your best Day&rdquo;
           </p>
 
           <form action={"#"} className="w-full mt-4 md:mt-12">
-            <div className="flex flex-col w-full gap-1">
-              <span className="text-slate-600 font-semibold text-base flex items-center gap-1">
-                <MdOutlineMailOutline />
-                Enter your email
-              </span>
-              <input
-                type="email"
-                placeholder="Enter Email"
-                name="current-password"
-                autocomplete="current-password"
-                required={true}
-                className="w-full p-1 bg-gray-200 border-b-2 border-b-gray-300 focus:outline-none focus:border-b-blue-400"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-            <div className="flex flex-col w-full gap-1 mt-3">
-              <span className="text-slate-600 font-semibold text-base flex items-center gap-1">
-                <MdOutlinePassword /> Enter your password
-              </span>
-              <div className="flex justify-between items-center  bg-gray-200">
+            <input
+              type="email"
+              placeholder="Enter Email"
+              name="current-password"
+              autocomplete="current-password"
+              required={true}
+              className="w-full p-2 bg-gray-100 border-b-2 border-b-gray-300 focus:outline-none focus:border-b-blue-400"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <div className="flex flex-col w-full mt-6">
+              <div className="flex justify-between items-center  bg-gray-100">
                 <input
                   type={showPassword ? "text" : "password"}
                   required={true}
                   name="password"
                   placeholder="Enter Password"
                   autocomplete="password"
-                  className="flex flex-1 bg-transparent p-1 border-b-2 border-b-gray-300 focus:outline-none focus:border-b-blue-400"
+                  className="flex flex-1 bg-transparent p-2 border-b-2 border-b-gray-300 focus:outline-none focus:border-b-blue-400"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
@@ -166,7 +153,7 @@ const page = () => {
               type="submit"
               onClick={loginUser}
               disabled={loading}
-              className={`w-full bg-colorPrimary disabled:bg-colorPrimary/50 text-white p-1 rounded-md mt-6 ${
+              className={`w-full bg-colorPrimary disabled:bg-colorPrimary/50 text-white p-2 rounded-md mt-6 ${
                 loading ? "animate-pulse" : ""
               }`}
             >
