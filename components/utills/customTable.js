@@ -13,6 +13,12 @@ import { MdClose } from "react-icons/md";
 import Modal from "./Modal";
 import { cellColors } from "@/lib/data/commonData";
 
+// icons
+import { MdOutlineArrowBackIos } from "react-icons/md";
+import { MdOutlineArrowForwardIos } from "react-icons/md";
+import { TfiControlBackward } from "react-icons/tfi";
+import { TfiControlForward } from "react-icons/tfi";
+
 // Default UI for filtering
 const DefaultColumnFilter = ({
   column: { filterValue, setFilter, preFilteredRows },
@@ -42,6 +48,8 @@ const CustomTable = ({
       setUniqueKey(uniqueDataKey);
     }
   }, [uniqueDataKey]);
+
+  const [selectedLeadForPopup, setSelectedLeadForPopup] = useState(false);
 
   const tableData = useMemo(() => data, [data]);
 
@@ -145,7 +153,7 @@ const CustomTable = ({
     "Remarks",
   ];
   return (
-    <div className="h-[85vh] flex flex-col justify-between">
+    <div className="h-full flex flex-col justify-between">
       {openModal && (
         <Modal>
           <div className="h-[70vh] p-4  min-w-[90vw] md:min-w-[25vw] bg-white rounded-md pt-9 relative">
@@ -162,10 +170,27 @@ const CustomTable = ({
           </div>
         </Modal>
       )}
-      <div className="overflow-auto h-[90%] scrollbar-thin">
+      {selectedLeadForPopup && (
+        <Modal>
+          <div className="p-4 min-w-[20vw] max-w-[90vw] md:max-w-[45vw] bg-white rounded-md relative">
+            <button
+              className="top-1 right-4 absolute"
+              onClick={() => setSelectedLeadForPopup(null)}
+            >
+              <MdClose className="text-red-500 text-3xl" />
+            </button>
+
+            <div className="p-2 flex flex-col gap-3">
+              <h1 className="font-semibold">Remarks</h1>
+              <p className="text-gray-500">{selectedLeadForPopup?.remarks}</p>
+            </div>
+          </div>
+        </Modal>
+      )}
+      <div className="overflow-auto h-[93%] scrollbar-thin">
         <table
           {...getTableProps()}
-          className="min-w-full divide-y mt-1 divide-gray-200"
+          className="min-w-full divide-y mt-1 divide-gray-200 max-h-[98%]"
         >
           <thead className="bg-blue-100">
             {headerGroups.map((headerGroup) => (
@@ -173,7 +198,7 @@ const CustomTable = ({
                 {headerGroup.headers.map((column) => (
                   <th
                     {...column.getHeaderProps(column.getSortByToggleProps())}
-                    className="p-2 cursor-pointer w-fit min-w-[150px] max-w-[200px]"
+                    className="p-2 cursor-pointer w-fit max-w-[200px]"
                   >
                     <div className="flex flex-col">
                       <div className="flex gap-2 px-2 text-sm">
@@ -208,15 +233,19 @@ const CustomTable = ({
                           ? getCellStyle(cell.value)
                           : {}
                       }
-                      className="whitespace-nowrap px-2 text-[12px] min-w-[150px] max-w-[280px] border border-gray-300 overflow-auto text-gray-700 scrollbar-thin"
+                      className="whitespace-nowrap px-2 text-[12px] max-w-[185px] border border-gray-300 overflow-hidden text-gray-700 scrollbar-thin"
                     >
                       <div
                         className={`${
                           wrapUpCols?.includes(cell?.column?.Header)
-                            ? "w-[260px] text-wrap"
+                            ? "max-w-[280px]"
                             : ""
                         }`}
-                        onClick={() => console.log("cell is", cell)}
+                        onClick={() => {
+                          cell?.column?.id == "remarks" &&
+                            cell?.row?.original?.remarks;
+                          setSelectedLeadForPopup(cell?.row?.original);
+                        }}
                       >
                         {cell.value && typeof cell.value != "object" ? (
                           <HighlightText
@@ -237,36 +266,55 @@ const CustomTable = ({
       </div>
 
       {data?.length > 9 && (
-        <div className="pagination flex gap-3 py-1 h-[10%] justify-center items-center bg-blue-200 flex-wrap">
+        <div className="pagination flex gap-3 py-1 h-[7%] justify-center items-center bg-colorPrimary/20 flex-wrap">
           <div className="flex gap-2 items-center">
-            <button
+            {/* <button
               className="h-[2rem] cursor-pointer border-2 border-slate-500 flex items-center justify-center px-1 font-semibold "
               onClick={() => gotoPage(0)}
               disabled={!canPreviousPage}
             >
               {"<<"}
-            </button>{" "}
-            <button
+            </button> */}
+            <TfiControlBackward
+              style={{ fontSize: 23 }}
+              onClick={() => gotoPage(0)}
+              disabled={!canPreviousPage}
+            />
+            {/* <button
               className="h-[2rem] cursor-pointer border-2 border-slate-500 flex items-center justify-center px-1 font-semibold "
               onClick={() => previousPage()}
               disabled={!canPreviousPage}
             >
               {"<"}
-            </button>{" "}
-            <button
+            </button>{" "} */}
+            <MdOutlineArrowBackIos
+              style={{ fontSize: 18 }}
+              onClick={() => previousPage()}
+              disabled={!canPreviousPage}
+            />
+            {/* <button
               className="h-[2rem] cursor-pointer border-2 border-slate-500 flex items-center justify-center px-1 font-semibold "
               onClick={() => nextPage()}
-              disabled={!canNextPage}
             >
               {">"}
-            </button>{" "}
-            <button
+            </button> */}
+            <MdOutlineArrowForwardIos
+              style={{ fontSize: 18 }}
+              onClick={() => nextPage()}
+              disabled={!canNextPage}
+            />
+            {/* <button
               className="h-[2rem] cursor-pointer border-2 border-slate-500 flex items-center justify-center px-1 font-semibold "
               onClick={() => gotoPage(pageCount - 1)}
               disabled={!canNextPage}
             >
               {">>"}
-            </button>{" "}
+            </button>{" "} */}
+            <TfiControlForward
+              style={{ fontSize: 23 }}
+              onClick={() => gotoPage(0)}
+              disabled={!canPreviousPage}
+            />
           </div>
           <span>
             Page{" "}

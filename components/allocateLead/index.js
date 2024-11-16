@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import CustomTable from "../utills/customTable";
 import { camelToTitle } from "../utills/commonFunctions";
 import { RiSettings2Line } from "react-icons/ri";
@@ -14,6 +14,7 @@ import ManualLeadForm from "../utills/ManualLeadForm";
 import Filters from "./filters";
 import Table from "../utills/Table";
 import { IoCloudDownloadOutline } from "react-icons/io5";
+import panelContext from "@/lib/context/panelContext";
 
 const index = () => {
   const [openModal, setOpenModal] = useState(false);
@@ -30,6 +31,18 @@ const index = () => {
   const [uploadModalVisible, setUploadVisible] = useState(false);
   const [leads, setLeads] = useState(null);
   const [searchValue, setSearchValue] = useState("");
+  const [pageHeight, setPageHeight] = useState(0);
+  const { headerHeight } = useContext(panelContext);
+  const filterBtnsRef = useRef(null);
+
+  useEffect(() => {
+    if (headerHeight) {
+      let windowHeight = window.innerHeight;
+
+      let pageH = windowHeight - headerHeight;
+      setPageHeight(pageH);
+    }
+  }, [headerHeight]);
 
   const getAllLeads = async () => {
     try {
@@ -73,7 +86,7 @@ const index = () => {
   useEffect(() => {
     let start = moment()
       .startOf("day")
-      .subtract({ days: 4 })
+      .subtract({ days: 5 })
       .format("YYYY-MM-DD");
     let end = moment().endOf("day").format("YYYY-MM-DD");
     setSelectedStartDate(start);
@@ -135,6 +148,7 @@ const index = () => {
     "your_mobile_number",
     "leadId",
     "salesExecutiveName",
+    "createdTime",
   ]; // Added fields to hide
 
   let checkMarkCol = ["Select"].map((key) => {
@@ -280,75 +294,73 @@ const index = () => {
   }, [searchValue, data?.length]);
 
   return (
-    <div className="py-1 px-2">
-      <div className="flex items-center gap-4">
-        <button
-          onClick={() => setFormVisible(true)}
-          className="rounded py-1 px-2 text-white bg-gray-400 hover:bg-gray-600"
-        >
-          Create Manual Lead
-        </button>
-        <button
-          onClick={() => setUploadVisible(true)}
-          className="rounded py-1 px-2 text-white bg-gray-400 hover:bg-gray-600"
-        >
-          Import Excel
-        </button>
-        {/* <button
-          onClick={() => setWorkModalVisible(true)}
-          className="rounded py-1 px-2 text-white bg-gray-400 hover:bg-gray-600"
-        >
-          Today work
-        </button> */}
-      </div>
-      <div className="flex items-center gap-4 px-2 flex-wrap my-2">
-        <div className="flex gap-2 bg-gray-200 items-end py-1 px-3 rounded-md flex-wrap">
-          <div className="flex flex-row items-center gap-1">
-            <span className="text-[12px] text-gray-600">From</span>
-            <input
-              type="date"
-              className="text-[12px] border border-gray-600 rounded px-2"
-              value={selectedStartDate}
-              onChange={(e) => setSelectedStartDate(e.target.value)}
-            />
-          </div>
-          <div className="flex flex-row items-center gap-1">
-            <span className="text-[12px] text-gray-600">To</span>
-            <input
-              type="date"
-              className="text-[12px] border border-gray-600 rounded px-2"
-              value={selectedEndDate}
-              onChange={(e) => setSelectedEndDate(e.target.value)}
-            />
-          </div>
+    <div
+      className="py-1 px-2"
+      style={{ height: pageHeight ? pageHeight : "auto" }}
+    >
+      <div ref={filterBtnsRef}>
+        <div className="flex items-center gap-2">
           <button
-            onClick={handleRefetchLeads}
-            className="text-white bg-blue-500 px-2 py-1 rounded-md text-xs"
+            onClick={() => setFormVisible(true)}
+            className="rounded py-1 px-2 text-sm text-white bg-gray-400 hover:bg-gray-600"
           >
-            Search
+            Create Lead
           </button>
+          <button
+            onClick={() => setUploadVisible(true)}
+            className="rounded py-1 px-2 text-sm text-white bg-gray-400 hover:bg-gray-600"
+          >
+            Import Excel
+          </button>
+
+          <div className="flex gap-2 bg-gray-200 items-end py-1 px-3 rounded-md flex-wrap">
+            <div className="flex flex-row items-center gap-1">
+              <span className="text-[12px] text-gray-600">From</span>
+              <input
+                type="date"
+                className="text-[12px] border border-gray-600 rounded px-2"
+                value={selectedStartDate}
+                onChange={(e) => setSelectedStartDate(e.target.value)}
+              />
+            </div>
+            <div className="flex flex-row items-center gap-1">
+              <span className="text-[12px] text-gray-600">To</span>
+              <input
+                type="date"
+                className="text-[12px] border border-gray-600 rounded px-2"
+                value={selectedEndDate}
+                onChange={(e) => setSelectedEndDate(e.target.value)}
+              />
+            </div>
+            <button
+              onClick={handleRefetchLeads}
+              className="text-white bg-blue-500 px-2 py-1 rounded-md text-xs"
+            >
+              Search
+            </button>
+          </div>
+
+          <RiSettings2Line
+            onClick={() => setOpenModal(true)}
+            className="text-gray-800 text-2xl font-semibold cursor-pointer"
+          />
+          <button
+            disabled={!selectedRows?.length}
+            className="bg-gray-500 flex items-center gap-1 disabled:bg-gray-500/40 disabled:cursor-not-allowed py-1 px-3 rounded-md text-white"
+            onClick={() => setSelectedRows([])}
+          >
+            Unselect all
+          </button>
+
+          <input
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
+            className="min-w-[160px] border border-gray-400 outline-blue-500 py-1 px-2 rounded"
+            placeholder="Enter to search table"
+          />
         </div>
-        <RiSettings2Line
-          onClick={() => setOpenModal(true)}
-          className="text-gray-800 text-2xl font-semibold cursor-pointer"
-        />
-        <button
-          disabled={!selectedRows?.length}
-          className="bg-gray-500 flex items-center gap-1 disabled:bg-gray-500/40 disabled:cursor-not-allowed py-1 px-3 rounded-md text-white"
-          onClick={() => setSelectedRows([])}
-        >
-          Unselect all
-        </button>
-
-        <input
-          value={searchValue}
-          onChange={(e) => setSearchValue(e.target.value)}
-          className="min-w-[160px] border border-gray-400 outline-blue-500 py-1 px-2 rounded"
-          placeholder="Enter to search table"
-        />
+        <Filters setLeads={setLeads} leads={leads} originalData={data} />
       </div>
-
-      <Filters setLeads={setLeads} leads={leads} originalData={data} />
 
       {leadsLoading && (
         <div className="w-full flex flex-col items-center justify-center">
@@ -359,26 +371,35 @@ const index = () => {
         </div>
       )}
 
-      {leads?.length > 0 ? (
-        <CustomTable
-          data={leads || []}
-          uniqueDataKey={"leadId"}
-          selectedRows={selectedRows}
-          setSelectedRows={setSelectedRows}
-          columns={columns}
-          openModal={openModal}
-          closeModal={() => setOpenModal(false)}
-          searchValue={searchValue}
-        />
-      ) : (
-        !leadsLoading && (
-          <div className="mt-10 w-full flex px-4">
-            <h1 className="text-gray-600 font-semibold text-2xl">
-              No data found with current date and filters.
-            </h1>
-          </div>
-        )
-      )}
+      <div
+        className="w-full"
+        style={{
+          height: filterBtnsRef?.current
+            ? pageHeight - filterBtnsRef?.current?.offsetHeight - 8
+            : "560px",
+        }}
+      >
+        {leads?.length > 0 ? (
+          <CustomTable
+            data={leads || []}
+            uniqueDataKey={"leadId"}
+            selectedRows={selectedRows}
+            setSelectedRows={setSelectedRows}
+            columns={columns}
+            openModal={openModal}
+            closeModal={() => setOpenModal(false)}
+            searchValue={searchValue}
+          />
+        ) : (
+          !leadsLoading && (
+            <div className="mt-10 w-full flex px-4">
+              <h1 className="text-gray-600 font-semibold text-2xl">
+                No data found with current date and filters.
+              </h1>
+            </div>
+          )
+        )}
+      </div>
 
       {selectedRows?.length > 0 && (
         <AllocateLeadModal
@@ -387,6 +408,7 @@ const index = () => {
           loading={allocatingLeads}
         />
       )}
+
       {formVisible && (
         <Modal>
           <div className="w-full h-[100vh] py-4 md:py-8">
@@ -394,12 +416,6 @@ const index = () => {
           </div>
         </Modal>
       )}
-
-      {/* {workModalVisible && (
-        <Modal>
-          <WorkedLeads setWorkModalVisible={setWorkModalVisible} />
-        </Modal>
-      )} */}
 
       {uploadModalVisible && (
         <Modal>

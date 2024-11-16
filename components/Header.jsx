@@ -4,7 +4,7 @@ import panelContext from "@/lib/context/panelContext";
 import { logout } from "@/store/auth/authReducer";
 import { authSelector } from "@/store/auth/selector";
 import { useRouter } from "next/navigation";
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { FaUser } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import Modal from "./utills/Modal";
@@ -19,6 +19,7 @@ import { IoIosArrowForward } from "react-icons/io";
 const Header = () => {
   const queryClient = useQueryClient();
   const { role } = useSelector(authSelector);
+  const headerRef = useRef(null);
   const {
     displayComponent,
     userDetails,
@@ -26,10 +27,17 @@ const Header = () => {
     setPreviousComponent,
     setShowSidebar,
     showSidebar,
+    setHeaderHeight,
   } = useContext(panelContext);
   const dispatch = useDispatch();
   const router = useRouter();
   const [showUserDetailsPopup, setShowUserDetailsPopup] = useState(false);
+
+  useEffect(() => {
+    if (headerRef.current) {
+      setHeaderHeight(headerRef.current.offsetHeight);
+    }
+  }, [headerRef]);
 
   const handleLogout = () => {
     localStorage.clear();
@@ -49,7 +57,10 @@ const Header = () => {
   };
 
   return (
-    <div className="bg-[#e0f0fb] px-2 py-1 md:py-1 flex justify-between w-full items-center ">
+    <div
+      ref={headerRef}
+      className="bg-[#e0f0fb] px-2 py-1 md:py-1 flex justify-between w-full items-center "
+    >
       {showUserDetailsPopup && (
         <Modal>
           <div className="w-[95vw] md:[50vw] lg:[40vw] xl:w-[28vw] h-[85vh] p-2 bg-white relative rounded-md overflow-hidden">
@@ -70,14 +81,14 @@ const Header = () => {
           <IoIosArrowForward
             onClick={() => setShowSidebar(!showSidebar)}
             className="text-gray-600 cursor-pointer"
-            fontSize={28}
+            fontSize={22}
           />
         </button>
         <button onClick={refreshPanel}>
           <img
             src="/flatLogo.png"
             alt="logo"
-            className="h-8 w-auto select-none"
+            className="h-[30px] w-auto select-none"
           />
         </button>
         {/* <div className="h-8 md:h-14 w-8 md:w-14 bg-colorPrimary rounded-full"></div> */}
@@ -87,7 +98,7 @@ const Header = () => {
         <MdSearch
           onClick={showGlobalSearch}
           className="text-gray-600 cursor-pointer"
-          style={{ fontSize: 28 }}
+          style={{ fontSize: 22 }}
         />
 
         {/* <div className="hidden md:flex flex-col">
@@ -109,7 +120,7 @@ const Header = () => {
             >
               <img
                 src={userDetails?.userImageLink}
-                className="rounded-full h-9 w-9 object-cover"
+                className="rounded-full h-8 w-8 object-cover"
               />
             </button>
           ) : (
@@ -120,7 +131,7 @@ const Header = () => {
           )}
         </div>
         <button
-          className="text-white text-sm bg-colorPrimary px-4 hidden md:flex items-center gap-2 py-[2px] rounded-md"
+          className="text-white text-xs bg-colorPrimary px-4 hidden md:flex items-center gap-2 py-[3px] rounded-md"
           onClick={handleLogout}
         >
           Logout

@@ -245,8 +245,8 @@ const Filters = ({
   };
 
   return (
-    <div className="flex flex-col gap-2 w-full mt-4 mb-2 pl-2">
-      {list?.hasOwnProperty("salesMembers") &&
+    <div className="flex flex-col gap-2 w-full mb-2  mt-2">
+      {/* {list?.hasOwnProperty("salesMembers") &&
         currentLoggedInUser?.hierarchy !== "executive" && (
           <div className="w-[180px] flex gap-[2px] flex-col">
             <span className="text-xs text-gray-400">SalesMembers</span>
@@ -260,7 +260,7 @@ const Filters = ({
               className=""
             />
           </div>
-        )}
+        )} */}
       <div className="flex gap-[6px] items-end w-full overflow-x-auto">
         <button
           onClick={resetFilters}

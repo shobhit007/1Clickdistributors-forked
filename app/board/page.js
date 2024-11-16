@@ -21,6 +21,9 @@ const Page = () => {
   const [token, setToken] = useState(null);
   const [previousComponent, setPreviousComponent] = useState(null);
   const [showSidebar, setShowSidebar] = useState(false);
+  const [headerHeight, setHeaderHeight] = useState(null);
+
+  console.log("header height: ", headerHeight);
 
   useEffect(() => {
     let userToken = localStorage.getItem("authToken");
@@ -129,6 +132,8 @@ const Page = () => {
         allUserRoles,
         showSidebar,
         setShowSidebar,
+        headerHeight,
+        setHeaderHeight,
       }}
     >
       <div className="w-full h-[100vh] overflow-auto relative">
