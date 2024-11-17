@@ -8,9 +8,20 @@ import { useQuery } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
 import { authSelector } from "@/store/auth/selector";
 import Modal from "../utills/Modal";
+import { AiOutlineClose } from "react-icons/ai";
 
 const CallDetails = ({ data: leadDetails, refetchLead }) => {
   const userData = useSelector(authSelector);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [visible, setVisible] = useState(false);
+
+  const toggleDialog = () => {
+    setIsDialogOpen(!isDialogOpen);
+  };
+
+  const toggleVisible = () => {
+    setVisible(!visible);
+  };
 
   const [editCallDetails, setEditCallDetails] = useState(false);
   const [fields, setFields] = useState({
@@ -120,217 +131,205 @@ const CallDetails = ({ data: leadDetails, refetchLead }) => {
   };
 
   return (
-    <div className="bg-white w-[30%] max-w-[512px] border border-gray-200 overflow-auto p-2 relative">
+    <div className="w-[30%] max-w-80 overflow-auto relative">
       {/* show only for sales members */}
       {userData?.hierarchy === "executive" && (
         <LeadsCount leadsCount={leadsCount} refetch={refetch} />
       )}
 
-      <div>
-        <h2 className="font-normal text-gray-700 text-center text-2xl mt-2">
-          Call Details
-        </h2>
-
-        <div className="mt-2 p-4">
-          <div className="flex items-start gap-2">
-            <div className="flex-1 text-left">
-              <label
-                htmlFor="name"
-                className="text-sm text-gray-700 font-semibold nowrap"
-              >
-                Name:
-              </label>
-            </div>
-            <div className="flex-1 text-left">
-              <p className="text-base text-gray-700">
-                {leadDetails?.leadData?.full_name}
-              </p>
-            </div>
+      <div className="w-full border border-gray-200 bg-white p-3 rounded">
+        <div className="flex flex-col items-start gap-1">
+          <div className="text-left">
+            <label htmlFor="name" className="font-semibold text-black nowrap">
+              Name
+            </label>
           </div>
-          <div className="flex items-start gap-2 mt-2">
-            <div className="flex-1 text-left">
-              <label
-                htmlFor="companyName"
-                className=" text-sm text-gray-700 font-semibold nowrap"
-              >
-                Company Name:
-              </label>
-            </div>
-            <div className="flex-1 text-left">
-              <p className="text-base text-gray-700">
-                {leadDetails?.leadData?.company_name}
-              </p>
-            </div>
+          <div className="text-left">
+            <p className="text-gray-700">{leadDetails?.leadData?.full_name}</p>
           </div>
-
-          <div className="flex items-start gap-2 mt-2">
-            <div className="flex-1 text-left">
-              <label
-                htmlFor="phone"
-                className=" text-sm text-gray-700 font-semibold nowrap"
-              >
-                Contact Number:
-              </label>
-            </div>
-            <div className="flex-1 text-left">
-              <p className="text-base text-gray-700">
-                {leadDetails?.leadData?.phone_number ||
-                  leadDetails?.leadData?.mobile_number}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-start gap-2 mt-2">
-            <div className="flex-1 text-left">
-              <label
-                htmlFor="altPhone"
-                className=" text-sm text-gray-700 font-semibold nowrap"
-              >
-                Alt Contact Number:
-              </label>
-            </div>
-            <div className="flex-1 text-left">
-              <p className="text-base text-gray-700">
-                {leadDetails?.leadData?.altPhoneNumber || "NA"}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-start gap-2 mt-2">
-            <div className="flex-1 text-left">
-              <label
-                htmlFor="city"
-                className=" text-sm text-gray-700 font-semibold nowrap"
-              >
-                City:
-              </label>
-            </div>
-            <div className="flex-1 text-left">
-              <p className="text-base text-gray-700">
-                {leadDetails?.leadData?.city}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-start gap-2 mt-2">
-            <div className="flex-1 text-left">
-              <label
-                htmlFor="requirement"
-                className=" text-sm text-gray-700 font-semibold nowrap"
-              >
-                Requirement:
-              </label>
-            </div>
-            <div className="flex-1 text-left">
-              <p className="text-base text-gray-700">
-                {leadDetails?.leadData[
-                  "whats_is_your_requirement_?_write_in_brief"
-                ] || "NA"}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-start gap-2 mt-2">
-            <div className="flex-1 text-left">
-              <label
-                htmlFor="disposition"
-                className=" text-sm text-gray-700 font-semibold nowrap"
-              >
-                Disposition:
-              </label>
-            </div>
-            <div className="flex-1 text-left">
-              <p className="text-base text-gray-700">
-                {leadDetails?.leadData?.disposition || "NA"}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-start gap-2 mt-2">
-            <div className="flex-1 text-left">
-              <label
-                htmlFor="subDisposition"
-                className=" text-sm text-gray-700 font-semibold nowrap"
-              >
-                Sub-Disposition:
-              </label>
-            </div>
-            <div className="flex-1 text-left">
-              <p className="text-base text-gray-700">
-                {leadDetails?.leadData?.subDisposition || "NA"}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-start gap-2 mt-2">
-            <div className="flex-1 text-left">
-              <label
-                htmlFor="lastCallBackDate"
-                className=" text-sm text-gray-700 font-semibold nowrap"
-              >
-                Last Call Back Date:
-              </label>
-            </div>
-            <div className="flex-1 text-left">
-              <p className="text-base text-gray-700">
-                {leadDetails?.leadData?.lastCallBackDate
-                  ? moment(
-                      leadDetails?.leadData.lastCallBackDate
-                    ).toLocaleString()
-                  : "NA"}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-start gap-2 mt-2">
-            <div className="flex-1 text-left">
-              <label
-                htmlFor="followUpDate"
-                className=" text-sm text-gray-700 font-semibold nowrap"
-              >
-                Next Call Back Date:
-              </label>
-            </div>
-            <div className="flex-1 text-left">
-              <p className="text-base text-gray-700">
-                {leadDetails?.leadData?.followUpDate
-                  ? convertTimeStamp(leadDetails?.leadData.followUpDate)
-                  : "NA"}
-              </p>
-            </div>
-          </div>
-          <div className="mt-2 flex gap-4">
-            <div className="min-w-fit text-left">
-              <label
-                htmlFor="remarks"
-                className=" text-sm text-gray-700 font-semibold nowrap"
-              >
-                Remarks:
-              </label>
-            </div>
-            <div className="flex-1 items-start justify-start">
-              <p className="text-base text-gray-700">
-                {leadDetails?.leadData?.remarks || "NA"}
-              </p>
-            </div>
-          </div>
-          <button
-            className={`mt-8 bg-colorPrimary text-white p-2 rounded-md w-full`}
-            onClick={() => setEditCallDetails(true)}
-          >
-            Update
-          </button>
         </div>
+        <div className="flex flex-col items-start gap-1 mt-2">
+          <div className="text-left">
+            <label
+              htmlFor="companyName"
+              className="text-black font-semibold nowrap"
+            >
+              Company Name
+            </label>
+          </div>
+          <div className="text-left">
+            <p className="text-gray-700">
+              {leadDetails?.leadData?.company_name}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-col items-start gap-1 mt-2">
+          <div className="text-left">
+            <label htmlFor="city" className=" text-black font-semibold nowrap">
+              City
+            </label>
+          </div>
+          <div className="text-left">
+            <p className="text-gray-700">{leadDetails?.leadData?.city}</p>
+          </div>
+        </div>
+        <div className="flex flex-col items-start gap-1 mt-2">
+          <div className="text-left">
+            <label
+              htmlFor="requirement"
+              className="text-black font-semibold nowrap"
+            >
+              Requirement
+            </label>
+          </div>
+          <div className="text-left">
+            <span className="text-gray-700">
+              {leadDetails?.leadData[
+                "whats_is_your_requirement_?_write_in_brief"
+              ]?.length > 30
+                ? leadDetails?.leadData[
+                    "whats_is_your_requirement_?_write_in_brief"
+                  ]?.slice(0, 30) + "..."
+                : leadDetails?.leadData[
+                    "whats_is_your_requirement_?_write_in_brief"
+                  ] || "NA"}
+            </span>
+            {leadDetails?.leadData["whats_is_your_requirement_?_write_in_brief"]
+              ?.length > 30 && (
+              <button
+                onClick={toggleVisible}
+                className="ml-1 text-[11px] text-blue-600 hover:underline focus:outline-none"
+              >
+                {"Read More"}
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="border border-gray-200 p-4 mt-4 rounded bg-white">
+        <div className="flex flex-col items-start gap-1">
+          <div className="text-left">
+            <label
+              htmlFor="disposition"
+              className=" text-black font-semibold nowrap"
+            >
+              Disposition
+            </label>
+          </div>
+          <div className="text-left">
+            <p className="text-gray-700">
+              {leadDetails?.leadData?.disposition || "NA"}
+            </p>
+          </div>
+        </div>
+        <div className="flex flex-col items-start gap-1 mt-2">
+          <div className="text-left">
+            <label
+              htmlFor="subDisposition"
+              className="text-black font-semibold nowrap"
+            >
+              Sub-Disposition:
+            </label>
+          </div>
+          <div className="text-left">
+            <p className="text-gray-700">
+              {leadDetails?.leadData?.subDisposition || "NA"}
+            </p>
+          </div>
+        </div>
+        <div className="flex flex-col items-start gap-1 mt-2">
+          <div className="text-left">
+            <label
+              htmlFor="lastCallBackDate"
+              className="text-black font-semibold nowrap"
+            >
+              Last Call Back Date
+            </label>
+          </div>
+          <div className="text-left">
+            <p className="text-gray-700">
+              {leadDetails?.leadData?.lastCallBackDate
+                ? moment(
+                    leadDetails?.leadData.lastCallBackDate
+                  ).toLocaleString()
+                : "NA"}
+            </p>
+          </div>
+        </div>
+        <div className="flex flex-col items-start gap-1 mt-2">
+          <div className="text-left">
+            <label
+              htmlFor="followUpDate"
+              className="text-black font-semibold nowrap"
+            >
+              Next Call Back Date
+            </label>
+          </div>
+          <div className="text-left">
+            <p className="text-gray-700">
+              {leadDetails?.leadData?.followUpDate
+                ? convertTimeStamp(leadDetails?.leadData.followUpDate)
+                : "NA"}
+            </p>
+          </div>
+        </div>
+        <div className="mt-2 flex flex-col gap-1">
+          <div className="min-w-fit text-left">
+            <label
+              htmlFor="remarks"
+              className="text-black font-semibold nowrap"
+            >
+              Remarks
+            </label>
+          </div>
+          <div className="text-left flex items-end">
+            <p className="text-gray-800 leading-relaxed w-fit">
+              {leadDetails?.leadData?.remarks?.length > 30
+                ? leadDetails?.leadData?.remarks?.slice(0, 30) + "..."
+                : leadDetails?.leadData?.remarks}
+            </p>
+            {leadDetails?.leadData?.remarks?.length > 30 && (
+              <button
+                onClick={toggleDialog}
+                className="ml-1 text-[11px] text-blue-600 hover:underline focus:outline-none"
+              >
+                {"Read More"}
+              </button>
+            )}
+          </div>
+        </div>
+        <button
+          className={`mt-8 bg-colorPrimary text-white p-2 rounded-md w-full`}
+          onClick={() => setEditCallDetails(true)}
+        >
+          Update
+        </button>
       </div>
       {editCallDetails && (
         <Modal>
-          <div className="bg-white w-full max-w-lg border border-gray-200 overflow-auto py-2 px-6 relative">
-            <button
-              className="absolute right-0 top-0 bg-red-600 text-white text-sm px-3 py-1"
-              onClick={() => setEditCallDetails(false)}
-            >
-              close
-            </button>
+          <div className="bg-white rounded w-full max-w-2xl border border-gray-200 overflow-auto py-2 lg:pb-4 px-6 relative shadow-xl">
+            <div className="flex w-full justify-between items-center py-2">
+              <h2 className="text-base font-semibold">Update</h2>
+              <button
+                className="relative group"
+                data-lable="update"
+                onClick={() => setEditCallDetails(false)}
+              >
+                <AiOutlineClose
+                  fontSize={18}
+                  className="text-gray-400 group-hover:text-gray-500 font-bold"
+                />
+              </button>
+            </div>
 
             <div className="mt-4">
               {/* Remarks Textarea */}
               <div className="mb-4">
                 <label
                   htmlFor="remarks"
-                  className="block text-sm font-medium text-gray-700 mb-1"
+                  className="block text-sm font-medium text-gray-700 mb-2"
                 >
                   Remarks
                 </label>
@@ -422,6 +421,54 @@ const CallDetails = ({ data: leadDetails, refetchLead }) => {
           </div>
         </Modal>
       )}
+
+      {isDialogOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg shadow-lg max-w-lg w-full">
+            <div className="p-5">
+              <h2 className="text-base font-semibold text-gray-800">Remarks</h2>
+              <p className="mt-2 text-sm text-gray-600">
+                {leadDetails?.leadData?.remarks}
+              </p>
+            </div>
+            <div className="flex justify-end p-4">
+              <button
+                onClick={toggleDialog}
+                className="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 mr-2"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {visible && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg shadow-lg max-w-lg w-full">
+            <div className="p-5">
+              <h2 className="text-base font-semibold text-gray-800">
+                Requirement
+              </h2>
+              <p className="mt-2 text-sm text-gray-600">
+                {
+                  leadDetails?.leadData[
+                    "whats_is_your_requirement_?_write_in_brief"
+                  ]
+                }
+              </p>
+            </div>
+            <div className="flex justify-end p-4">
+              <button
+                onClick={toggleVisible}
+                className="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 mr-2"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -433,7 +480,7 @@ const LeadsCount = ({ leadsCount, refetch }) => {
         Refresh
       </button>
       <div className="flex gap-4 mt-8">
-        <div className="flex-1 py-4 rounded">
+        <div className="py-4 rounded">
           <div className="text-center">
             <h4 className="font-normal text-gray-700 text-center text-lg mt-4">
               Total Leads
@@ -443,7 +490,7 @@ const LeadsCount = ({ leadsCount, refetch }) => {
             </h2>
           </div>
         </div>
-        <div className="flex-1 py-4 rounded">
+        <div className="py-4 rounded">
           <div className="text-center">
             <h4 className="font-normal text-gray-700 text-center text-lg mt-4">
               Today Worked

@@ -24,10 +24,7 @@ const natureOfBusiness = [
 ];
 
 const BusinessDetails = ({ data }) => {
-  const {
-    leadData,
-    leadDetails: { business },
-  } = data;
+  const { leadData = null, leadDetails: { business = null } = {} } = data || {};
 
   const [edit, setEdit] = useState(false);
   const [fields, setFields] = useState({
@@ -112,7 +109,7 @@ const BusinessDetails = ({ data }) => {
             </label>
           </LeftBox>
           <RightBox>
-            <p className="text-base text-gray-700">{leadData?.company_name}</p>
+            <p className="text-gray-700">{leadData?.company_name}</p>
           </RightBox>
         </div>
         <div className="flex items-start gap-4 mt-4">
@@ -125,7 +122,7 @@ const BusinessDetails = ({ data }) => {
             </label>
           </LeftBox>
           <RightBox>
-            <p className="text-base text-gray-700">{leadData?.profileId}</p>
+            <p className="text-gray-700">{leadData?.profileId}</p>
           </RightBox>
         </div>
         <div className="flex items-start gap-4 mt-4">
@@ -138,19 +135,22 @@ const BusinessDetails = ({ data }) => {
             </label>
           </LeftBox>
           <RightBox>
-            <select
-              disabled={!edit}
-              className={`border p-2 rounded-md border-gray-400 w-full md:w-full`}
-              name={"profileScore"}
-              value={fields.profileScore}
-              onChange={handleChange}
-            >
-              {profiles?.map((profile, idx) => (
-                <option key={idx.toString()} value={profile}>
-                  {profile}
-                </option>
-              ))}
-            </select>
+            {edit ? (
+              <select
+                className={`border p-2 rounded-md border-gray-400 w-full md:w-full`}
+                name={"profileScore"}
+                value={fields.profileScore}
+                onChange={handleChange}
+              >
+                {profiles?.map((profile, idx) => (
+                  <option key={idx.toString()} value={profile}>
+                    {profile}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <p className="text-gray-700">{fields.profileScore || "NA"}</p>
+            )}
           </RightBox>
         </div>
         <div className="flex items-start gap-4 mt-4">
@@ -163,7 +163,7 @@ const BusinessDetails = ({ data }) => {
             </label>
           </LeftBox>
           <RightBox>
-            <p className="text-base text-gray-700">
+            <p className="text-gray-700">
               {convertTimeStamp(leadData?.createdAt)}
             </p>
           </RightBox>
@@ -178,7 +178,7 @@ const BusinessDetails = ({ data }) => {
             </label>
           </LeftBox>
           <RightBox>
-            <p className="text-base text-gray-700">{leadData?.source}</p>
+            <p className="text-gray-700">{leadData?.source}</p>
           </RightBox>
         </div>
         <div className="flex items-start gap-4 mt-4">
@@ -191,18 +191,22 @@ const BusinessDetails = ({ data }) => {
             </label>
           </LeftBox>
           <RightBox>
-            <input
-              disabled={!edit}
-              type="number"
-              id="profileStatus"
-              name="profileStatus"
-              value={fields.profileStatus}
-              onChange={handleChange}
-              className={`flex-1 px-3 py-2 ${
-                edit &&
-                "border border-gray-300 rounded-md focus:outline-none w-full"
-              }`}
-            />
+            {edit ? (
+              <input
+                disabled={!edit}
+                type="number"
+                id="profileStatus"
+                name="profileStatus"
+                value={fields.profileStatus}
+                onChange={handleChange}
+                className={`flex-1 px-3 py-2 ${
+                  edit &&
+                  "border border-gray-300 rounded-md focus:outline-none w-full"
+                }`}
+              />
+            ) : (
+              <p className="text-gray-700">{fields.profileStatus || "NA"}</p>
+            )}
           </RightBox>
         </div>
         <div className="flex items-start gap-4 mt-4">
@@ -215,19 +219,23 @@ const BusinessDetails = ({ data }) => {
             </label>
           </LeftBox>
           <RightBox>
-            <input
-              disabled={!edit}
-              type="text"
-              id="aboutCompany"
-              name="aboutCompany"
-              value={fields.aboutCompany}
-              onChange={handleChange}
-              placeholder="About Company"
-              className={`flex-1 px-3 py-2 ${
-                edit &&
-                "border border-gray-300 rounded-md focus:outline-none w-full"
-              }`}
-            />
+            {edit ? (
+              <input
+                disabled={!edit}
+                type="text"
+                id="aboutCompany"
+                name="aboutCompany"
+                value={fields.aboutCompany}
+                onChange={handleChange}
+                placeholder="About Company"
+                className={`flex-1 px-3 py-2 ${
+                  edit &&
+                  "border border-gray-300 rounded-md focus:outline-none w-full"
+                }`}
+              />
+            ) : (
+              <p className="text-gray-700">{fields.aboutCompany || "NA"}</p>
+            )}
           </RightBox>
         </div>
         <div className="flex items-start gap-4 mt-4">
@@ -240,19 +248,23 @@ const BusinessDetails = ({ data }) => {
             </label>
           </LeftBox>
           <RightBox>
-            <input
-              disabled={!edit}
-              type="text"
-              id="companyType"
-              name="companyType"
-              value={fields.companyType}
-              onChange={handleChange}
-              placeholder="Enter Company Type"
-              className={`flex-1 px-3 py-2 ${
-                edit &&
-                "border border-gray-300 rounded-md focus:outline-none w-full"
-              }`}
-            />
+            {edit ? (
+              <input
+                disabled={!edit}
+                type="text"
+                id="companyType"
+                name="companyType"
+                value={fields.companyType}
+                onChange={handleChange}
+                placeholder="Enter Company Type"
+                className={`flex-1 px-3 py-2 ${
+                  edit &&
+                  "border border-gray-300 rounded-md focus:outline-none w-full"
+                }`}
+              />
+            ) : (
+              <p className="text-gray-700">{fields.companyType || "NA"}</p>
+            )}
           </RightBox>
         </div>
         <div className="flex items-start gap-4 mt-4">
@@ -265,19 +277,23 @@ const BusinessDetails = ({ data }) => {
             </label>
           </LeftBox>
           <RightBox>
-            <input
-              disabled={!edit}
-              type="number"
-              id="establishYear"
-              name="establishYear"
-              value={fields.establishYear}
-              onChange={handleChange}
-              placeholder="Enter Establishment Year"
-              className={`flex-1 px-3 py-2 ${
-                edit &&
-                "border border-gray-300 rounded-md focus:outline-none w-full"
-              }`}
-            />
+            {edit ? (
+              <input
+                disabled={!edit}
+                type="number"
+                id="establishYear"
+                name="establishYear"
+                value={fields.establishYear}
+                onChange={handleChange}
+                placeholder="Enter Establishment Year"
+                className={`flex-1 px-3 py-2 ${
+                  edit &&
+                  "border border-gray-300 rounded-md focus:outline-none w-full"
+                }`}
+              />
+            ) : (
+              <p className="text-gray-700">{fields.establishYear || "NA"}</p>
+            )}
           </RightBox>
         </div>
         <div className="flex items-start gap-4 mt-4">
@@ -290,19 +306,25 @@ const BusinessDetails = ({ data }) => {
             </label>
           </LeftBox>
           <RightBox>
-            <select
-              disabled={!edit}
-              className={`border p-2 rounded-md border-gray-400 w-full md:w-full`}
-              name={"businessNature"}
-              value={fields.businessNature}
-              onChange={handleChange}
-            >
-              {natureOfBusiness?.map((nature, idx) => (
-                <option key={idx.toString()} value={nature}>
-                  {nature}
-                </option>
-              ))}
-            </select>
+            {edit ? (
+              <select
+                disabled={!edit}
+                className={`border p-2 rounded-md border-gray-400 w-full md:w-full ${
+                  !edit ? "bg-transparent" : "bg-auto"
+                }`}
+                name={"businessNature"}
+                value={fields.businessNature}
+                onChange={handleChange}
+              >
+                {natureOfBusiness?.map((nature, idx) => (
+                  <option key={idx.toString()} value={nature}>
+                    {nature}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <p className="text-gray-700">{fields.businessNature || "NA"}</p>
+            )}
           </RightBox>
         </div>
         <div className="flex items-start gap-4 mt-4">
@@ -315,19 +337,23 @@ const BusinessDetails = ({ data }) => {
             </label>
           </LeftBox>
           <RightBox>
-            <input
-              disabled={!edit}
-              type="number"
-              id="turnOver"
-              name="turnOver"
-              value={fields.turnOver}
-              onChange={handleChange}
-              placeholder="Enter Turn Over"
-              className={`flex-1 px-3 py-2 ${
-                edit &&
-                "border border-gray-300 rounded-md focus:outline-none w-full"
-              }`}
-            />
+            {edit ? (
+              <input
+                disabled={!edit}
+                type="number"
+                id="turnOver"
+                name="turnOver"
+                value={fields.turnOver}
+                onChange={handleChange}
+                placeholder="Enter Turn Over"
+                className={`flex-1 px-3 py-2 ${
+                  edit &&
+                  "border border-gray-300 rounded-md focus:outline-none w-full"
+                }`}
+              />
+            ) : (
+              <p className="text-gray-700">{fields.turnOver || "NA"}</p>
+            )}
           </RightBox>
         </div>
         <div className="flex items-start gap-4 mt-4">
@@ -340,7 +366,7 @@ const BusinessDetails = ({ data }) => {
             </label>
           </LeftBox>
           <RightBox>
-            <p className="text-base text-gray-800" id="city">
+            <p className="text-gray-800" id="city">
               {leadData?.city}
             </p>
           </RightBox>
@@ -355,19 +381,23 @@ const BusinessDetails = ({ data }) => {
             </label>
           </LeftBox>
           <RightBox>
-            <input
-              disabled={!edit}
-              type="text"
-              id="state"
-              name="state"
-              value={fields.state}
-              onChange={handleChange}
-              placeholder="Enter State"
-              className={`flex-1 px-3 py-2 ${
-                edit &&
-                "border border-gray-300 rounded-md focus:outline-none w-full"
-              }`}
-            />
+            {edit ? (
+              <input
+                disabled={!edit}
+                type="text"
+                id="state"
+                name="state"
+                value={fields.state}
+                onChange={handleChange}
+                placeholder="Enter State"
+                className={`flex-1 px-3 py-2 ${
+                  edit &&
+                  "border border-gray-300 rounded-md focus:outline-none w-full"
+                }`}
+              />
+            ) : (
+              <p className="text-gray-700">{fields.state || "NA"}</p>
+            )}
           </RightBox>
         </div>
         <div className="flex items-start gap-4 mt-4">
@@ -380,19 +410,23 @@ const BusinessDetails = ({ data }) => {
             </label>
           </LeftBox>
           <RightBox>
-            <input
-              disabled={!edit}
-              type="text"
-              id="address"
-              name="address"
-              value={fields.address}
-              onChange={handleChange}
-              placeholder="Enter Address"
-              className={`flex-1 px-3 py-2 ${
-                edit &&
-                "border border-gray-300 rounded-md focus:outline-none w-full"
-              }`}
-            />
+            {edit ? (
+              <input
+                disabled={!edit}
+                type="text"
+                id="address"
+                name="address"
+                value={fields.address}
+                onChange={handleChange}
+                placeholder="Enter Address"
+                className={`flex-1 px-3 py-2 ${
+                  edit &&
+                  "border border-gray-300 rounded-md focus:outline-none w-full"
+                }`}
+              />
+            ) : (
+              <p className="text-gray-700">{fields.address || "NA"}</p>
+            )}
           </RightBox>
         </div>
         <div className="flex items-start gap-4 mt-4">
@@ -405,19 +439,23 @@ const BusinessDetails = ({ data }) => {
             </label>
           </LeftBox>
           <RightBox>
-            <input
-              disabled={!edit}
-              type="number"
-              id="pincode"
-              name="pincode"
-              value={fields.pincode}
-              onChange={handleChange}
-              placeholder="Enter Pincode"
-              className={`flex-1 px-3 py-2 ${
-                edit &&
-                "border border-gray-300 rounded-md focus:outline-none w-full"
-              }`}
-            />
+            {edit ? (
+              <input
+                disabled={!edit}
+                type="number"
+                id="pincode"
+                name="pincode"
+                value={fields.pincode}
+                onChange={handleChange}
+                placeholder="Enter Pincode"
+                className={`flex-1 px-3 py-2 ${
+                  edit &&
+                  "border border-gray-300 rounded-md focus:outline-none w-full"
+                }`}
+              />
+            ) : (
+              <p className="text-gray-700">{fields.pincode || "NA"}</p>
+            )}
           </RightBox>
         </div>
         <div className="flex items-start gap-4 mt-4">
@@ -430,19 +468,23 @@ const BusinessDetails = ({ data }) => {
             </label>
           </LeftBox>
           <RightBox>
-            <input
-              disabled={!edit}
-              type="text"
-              id="country"
-              name="country"
-              value={fields.country}
-              onChange={handleChange}
-              placeholder="Enter Country"
-              className={`flex-1 px-3 py-2 ${
-                edit &&
-                "border border-gray-300 rounded-md focus:outline-none w-full"
-              }`}
-            />
+            {edit ? (
+              <input
+                disabled={!edit}
+                type="text"
+                id="country"
+                name="country"
+                value={fields.country}
+                onChange={handleChange}
+                placeholder="Enter Country"
+                className={`flex-1 px-3 py-2 ${
+                  edit &&
+                  "border border-gray-300 rounded-md focus:outline-none w-full"
+                }`}
+              />
+            ) : (
+              <p className="text-gray-700">{fields.country || "NA"}</p>
+            )}
           </RightBox>
         </div>
         <div className="flex items-start gap-4 mt-4">
@@ -455,19 +497,23 @@ const BusinessDetails = ({ data }) => {
             </label>
           </LeftBox>
           <RightBox>
-            <input
-              disabled={!edit}
-              type="text"
-              id="gstNumber"
-              name="gstNumber"
-              value={fields.gstNumber}
-              onChange={handleChange}
-              placeholder="Enter GST Number"
-              className={`flex-1 px-3 py-2 ${
-                edit &&
-                "border border-gray-300 rounded-md focus:outline-none w-full"
-              }`}
-            />
+            {edit ? (
+              <input
+                disabled={!edit}
+                type="text"
+                id="gstNumber"
+                name="gstNumber"
+                value={fields.gstNumber}
+                onChange={handleChange}
+                placeholder="Enter GST Number"
+                className={`flex-1 px-3 py-2 ${
+                  edit &&
+                  "border border-gray-300 rounded-md focus:outline-none w-full"
+                }`}
+              />
+            ) : (
+              <p className="text-gray-700">{fields.gstNumber || "NA"}</p>
+            )}
           </RightBox>
         </div>
         <div className="flex items-start gap-4 mt-4">
@@ -480,7 +526,7 @@ const BusinessDetails = ({ data }) => {
             </label>
           </LeftBox>
           <RightBox>
-            <p className="text-base text-gray-700" id="phone">
+            <p className="text-gray-700" id="phone">
               {leadData?.phone_number}
             </p>
           </RightBox>
@@ -495,19 +541,23 @@ const BusinessDetails = ({ data }) => {
             </label>
           </LeftBox>
           <RightBox>
-            <input
-              disabled={!edit}
-              type="number"
-              id="employeeCount"
-              name="employeeCount"
-              value={fields.employeeCount}
-              placeholder="Employee Count"
-              onChange={handleChange}
-              className={`flex-1 px-3 py-2 ${
-                edit &&
-                "border border-gray-300 rounded-md focus:outline-none w-full"
-              }`}
-            />
+            {edit ? (
+              <input
+                disabled={!edit}
+                type="number"
+                id="employeeCount"
+                name="employeeCount"
+                value={fields.employeeCount}
+                placeholder="Employee Count"
+                onChange={handleChange}
+                className={`flex-1 px-3 py-2 ${
+                  edit &&
+                  "border border-gray-300 rounded-md focus:outline-none w-full"
+                }`}
+              />
+            ) : (
+              <p className="text-gray-700">{fields.employeeCount || "NA"}</p>
+            )}
           </RightBox>
         </div>
         <div className="flex items-start gap-4 mt-4">
@@ -520,19 +570,23 @@ const BusinessDetails = ({ data }) => {
             </label>
           </LeftBox>
           <RightBox>
-            <input
-              disabled={!edit}
-              type="text"
-              id="onlineLink1"
-              name="onlineLink1"
-              value={fields.onlineLink1}
-              onChange={handleChange}
-              placeholder="Online Link - 1"
-              className={`flex-1 px-3 py-2 ${
-                edit &&
-                "border border-gray-300 rounded-md focus:outline-none w-full"
-              }`}
-            />
+            {edit ? (
+              <input
+                disabled={!edit}
+                type="text"
+                id="onlineLink1"
+                name="onlineLink1"
+                value={fields.onlineLink1}
+                onChange={handleChange}
+                placeholder="Online Link - 1"
+                className={`flex-1 px-3 py-2 ${
+                  edit &&
+                  "border border-gray-300 rounded-md focus:outline-none w-full"
+                }`}
+              />
+            ) : (
+              <p className="text-gray-700">{fields.onlineLink1 || "NA"}</p>
+            )}
           </RightBox>
         </div>
         <div className="flex items-start gap-4 mt-4">
@@ -545,19 +599,23 @@ const BusinessDetails = ({ data }) => {
             </label>
           </LeftBox>
           <RightBox>
-            <input
-              disabled={!edit}
-              type="text"
-              id="onlineLink2"
-              name="onlineLink2"
-              value={fields.onlineLink2}
-              onChange={handleChange}
-              placeholder="Online Link - 2"
-              className={`flex-1 px-3 py-2 ${
-                edit &&
-                "border border-gray-300 rounded-md focus:outline-none w-full"
-              }`}
-            />
+            {edit ? (
+              <input
+                disabled={!edit}
+                type="text"
+                id="onlineLink2"
+                name="onlineLink2"
+                value={fields.onlineLink2}
+                onChange={handleChange}
+                placeholder="Online Link - 2"
+                className={`flex-1 px-3 py-2 ${
+                  edit &&
+                  "border border-gray-300 rounded-md focus:outline-none w-full"
+                }`}
+              />
+            ) : (
+              <p className="text-gray-700">{fields.onlineLink2 || "NA"}</p>
+            )}
           </RightBox>
         </div>
         <div className="flex items-start gap-4 mt-4">
@@ -570,19 +628,23 @@ const BusinessDetails = ({ data }) => {
             </label>
           </LeftBox>
           <RightBox>
-            <input
-              disabled={!edit}
-              type="text"
-              id="onlineLink3"
-              name="onlineLink3"
-              value={fields.onlineLink3}
-              onChange={handleChange}
-              placeholder="Online Link - 3"
-              className={`flex-1 px-3 py-2 ${
-                edit &&
-                "border border-gray-300 rounded-md focus:outline-none w-full"
-              }`}
-            />
+            {edit ? (
+              <input
+                disabled={!edit}
+                type="text"
+                id="onlineLink3"
+                name="onlineLink3"
+                value={fields.onlineLink3}
+                onChange={handleChange}
+                placeholder="Online Link - 3"
+                className={`flex-1 px-3 py-2 ${
+                  edit &&
+                  "border border-gray-300 rounded-md focus:outline-none w-full"
+                }`}
+              />
+            ) : (
+              <p className="text-gray-700">{fields.onlineLink3 || "NA"}</p>
+            )}
           </RightBox>
         </div>
         <div className="flex items-start gap-4 mt-4">
@@ -595,19 +657,23 @@ const BusinessDetails = ({ data }) => {
             </label>
           </LeftBox>
           <RightBox>
-            <input
-              disabled={!edit}
-              type="text"
-              id="onlineLink4"
-              name="onlineLink4"
-              placeholder="Online Link - 4"
-              value={fields.onlineLink4}
-              onChange={handleChange}
-              className={`flex-1 px-3 py-2 ${
-                edit &&
-                "border border-gray-300 rounded-md focus:outline-none w-full"
-              }`}
-            />
+            {edit ? (
+              <input
+                disabled={!edit}
+                type="text"
+                id="onlineLink4"
+                name="onlineLink4"
+                placeholder="Online Link - 4"
+                value={fields.onlineLink4}
+                onChange={handleChange}
+                className={`flex-1 px-3 py-2 ${
+                  edit &&
+                  "border border-gray-300 rounded-md focus:outline-none w-full"
+                }`}
+              />
+            ) : (
+              <p className="text-gray-700">{fields.onlineLink4 || "NA"}</p>
+            )}
           </RightBox>
         </div>
         <div className="flex items-start gap-4 mt-4">
@@ -620,19 +686,23 @@ const BusinessDetails = ({ data }) => {
             </label>
           </LeftBox>
           <RightBox>
-            <input
-              disabled={!edit}
-              type="text"
-              id="website"
-              name="website"
-              value={fields.website}
-              onChange={handleChange}
-              placeholder="Website URL"
-              className={`flex-1 px-3 py-2 ${
-                edit &&
-                "border border-gray-300 rounded-md focus:outline-none w-full"
-              }`}
-            />
+            {edit ? (
+              <input
+                disabled={!edit}
+                type="text"
+                id="website"
+                name="website"
+                value={fields.website}
+                onChange={handleChange}
+                placeholder="Website URL"
+                className={`flex-1 px-3 py-2 ${
+                  edit &&
+                  "border border-gray-300 rounded-md focus:outline-none w-full"
+                }`}
+              />
+            ) : (
+              <p className="text-gray-700">{fields.website || "NA"}</p>
+            )}
           </RightBox>
         </div>
         <div className="flex items-start gap-4 mt-4">
@@ -645,19 +715,23 @@ const BusinessDetails = ({ data }) => {
             </label>
           </LeftBox>
           <RightBox>
-            <input
-              disabled={!edit}
-              type="text"
-              id="facebook"
-              name="facebook"
-              value={fields.facebook}
-              placeholder="Facebook ID"
-              onChange={handleChange}
-              className={`flex-1 px-3 py-2 ${
-                edit &&
-                "border border-gray-300 rounded-md focus:outline-none w-full"
-              }`}
-            />
+            {edit ? (
+              <input
+                disabled={!edit}
+                type="text"
+                id="facebook"
+                name="facebook"
+                value={fields.facebook}
+                placeholder="Facebook ID"
+                onChange={handleChange}
+                className={`flex-1 px-3 py-2 ${
+                  edit &&
+                  "border border-gray-300 rounded-md focus:outline-none w-full"
+                }`}
+              />
+            ) : (
+              <p className="text-gray-700">{fields.facebook || "NA"}</p>
+            )}
           </RightBox>
         </div>
         <div className="flex items-start gap-4 mt-4">
@@ -670,19 +744,23 @@ const BusinessDetails = ({ data }) => {
             </label>
           </LeftBox>
           <RightBox>
-            <input
-              disabled={!edit}
-              type="text"
-              id="insta"
-              name="insta"
-              value={fields.insta}
-              onChange={handleChange}
-              placeholder="Insta ID"
-              className={`flex-1 px-3 py-2 ${
-                edit &&
-                "border border-gray-300 rounded-md focus:outline-none w-full"
-              }`}
-            />
+            {edit ? (
+              <input
+                disabled={!edit}
+                type="text"
+                id="insta"
+                name="insta"
+                value={fields.insta}
+                onChange={handleChange}
+                placeholder="Insta ID"
+                className={`flex-1 px-3 py-2 ${
+                  edit &&
+                  "border border-gray-300 rounded-md focus:outline-none w-full"
+                }`}
+              />
+            ) : (
+              <p className="text-gray-700">{fields.insta || "NA"}</p>
+            )}
           </RightBox>
         </div>
         <div className="flex items-start gap-4 mt-4">
@@ -695,19 +773,23 @@ const BusinessDetails = ({ data }) => {
             </label>
           </LeftBox>
           <RightBox>
-            <input
-              disabled={!edit}
-              type="text"
-              id="linkedIn"
-              name="linkedIn"
-              value={fields.linkedIn}
-              placeholder="LinkedIn ID"
-              onChange={handleChange}
-              className={`flex-1 px-3 py-2 ${
-                edit &&
-                "border border-gray-300 rounded-md focus:outline-none w-full"
-              }`}
-            />
+            {edit ? (
+              <input
+                disabled={!edit}
+                type="text"
+                id="linkedIn"
+                name="linkedIn"
+                value={fields.linkedIn}
+                placeholder="LinkedIn ID"
+                onChange={handleChange}
+                className={`flex-1 px-3 py-2 ${
+                  edit &&
+                  "border border-gray-300 rounded-md focus:outline-none w-full"
+                }`}
+              />
+            ) : (
+              <p className="text-gray-700">{fields.linkedIn || "NA"}</p>
+            )}
           </RightBox>
         </div>
         <div className="flex items-start gap-4 mt-4">
@@ -720,19 +802,23 @@ const BusinessDetails = ({ data }) => {
             </label>
           </LeftBox>
           <RightBox>
-            <input
-              disabled={!edit}
-              type="text"
-              id="youtube"
-              name="youtube"
-              value={fields.youtube}
-              onChange={handleChange}
-              placeholder="Youtube Channel"
-              className={`flex-1 px-3 py-2 ${
-                edit &&
-                "border border-gray-300 rounded-md focus:outline-none w-full"
-              }`}
-            />
+            {edit ? (
+              <input
+                disabled={!edit}
+                type="text"
+                id="youtube"
+                name="youtube"
+                value={fields.youtube}
+                onChange={handleChange}
+                placeholder="Youtube Channel"
+                className={`flex-1 px-3 py-2 ${
+                  edit &&
+                  "border border-gray-300 rounded-md focus:outline-none w-full"
+                }`}
+              />
+            ) : (
+              <p className="text-gray-700">{fields.youtube || "NA"}</p>
+            )}
           </RightBox>
         </div>
         <div className="flex items-start gap-4 mt-4">
@@ -745,19 +831,23 @@ const BusinessDetails = ({ data }) => {
             </label>
           </LeftBox>
           <RightBox>
-            <input
-              disabled={!edit}
-              type="text"
-              id="quora"
-              name="quora"
-              value={fields.quora}
-              onChange={handleChange}
-              placeholder="Quora Profile"
-              className={`flex-1 px-3 py-2 ${
-                edit &&
-                "border border-gray-300 rounded-md focus:outline-none w-full"
-              }`}
-            />
+            {edit ? (
+              <input
+                disabled={!edit}
+                type="text"
+                id="quora"
+                name="quora"
+                value={fields.quora}
+                onChange={handleChange}
+                placeholder="Quora Profile"
+                className={`flex-1 px-3 py-2 ${
+                  edit &&
+                  "border border-gray-300 rounded-md focus:outline-none w-full"
+                }`}
+              />
+            ) : (
+              <p className="text-gray-700">{fields.quora || "NA"}</p>
+            )}
           </RightBox>
         </div>
         <button
@@ -780,7 +870,7 @@ const LeftBox = ({ children }) => {
 const RightBox = ({ children }) => {
   return (
     <div className="flex-1 text-left">
-      <div className="max-w-72">{children}</div>
+      <div className="max-w-64  ">{children}</div>
     </div>
   );
 };
