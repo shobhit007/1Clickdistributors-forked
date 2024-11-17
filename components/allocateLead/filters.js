@@ -24,6 +24,7 @@ const Filters = ({
   setMyData,
   myData,
   isSalesPanel,
+  selectedSalesMembers,
 }) => {
   const [selectedDisposition, setSelectedDisposition] = useState([]);
   const [selectedSubDisposition, setSelectedSubDisposition] = useState([]);
@@ -39,6 +40,12 @@ const Filters = ({
 
   const [dispositionData, setDispositionData] = useState(null);
   const currentLoggedInUser = currentUser?.userDetails;
+
+  useEffect(() => {
+    if (selectedSalesMembers) {
+      setFilters((pre) => ({ ...pre, salesMembers: selectedSalesMembers }));
+    }
+  }, [selectedSalesMembers]);
 
   useEffect(() => {
     if (!originalData) {
@@ -243,7 +250,6 @@ const Filters = ({
       color: "white",
     };
   };
-
   return (
     <div className="flex flex-col gap-2 w-full mb-2  mt-2">
       {/* {list?.hasOwnProperty("salesMembers") &&

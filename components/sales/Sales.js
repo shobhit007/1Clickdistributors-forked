@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import moment from "moment";
 import { useQuery } from "@tanstack/react-query";
 import CustomTable from "../utills/customTable";
@@ -9,6 +9,7 @@ import { salesPanelColumns, subDispositions } from "@/lib/data/commonData";
 import LeadManager from "../leadManager/index";
 import Filters from "../allocateLead/filters";
 import panelContext from "@/lib/context/panelContext";
+import FilterLeadsByMember from "../FilterLeadsByMember";
 
 const salesFilters = ["All", "Pendings", "New Leads", "Follow Ups"];
 
@@ -29,7 +30,20 @@ export default function Sales() {
   const [myData, setMyData] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  const [pageHeight, setPageHeight] = useState(0);
+  const filterBtnsRef = useRef(null);
   const userDetails = useContext(panelContext);
+  const { headerHeight } = useContext(panelContext);
+  const [selectedSalesMembers, setSelectedSalesMembers] = useState([]);
+
+  useEffect(() => {
+    if (headerHeight) {
+      let windowHeight = window.innerHeight;
+
+      let pageH = windowHeight - headerHeight;
+      setPageHeight(pageH);
+    }
+  }, [headerHeight]);
 
   // search for default date
   useEffect(() => {
@@ -172,6 +186,26 @@ export default function Sales() {
           return true;
         })
         .map((key) => {
+          if (key == "profileId") {
+            return {
+              Header: key,
+              accessor: key,
+              Cell: ({ row }) => {
+                return (
+                  <button
+                    onClick={() => {
+                      setSelectedRows([row?.original]);
+                      setShowLeadManager(true);
+                    }}
+                    className="text-blue-500 font-semibold hover:underline"
+                  >
+                    {row?.original?.profileId}
+                  </button>
+                );
+              },
+            };
+          }
+
           if (
             key == "assignedAt" ||
             key == "createdAt" ||
@@ -207,6 +241,7 @@ export default function Sales() {
               id: key,
             };
           }
+
           return {
             Header: salesPanelColumns[key] || camelToTitle(key),
             accessor: key,
@@ -218,26 +253,26 @@ export default function Sales() {
       dynamicCols = dynamicCols?.filter((col) => col.accessor !== "leadId"); // Remove leadId
 
       // Add Profile Id column
-      const profileIdCol = {
-        Header: "Profile Id", // New column header
-        id: "profileId",
-        Cell: ({ row }) => {
-          return (
-            <button
-              onClick={() => {
-                setSelectedRows([row?.original]);
-                setShowLeadManager(true);
-              }}
-              className="text-blue-500 font-semibold hover:underline"
-            >
-              {row?.original?.profileId}
-            </button>
-          );
-        },
-      };
+      // const profileIdCol = {
+      //   Header: "Profile Id", // New column header
+      //   id: "profileId",
+      //   Cell: ({ row }) => {
+      //     return (
+      //       <button
+      //         onClick={() => {
+      //           setSelectedRows([row?.original]);
+      //           setShowLeadManager(true);
+      //         }}
+      //         className="text-blue-500 font-semibold hover:underline"
+      //       >
+      //         {row?.original?.profileId}
+      //       </button>
+      //     );
+      //   },
+      // };
 
       // Move Profile Id to the second position
-      dynamicCols.splice(1, 0, profileIdCol); // Insert Profile Id at index 1
+      // dynamicCols.splice(1, 0, profileIdCol); // Insert Profile Id at index 1
 
       let statiCols = staticColumns.map((key) => {
         return {
@@ -352,8 +387,8 @@ export default function Sales() {
   };
 
   return (
-    <div className="pt-4">
-      <div className="px-1 mb-6">
+    <div className="pt-1" style={{ height: pageHeight || "auto" }}>
+      <div className="px-1" ref={filterBtnsRef}>
         <div className="flex gap-1 flex-col rounded-md flex-wrap">
           <div className="flex gap-2 items-end flex-wrap">
             <div className="flex gap-2 items-end p-1 rounded bg-gray-300">
@@ -385,6 +420,11 @@ export default function Sales() {
               </div>
             </div>
 
+            <FilterLeadsByMember
+              selectedSalesMembers={selectedSalesMembers}
+              setSelectedSalesMembers={setSelectedSalesMembers}
+            />
+
             <input
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
@@ -407,6 +447,7 @@ export default function Sales() {
             setMyData={setMyData}
             myData={myData}
             isSalesPanel={true}
+            selectedSalesMembers={selectedSalesMembers}
           />
         </div>
       </div>
@@ -426,16 +467,25 @@ export default function Sales() {
         </div>
       )}
 
-      <CustomTable
-        data={leads || []}
-        uniqueDataKey={"leadId"}
-        selectedRows={[]}
-        setSelectedRows={() => {}}
-        columns={columns}
-        openModal={openModal}
-        closeModal={() => setOpenModal(false)}
-        searchValue={searchValue}
-      />
+      <div
+        className="w-full"
+        style={{
+          height: filterBtnsRef?.current
+            ? pageHeight - filterBtnsRef?.current?.offsetHeight - 8
+            : "560px",
+        }}
+      >
+        <CustomTable
+          data={leads || []}
+          uniqueDataKey={"leadId"}
+          selectedRows={[]}
+          setSelectedRows={() => {}}
+          columns={columns}
+          openModal={openModal}
+          closeModal={() => setOpenModal(false)}
+          searchValue={searchValue}
+        />
+      </div>
 
       {showUpdateModal && (
         <Modal>

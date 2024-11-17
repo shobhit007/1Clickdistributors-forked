@@ -12,11 +12,15 @@ const EdituserForm = ({ close, refetchUsers, currentUser, allUsers }) => {
     phone: "",
     department: "",
     hierarchy: "",
+    employeeId: "",
+    exitDate: "",
     senior: null,
   });
   const [loading, setLoading] = useState(false);
   // const [allLeaders, setAllLeaders] = useState(null);
   const [seniorPosition, setSeniorPosition] = useState(null);
+
+  console.log("data is", data);
 
   useEffect(() => {
     setData((pre) => ({ ...pre, senior: null }));
@@ -31,6 +35,8 @@ const EdituserForm = ({ close, refetchUsers, currentUser, allUsers }) => {
         department: currentUser.department,
         hierarchy: currentUser.hierarchy,
         senior: currentUser.senior || null,
+        employeeId: currentUser.employeeId || null,
+        exitDate: currentUser.employeeId || null,
       });
     }
   }, [currentUser]);
@@ -144,6 +150,20 @@ const EdituserForm = ({ close, refetchUsers, currentUser, allUsers }) => {
       <div className="flex flex-col w-full gap-1">
         <span className={`${spanStyle}`}>
           {/* <MdOutlineMailOutline /> */}
+          Enter user EmployeeId
+        </span>
+        <input
+          type="number"
+          name="employeeId"
+          required={true}
+          className="w-full rounded-md border border-gray-300 p-1"
+          value={data?.employeeId}
+          onChange={handleInputChange}
+        />
+      </div>
+      <div className="flex flex-col w-full gap-1">
+        <span className={`${spanStyle}`}>
+          {/* <MdOutlineMailOutline /> */}
           Enter password for user
         </span>
         <input
@@ -233,6 +253,21 @@ const EdituserForm = ({ close, refetchUsers, currentUser, allUsers }) => {
           </select>
         </div>
       )}
+
+      <div className="flex flex-col w-full gap-1">
+        <span className={`${spanStyle}`}>
+          {/* <MdOutlineMailOutline /> */}
+          Enter Exit date
+        </span>
+        <input
+          type="datetime-local"
+          name="exitDate"
+          required={true}
+          className="w-full rounded-md border border-gray-300 p-1"
+          value={data?.exitDate}
+          onChange={handleInputChange}
+        />
+      </div>
 
       <div className="mt-4 w-full">
         <button

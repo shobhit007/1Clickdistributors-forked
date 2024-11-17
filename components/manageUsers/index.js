@@ -107,13 +107,15 @@ const ManageUsers = () => {
       "department",
       "hierarchy",
       "seniorName",
+      "employeeId",
       "active",
       "password",
       "createdAt",
+      "exitDate",
       "edit",
     ];
     return cols.map((key) => {
-      if (key == "createdAt") {
+      if (key == "createdAt" || key == "exitDate") {
         return {
           Header: key,
           accessor: key,

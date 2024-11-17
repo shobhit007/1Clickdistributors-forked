@@ -11,7 +11,6 @@ import { RiListSettingsFill } from "react-icons/ri";
 import { panelNames } from "@/lib/data/commonData";
 import { FaChartBar } from "react-icons/fa";
 
-
 const getIcons = (panelName, selected) => {
   console.log("panel name is", panelName);
   let d6521f = { color: selected ? "#fff" : "#d6521f", fontSize: 22 };
@@ -19,13 +18,14 @@ const getIcons = (panelName, selected) => {
     case "allocate_leads":
       return <MdHowToVote style={d6521f} />;
     case "sales_panel":
-      return <FaChartBar style={d6521f} />;
+      return <img src="/sales.png" className="h-5 w-5" />;
     case "manage_users":
-      return <FaUsersRays style={d6521f} />;
+      return <img src="/hrms.png" className="h-5 w-5"/>
     case "roles_and_permissions":
       return <GiSettingsKnobs style={d6521f} />;
     case "dashboard":
-      return <RxDashboard style={d6521f} />;
+      return <img src="/Dashboard.png" className="h-5 w-5" />;
+    // return <RxDashboard style={d6521f} />;
     case "panel_settings":
       return <RiListSettingsFill style={d6521f} />;
     default:
@@ -74,7 +74,7 @@ const PanelSelector = () => {
   return (
     <motion.div
       initial={{ width: 0, opacity: 0 }}
-      animate={{ width: "300px", opacity: 1 }}
+      animate={{ width: "230px", opacity: 1 }}
       exit={{ width: 0, opacity: 0 }}
       transition={{ duration: 0.2 }}
       ref={sidebarRef}
@@ -82,10 +82,10 @@ const PanelSelector = () => {
     >
       <div className="flex flex-col relative w-full pt-12">
         <button
-          className="text-white text-3xl cursor-pointer absolute top-0 right-0 bg-red-500 py-1 px-2"
+          className="text-white text-3xl cursor-pointer absolute top-0 right-0 bg-red-500 py-1 px-1"
           onClick={() => setShowSidebar(false)}
         >
-          <MdClose className="" />
+          <MdClose className="text-lg" />
         </button>
         {userRoles?.length > 0 ? (
           userRoles?.map((permission) => (

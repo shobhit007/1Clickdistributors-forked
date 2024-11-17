@@ -242,12 +242,23 @@ const CustomTable = ({
                             : ""
                         }`}
                         onClick={() => {
-                          cell?.column?.id == "remarks" &&
-                            cell?.row?.original?.remarks;
-                          setSelectedLeadForPopup(cell?.row?.original);
+                          if (
+                            cell?.column?.id == "remarks" &&
+                            cell?.row?.original?.remarks
+                          ) {
+                            console.log(
+                              'cell?.column?.id == "remarks" &&',
+                              cell?.column?.id == "remarks" &&
+                                cell?.row?.original?.remarks,
+                              cell?.column?.id
+                            );
+                            setSelectedLeadForPopup(cell?.row?.original);
+                          }
                         }}
                       >
-                        {cell.value && typeof cell.value != "object" ? (
+                        {cell.value &&
+                        typeof cell.value != "object" &&
+                        cell?.column?.id != "profileId" ? (
                           <HighlightText
                             text={cell.value || ""}
                             searchValue={searchValue}

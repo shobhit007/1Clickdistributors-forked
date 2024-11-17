@@ -26,6 +26,7 @@ const AdduserForm = ({ close, refetchUsers, allUsers }) => {
     phone: "",
     department: "",
     hierarchy: "",
+    employeeId: "",
     isActive: true,
     senior: null,
   });
@@ -57,6 +58,8 @@ const AdduserForm = ({ close, refetchUsers, allUsers }) => {
     let value = event.target.value;
     setData((pre) => ({ ...pre, [name]: value }));
   };
+
+  console.log(" data is", data);
 
   // useEffect(() => {
   //   let leaders = allUsers.filter((item) => item?.hierarchy == "teamLead");
@@ -145,6 +148,20 @@ const AdduserForm = ({ close, refetchUsers, allUsers }) => {
           required={true}
           className="w-full rounded-md border border-gray-300 p-1"
           value={data?.email}
+          onChange={handleInputChange}
+        />
+      </div>
+      <div className="flex flex-col w-full gap-1">
+        <span className={`${spanStyle}`}>
+          {/* <MdOutlineMailOutline /> */}
+          Enter EmployeeId
+        </span>
+        <input
+          type="text"
+          name="employeeId"
+          required={true}
+          className="w-full rounded-md border border-gray-300 p-1"
+          value={data?.employeeId}
           onChange={handleInputChange}
         />
       </div>
