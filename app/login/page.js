@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FaRegEyeSlash } from "react-icons/fa";
 import {
   MdOutlineMailOutline,
@@ -19,9 +19,22 @@ const page = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const router = useRouter();
   const dispatch = useDispatch();
   const queryClient = useQueryClient();
+
+  useEffect(() => {
+    // Check if credentials are saved in localStorage
+    const savedCredentials = JSON.parse(
+      localStorage.getItem("rememberMeCredentials")
+    );
+    if (savedCredentials) {
+      setEmail(savedCredentials.email);
+      setPassword(savedCredentials.password);
+      setRememberMe(true);
+    }
+  }, []);
 
   const getLoginPageImage = async () => {
     try {
@@ -74,6 +87,16 @@ const page = () => {
         );
         localStorage.setItem("authToken", data.token);
         localStorage.setItem("email", email);
+        if (rememberMe) {
+          // Save credentials to localStorage
+          localStorage.setItem(
+            "rememberMeCredentials",
+            JSON.stringify({ email, password })
+          );
+        } else {
+          // Remove credentials from localStorage if not remembered
+          localStorage.removeItem("rememberMeCredentials");
+        }
         router.replace("/board");
       } else {
         return toast.error(data.message);
@@ -88,7 +111,7 @@ const page = () => {
 
   return (
     <div className="w-[98vw] h-[100vh] flex items-center justify-center">
-      <div className="imgComponent hidden sm:flex items-center justify-center sm:w-[70%] h-full bg-gray-200">
+      <div className="imgComponent hidden sm:flex items-center justify-center sm:w-[75%] h-full bg-gray-200">
         {!isLoading && (
           <img
             src={loginPageImage || "/loginbg.jpg"}
@@ -97,13 +120,13 @@ const page = () => {
         )}
       </div>
 
-      <div className="flex relative justify-center h-full items-center w-full sm:w-[30%]">
+      <div className="flex relative justify-start h-full items-center w-full sm:w-[25%]">
         {/* <div className="w-full"> */}
         {/* </div>\  */}
-        <div className="flex relative flex-col items-start justify-start w-full bg-white">
+        <div className="flex relative flex-col items-start justify-start w-fit bg-white">
           <img
             src="/expendico.png"
-            className="w-40 h-auto object-contain filter mb-4 lg:mb-6 -translate-x-4"
+            className="w-72 h-auto object-contain filter mb-4 lg:mb-6 -translate-x-8"
           />
           <h2 className="text-lg md:text-[1.5rem] text-black">
             Welcome to 1Clickdistributors
@@ -119,19 +142,19 @@ const page = () => {
               name="current-password"
               autocomplete="current-password"
               required={true}
-              className="w-full p-2 bg-gray-100 border-b-2 border-b-gray-300 focus:outline-none focus:border-b-blue-400"
+              className="w-full p-2 bg-transparent border-2 rounded-md border-gray-200 focus:outline-none focus:border-gray-300"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
             <div className="flex flex-col w-full mt-6">
-              <div className="flex justify-between items-center  bg-gray-100">
+              <div className="flex justify-between items-center bg-transparent border-2 rounded-md border-gray-200 focus:border-gray-300">
                 <input
                   type={showPassword ? "text" : "password"}
                   required={true}
                   name="password"
                   placeholder="Enter Password"
                   autocomplete="password"
-                  className="flex flex-1 bg-transparent p-2 border-b-2 border-b-gray-300 focus:outline-none focus:border-b-blue-400"
+                  className="w-full p-2 bg-transparent focus:outline-none"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
@@ -149,24 +172,39 @@ const page = () => {
               </div>
             </div>
 
+            {/* Remember Me Checkbox */}
+            <div className="flex items-center justify-between w-full mt-3">
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="rememberMe"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="mr-2 accent-blue-600"
+                />
+                <label htmlFor="rememberMe" className="text-xs text-gray-500">
+                  Remember Me
+                </label>
+              </div>
+              <Link
+                href={`/reset-password`}
+                className="text-xs font-semibold text-blue-600"
+              >
+                Forgot Password?
+              </Link>
+            </div>
+
             <button
               type="submit"
               onClick={loginUser}
               disabled={loading}
-              className={`w-full bg-colorPrimary disabled:bg-colorPrimary/50 text-white p-2 rounded-md mt-6 ${
+              className={`w-full bg-[#4a90e2] disabled:bg-blue-600/25 text-white p-2 rounded-md mt-8 ${
                 loading ? "animate-pulse" : ""
               }`}
             >
               {loading ? "Logging in..." : "Login"}
             </button>
           </form>
-
-          <Link
-            href={`/reset-password`}
-            className="hover:underline text-colorPrimary/70 mt-4 text-left"
-          >
-            Forgot Password? Click to recover
-          </Link>
         </div>
 
         {/* image component */}

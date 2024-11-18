@@ -131,7 +131,7 @@ const CallDetails = ({ data: leadDetails, refetchLead }) => {
   };
 
   return (
-    <div className="w-[30%] max-w-80 overflow-auto relative">
+    <div className="w-[30%] max-w-80 overflow-auto relative pr-3">
       {/* show only for sales members */}
       {userData?.hierarchy === "executive" && (
         <LeadsCount leadsCount={leadsCount} refetch={refetch} />

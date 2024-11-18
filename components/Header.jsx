@@ -40,7 +40,8 @@ const Header = () => {
   }, [headerRef]);
 
   const handleLogout = () => {
-    localStorage.clear();
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("email");
     dispatch({ type: "LOGOUT" });
     dispatch(logout());
     router.replace("/login");
