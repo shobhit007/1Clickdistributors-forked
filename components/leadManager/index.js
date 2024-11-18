@@ -52,12 +52,12 @@ export default function LeadManager({ onClose, lead }) {
     <Modal>
       <div className="w-screen h-screen p-4 flex">
         <div className="bg-slate-50 w-full px-4 pb-4 pt-8 overflow-hidden relative rounded">
-          <button
+          {/* <button
             className="absolute right-20 top-0 text-gray-800 text-sm px-3 py-1"
             onClick={refetch}
           >
             refetch
-          </button>
+          </button> */}
           <button
             className="absolute right-0 top-0 bg-red-600 text-white text-sm px-3 py-1"
             onClick={onClose}

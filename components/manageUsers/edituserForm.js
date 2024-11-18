@@ -10,6 +10,7 @@ const EdituserForm = ({ close, refetchUsers, currentUser, allUsers }) => {
     name: "",
     password: "",
     phone: "",
+    updatedEmail:"",
     department: "",
     hierarchy: "",
     employeeId: "",
@@ -32,11 +33,12 @@ const EdituserForm = ({ close, refetchUsers, currentUser, allUsers }) => {
         name: currentUser.name,
         password: currentUser.password,
         phone: currentUser.phone,
+        updatedEmail: currentUser.email,
         department: currentUser.department,
         hierarchy: currentUser.hierarchy,
         senior: currentUser.senior || null,
         employeeId: currentUser.employeeId || null,
-        exitDate: currentUser.employeeId || null,
+        exitDate: currentUser.exitDate || null,
       });
     }
   }, [currentUser]);
@@ -150,10 +152,24 @@ const EdituserForm = ({ close, refetchUsers, currentUser, allUsers }) => {
       <div className="flex flex-col w-full gap-1">
         <span className={`${spanStyle}`}>
           {/* <MdOutlineMailOutline /> */}
+          Enter user email
+        </span>
+        <input
+          type="text"
+          name="updatedEmail"
+          required={true}
+          className="w-full rounded-md border border-gray-300 p-1"
+          value={data?.updatedEmail}
+          onChange={handleInputChange}
+        />
+      </div>
+      <div className="flex flex-col w-full gap-1">
+        <span className={`${spanStyle}`}>
+          {/* <MdOutlineMailOutline /> */}
           Enter user EmployeeId
         </span>
         <input
-          type="number"
+          type="text"
           name="employeeId"
           required={true}
           className="w-full rounded-md border border-gray-300 p-1"
