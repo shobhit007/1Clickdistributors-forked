@@ -44,7 +44,7 @@ const FilterLeadsByMember = ({
   };
 
   const { data: allMembers, refetch } = useQuery({
-    queryKey: ["allSalesMembers"],
+    queryKey: ["allInternalMembers"],
     queryFn: getallMembers,
   });
 
