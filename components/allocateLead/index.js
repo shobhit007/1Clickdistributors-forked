@@ -217,10 +217,7 @@ const index = () => {
               return (
                 value && (
                   <p>
-                    {value?._seconds &&
-                      moment(new Date(value?._seconds * 1000)).format(
-                        "dd-mm-yyyy"
-                      )}
+                    {new Date(value?._seconds * 1000)?.toLocaleDateString()}
                   </p>
                 )
               );
