@@ -120,15 +120,15 @@ const page = () => {
         )}
       </div>
 
-      <div className="flex relative justify-start h-full items-center w-full sm:w-[25%]">
+      <div className="flex relative justify-center sm:justify-start h-full items-center w-full sm:w-[25%]">
         {/* <div className="w-full"> */}
         {/* </div>\  */}
-        <div className="flex relative flex-col items-start justify-start w-fit bg-white">
+        <div className="flex relative flex-col items-center justify-start w-fit bg-white">
           <img
             src="/expendico.png"
-            className="w-72 h-auto object-contain filter mb-4 lg:mb-6 -translate-x-8"
+            className="w-72 ml-5 h-auto object-contain filter mb-4 lg:mb-6 -translate-x-8"
           />
-          <h2 className="text-lg md:text-[1.5rem] text-black">
+          <h2 className="text-lg lg:text-[1.2rem] xl:text-[1.5rem] text-black">
             Welcome to 1Clickdistributors
           </h2>
           <p className="text-sm md:text-base text-gray-500 mt-2 font-semibold">
