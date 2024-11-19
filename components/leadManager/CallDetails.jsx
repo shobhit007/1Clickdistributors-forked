@@ -151,6 +151,21 @@ const CallDetails = ({ data: leadDetails, refetchLead }) => {
         <div className="flex flex-col items-start gap-1 mt-2">
           <div className="text-left">
             <label
+              htmlFor="contact number"
+              className="font-semibold text-black nowrap"
+            >
+              Contact Number
+            </label>
+          </div>
+          <div className="text-left">
+            <p className="text-gray-700">
+              {leadDetails?.leadData?.phone_number}
+            </p>
+          </div>
+        </div>
+        <div className="flex flex-col items-start gap-1 mt-2">
+          <div className="text-left">
+            <label
               htmlFor="companyName"
               className="text-black font-semibold nowrap"
             >
@@ -230,7 +245,7 @@ const CallDetails = ({ data: leadDetails, refetchLead }) => {
               htmlFor="subDisposition"
               className="text-black font-semibold nowrap"
             >
-              Sub-Disposition:
+              Sub-Disposition
             </label>
           </div>
           <div className="text-left">
@@ -245,15 +260,13 @@ const CallDetails = ({ data: leadDetails, refetchLead }) => {
               htmlFor="lastCallBackDate"
               className="text-black font-semibold nowrap"
             >
-              Last Call Back Date
+              Last Call Back
             </label>
           </div>
           <div className="text-left">
             <p className="text-gray-700">
               {leadDetails?.leadData?.lastCallBackDate
-                ? moment(
-                    leadDetails?.leadData.lastCallBackDate
-                  ).toLocaleString()
+                ? convertTimeStamp(leadDetails?.leadData?.lastCallBackDate)
                 : "NA"}
             </p>
           </div>
@@ -264,13 +277,13 @@ const CallDetails = ({ data: leadDetails, refetchLead }) => {
               htmlFor="followUpDate"
               className="text-black font-semibold nowrap"
             >
-              Next Call Back Date
+              Next Call Back
             </label>
           </div>
           <div className="text-left">
             <p className="text-gray-700">
               {leadDetails?.leadData?.followUpDate
-                ? convertTimeStamp(leadDetails?.leadData.followUpDate)
+                ? convertTimeStamp(leadDetails?.leadData?.followUpDate)
                 : "NA"}
             </p>
           </div>
