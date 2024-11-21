@@ -65,6 +65,7 @@ const Filters = ({
     let filteredSubDispositionData = {
       "Prospect-Followup": 0,
       "Presentation-Followup": 0,
+      "Payment-Followup": 0
     };
     originalData?.forEach((lead) => {
       if (!lead.salesExecutive) {
@@ -132,7 +133,7 @@ const Filters = ({
       "Not Interested",
       "Deal Done",
     ];
-    let subDispositionFilter = ["Prospect-Followup", "Presentation-Followup"];
+    let subDispositionFilter = ["Prospect-Followup", "Presentation-Followup", "Payment-Followup"];
 
     if (filters?.btnFilter) {
       if (dispostionsFilter.includes(filters?.btnFilter)) {
@@ -270,7 +271,7 @@ const Filters = ({
       <div className="flex gap-[6px] items-end w-full overflow-x-auto">
         <button
           onClick={resetFilters}
-          className="flex text-nowrap items-center gap-1 hover:bg-colorPrimary/20 bg-colorPrimary/10 px-1 py-[2px] rounded-md border border-colorPrimary text-colorPrimary font-semibold text-sm"
+          className="flex text-nowrap items-center gap-1 hover:bg-colorPrimary/20 bg-colorPrimary/10 px-1 py-[2px] rounded-md border border-colorPrimary text-colorPrimary font-semibold text-[12px]"
         >
           Reset filters
           <MdClose className="text-colorPrimary text-base" />
@@ -284,11 +285,10 @@ const Filters = ({
                 unAllocated: !pre.unAllocated,
               }))
             }
-            className={`py-[2px] text-nowrap text-sm px-1 border font-semibold rounded-md ${
-              filters?.unAllocated
-                ? "bg-colorPrimary  text-white"
-                : "bg-colorPrimary/20  text-gray-500"
-            }`}
+            className={`py-[2px] text-nowrap text-[12px] px-1 border font-semibold rounded-md ${filters?.unAllocated
+              ? "bg-colorPrimary  text-white"
+              : "bg-colorPrimary/20  text-gray-500"
+              }`}
           >
             Unallocated leads{" "}
             {unallocatedLeadsCount && <span>({unallocatedLeadsCount})</span>}
@@ -304,9 +304,8 @@ const Filters = ({
               //   item !== "Today_Followup"
               // }
               style={getBtnSyle(item)}
-              className={`flex text-nowrap items-center gap-1 px-1 rounded py-[2px] text-sm ${
-                filters?.btnFilter == item ? "scale-105" : ""
-              }`}
+              className={`flex text-nowrap items-center gap-1 px-1 rounded py-[2px] text-[12px] ${filters?.btnFilter == item ? "scale-105" : ""
+                }`}
               onClick={() => onSelectButtonFilter(item)}
             >
               {item?.split("_").join(" ")} ({dispositionData[item]})
