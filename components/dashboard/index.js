@@ -169,7 +169,7 @@ const index = () => {
       )}
 
       <div className="flex gap-2 items-end py-1 px-3 rounded-md flex-wrap my-2 mb-6">
-        <div className="flex flex-col">
+        <div className="flex flex-row gap-1 items-center">
           <span className="text-[12px] text-gray-500">From</span>
           <input
             type="date"
@@ -178,7 +178,7 @@ const index = () => {
             onChange={(e) => setSelectedStartDate(e.target.value)}
           />
         </div>
-        <div className="flex flex-col">
+        <div className="flex flex-row gap-1 items-center">
           <span className="text-[12px] text-gray-500">To</span>
           <input
             type="date"

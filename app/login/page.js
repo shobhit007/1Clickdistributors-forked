@@ -111,7 +111,7 @@ const page = () => {
 
   return (
     <div className="w-[98vw] h-[100vh] flex items-center justify-center">
-      <div className="imgComponent hidden sm:flex items-center justify-center sm:w-[75%] h-full bg-gray-200">
+      <div className="imgComponent hidden sm:flex items-center justify-center sm:w-[72%] h-full bg-gray-200">
         {!isLoading && (
           <img
             src={loginPageImage || "/loginbg.jpg"}
@@ -120,13 +120,13 @@ const page = () => {
         )}
       </div>
 
-      <div className="flex relative justify-center sm:justify-start h-full items-center w-full sm:w-[25%]">
+      <div className="flex relative justify-center sm:justify-start h-full items-center w-full sm:w-[28%] px-2 md:px-4">
         {/* <div className="w-full"> */}
         {/* </div>\  */}
-        <div className="flex relative flex-col items-center justify-start w-fit bg-white">
+        <div className="flex relative flex-col items-center justify-start w-full bg-white">
           <img
             src="/expendico.png"
-            className="w-72 ml-5 h-auto object-contain filter mb-4 lg:mb-6 -translate-x-8"
+            className="w-80 h-auto object-contain filter mb-4 lg:mb-10"
           />
           <h2 className="text-lg lg:text-[1.2rem] xl:text-[1.5rem] text-black">
             Welcome to 1Clickdistributors

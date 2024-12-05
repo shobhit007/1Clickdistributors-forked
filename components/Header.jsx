@@ -96,22 +96,21 @@ const Header = () => {
       </div>
 
       <div className="flex items-center gap-4">
+        <div className="hidden sm:flex flex-col">
+          <h1 className="text-sm font-semibold capitalize text-orange-900">
+            {userDetails?.name}
+          </h1>
+          {/* {userDetails?.hierarchy && (
+            <h1 className="text-sm text-gray-500 capitalize">
+              ({userDetails?.hierarchy})
+            </h1>
+          )} */}
+        </div>
         <MdSearch
           onClick={showGlobalSearch}
           className="text-gray-600 cursor-pointer"
           style={{ fontSize: 22 }}
         />
-
-        {/* <div className="hidden md:flex flex-col">
-          <h1 className="text-sm font-semibold capitalize">
-            Welcome {userDetails?.name}
-          </h1>
-          {userDetails?.hierarchy && (
-            <h1 className="text-sm text-gray-500 capitalize">
-              ({userDetails?.hierarchy})
-            </h1>
-          )}
-        </div> */}
 
         <div className="flex items-center gap-1">
           {userDetails?.userImageLink ? (

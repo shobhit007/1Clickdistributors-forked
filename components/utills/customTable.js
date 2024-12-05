@@ -193,16 +193,16 @@ const CustomTable = ({
           {...getTableProps()}
           className="min-w-full divide-y mt-1 divide-gray-200 max-h-[98%]"
         >
-          <thead className="bg-blue-100">
+          <thead className="bg-blue-100 sticky top-0">
             {headerGroups.map((headerGroup) => (
               <tr {...headerGroup.getHeaderGroupProps()}>
                 {headerGroup.headers.map((column) => (
                   <th
                     {...column.getHeaderProps(column.getSortByToggleProps())}
-                    className="p-2 cursor-pointer w-fit max-w-[200px]"
+                    className="p-1 cursor-pointer w-fit max-w-[200px]"
                   >
                     <div className="flex flex-col">
-                      <div className="flex gap-2 px-2 text-sm">
+                      <div className="flex gap-2 px-2 text-sm font-[Figtree] font-[600]">
                         {column.render("Header")}
                         <span>
                           {column.isSorted
