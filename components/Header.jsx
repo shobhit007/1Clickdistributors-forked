@@ -105,7 +105,7 @@ const Header = () => {
               ({userDetails?.hierarchy})
             </h1>
           )} */}
-        </div>
+      </div>
         <MdSearch
           onClick={showGlobalSearch}
           className="text-gray-600 cursor-pointer"

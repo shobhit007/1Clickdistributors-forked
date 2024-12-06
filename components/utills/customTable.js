@@ -79,11 +79,12 @@ const CustomTable = ({
           }
         }
       },
-      className: `cursor-pointer ${selectedRows?.filter((item) => item[uniqueKey] == row[uniqueKey])
-        ?.length > 0
-        ? "bg-gray-200"
-        : "bg-white"
-        } hover:bg-gray-200`,
+      className: `cursor-pointer ${
+        selectedRows?.filter((item) => item[uniqueKey] == row[uniqueKey])
+          ?.length > 0
+          ? "bg-gray-200"
+          : "bg-white"
+      } hover:bg-gray-200`,
     };
   };
 
@@ -180,10 +181,13 @@ const CustomTable = ({
               <MdClose className="text-red-500 text-3xl" />
             </button>
 
-
             <div className="p-2 flex flex-col gap-3">
-              <h1 className="font-semibold">{selectedTypeToShow == "remarks" ? "Remarks" : "Query"}</h1>
-              <p className="text-gray-500">{selectedLeadForPopup[selectedTypeToShow] || "Nothing to show"}</p>
+              <h1 className="font-semibold">
+                {selectedTypeToShow == "remarks" ? "Remarks" : "Query"}
+              </h1>
+              <p className="text-gray-500">
+                {selectedLeadForPopup[selectedTypeToShow] || "Nothing to show"}
+              </p>
             </div>
           </div>
         </Modal>
@@ -237,22 +241,25 @@ const CustomTable = ({
                       className="whitespace-nowrap px-2 text-[12px] max-w-[185px] border border-gray-300 overflow-hidden text-gray-700 scrollbar-thin"
                     >
                       <div
-                        className={`${wrapUpCols?.includes(cell?.column?.Header)
-                          ? "max-w-[280px]"
-                          : ""
-                          }`}
+                        className={`capitalize ${
+                          wrapUpCols?.includes(cell?.column?.Header)
+                            ? "max-w-[280px]"
+                            : ""
+                        }`}
                         onClick={() => {
                           if (
-                            cell?.column?.id == "remarks" || cell?.column?.id == "whats_is_your_requirement_?_write_in_brief"
+                            cell?.column?.id == "remarks" ||
+                            cell?.column?.id ==
+                              "whats_is_your_requirement_?_write_in_brief"
                           ) {
                             setSelectedLeadForPopup(cell?.row?.original);
-                            setSelectedTypeToShow(cell.column.id)
+                            setSelectedTypeToShow(cell.column.id);
                           }
                         }}
                       >
                         {cell.value &&
-                          typeof cell.value != "object" &&
-                          cell?.column?.id != "profileId" ? (
+                        typeof cell.value != "object" &&
+                        cell?.column?.id != "profileId" ? (
                           <HighlightText
                             text={cell.value || ""}
                             searchValue={searchValue}

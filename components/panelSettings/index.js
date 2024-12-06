@@ -105,9 +105,15 @@ const index = () => {
   return (
     <div className="w-full h-auto p-3">
       <div className="flex flex-col gap-2 ">
-        <span className="text-gray-600 text-lg underline font-semibold">
-          1. Login cover picture
-        </span>
+        <div className="flex flex-col">
+          <span className="text-gray-600 text-lg underline font-semibold">
+            1. Login cover picture
+          </span>
+          <span className="text-gray-600 text-sm">
+            Note. upload image with 16:9 ratio full hd image roughly "1920px x
+            1080px"
+          </span>
+        </div>
 
         <img src={loginPageImage} className="h-auto rounded w-[300px]" />
         <div className="flex gap-1 items-center">

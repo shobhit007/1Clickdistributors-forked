@@ -8,6 +8,7 @@ import { RiCloseCircleFill } from "react-icons/ri";
 import Modal from "../utills/Modal";
 import LeadUpdateHistory from "../leadUpdateHistory";
 import ShowDetails from "../allocateLead/showDetails";
+import { leadsPanelColumns } from "@/lib/data/commonData";
 
 const index = () => {
   const { previousComponent, setDisplayComponent } = useContext(panelContext);
@@ -23,6 +24,7 @@ const index = () => {
     { label: "Lead Id", value: "leadId" },
     { label: "Phone", value: "phone" },
     { label: "Company name", value: "companyName" },
+    { label: "Profile Id", value: "profileId" },
   ];
 
   const handleSearch = async () => {
@@ -57,22 +59,24 @@ const index = () => {
   };
 
   const staticColumns = [
-    "leadId",
-    "full_name",
+    "createdAt",
+    "source",
+    "dataType",
+    "profileId",
     "company_name",
     "looking_for",
-    "phone_number",
-    "salesExecutiveName",
+    "your_mobile_number",
+    "email",
+    "city",
+    "whats_is_your_requirement_?_write_in_brief",
     "disposition",
-    "subDisposition",
-    "followUpDate",
   ];
 
   const columns = useMemo(() => {
     return staticColumns.map((key) => {
       if (key == "followUpDate" || key == "createdAt" || key == "updatedAt") {
         return {
-          Header: key,
+          Header: leadsPanelColumns[key] || key,
           accessor: key,
           Cell: ({ value }) => {
             return (
@@ -99,7 +103,7 @@ const index = () => {
         };
       }
       return {
-        Header: camelToTitle(key),
+        Header: leadsPanelColumns[key] || camelToTitle(key),
         accessor: key,
         id: key,
       };

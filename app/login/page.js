@@ -111,12 +111,15 @@ const page = () => {
 
   return (
     <div className="w-[98vw] h-[100vh] flex items-center justify-center">
-      <div className="imgComponent hidden sm:flex items-center justify-center sm:w-[72%] h-full bg-gray-200">
+      <div className="imgComponent hidden sm:flex items-center justify-center sm:w-[72%] h-full">
         {!isLoading && (
-          <img
-            src={loginPageImage || "/loginbg.jpg"}
-            className="w-full h-full bg-cover bg-center"
-          />
+          <div className="w-full h-full aspect-[16/9]">
+            <img
+              src={loginPageImage || "/loginbg.jpg"}
+              alt="Login Background"
+              className="w-full h-full object-contain"
+            />
+          </div>
         )}
       </div>
 
