@@ -85,6 +85,7 @@ const CallDetails = ({ data: leadDetails, refetchLead }) => {
       if (
         fields.disposition !== "Not Interested" &&
         fields.disposition !== "Become Distributor" &&
+        fields.disposition !== "No Contactable" &&
         !fields.followUpDate
       ) {
         toast.error("Please select follow up date");
@@ -131,30 +132,30 @@ const CallDetails = ({ data: leadDetails, refetchLead }) => {
   };
 
   return (
-    <div className="w-[30%] max-w-80 overflow-auto relative pr-3">
+    <div className="w-[30%] max-w-80 overflow-auto relative pr-3 flex flex-col">
       {/* show only for sales members */}
       {userData?.hierarchy === "executive" && (
         <LeadsCount leadsCount={leadsCount} refetch={refetch} />
       )}
 
       <div className="w-full border border-gray-200 bg-white p-3 rounded">
-        <div className="flex flex-col items-start gap-1">
+        <div className="flex items-start gap-2">
           <div className="text-left">
             <label htmlFor="name" className="font-semibold text-black nowrap">
-              Name
+              Name:
             </label>
           </div>
           <div className="text-left">
             <p className="text-gray-700">{leadDetails?.leadData?.full_name}</p>
           </div>
         </div>
-        <div className="flex flex-col items-start gap-1 mt-2">
+        <div className="flex items-start gap-2 mt-2">
           <div className="text-left">
             <label
               htmlFor="contact number"
               className="font-semibold text-black nowrap"
             >
-              Contact Number
+              Contact Number:
             </label>
           </div>
           <div className="text-left">
@@ -163,13 +164,13 @@ const CallDetails = ({ data: leadDetails, refetchLead }) => {
             </p>
           </div>
         </div>
-        <div className="flex flex-col items-start gap-1 mt-2">
+        <div className="flex items-start gap-2 mt-2">
           <div className="text-left">
             <label
               htmlFor="companyName"
               className="text-black font-semibold nowrap"
             >
-              Company Name
+              Company Name:
             </label>
           </div>
           <div className="text-left">
@@ -179,10 +180,10 @@ const CallDetails = ({ data: leadDetails, refetchLead }) => {
           </div>
         </div>
 
-        <div className="flex flex-col items-start gap-1 mt-2">
+        <div className="flex items-start gap-2 mt-2">
           <div className="text-left">
             <label htmlFor="city" className=" text-black font-semibold nowrap">
-              City
+              City:
             </label>
           </div>
           <div className="text-left">
@@ -223,14 +224,14 @@ const CallDetails = ({ data: leadDetails, refetchLead }) => {
         </div>
       </div>
 
-      <div className="border border-gray-200 p-4 mt-4 rounded bg-white">
-        <div className="flex flex-col items-start gap-1">
+      <div className="border border-gray-200 p-4 mt-4 rounded bg-white flex-1">
+        <div className="flex items-start gap-2">
           <div className="text-left">
             <label
               htmlFor="disposition"
               className=" text-black font-semibold nowrap"
             >
-              Disposition
+              Disposition:
             </label>
           </div>
           <div className="text-left">
@@ -239,13 +240,13 @@ const CallDetails = ({ data: leadDetails, refetchLead }) => {
             </p>
           </div>
         </div>
-        <div className="flex flex-col items-start gap-1 mt-2">
+        <div className="flex items-start gap-2 mt-2">
           <div className="text-left">
             <label
               htmlFor="subDisposition"
               className="text-black font-semibold nowrap"
             >
-              Sub-Disposition
+              Sub-Disposition:
             </label>
           </div>
           <div className="text-left">
@@ -254,13 +255,13 @@ const CallDetails = ({ data: leadDetails, refetchLead }) => {
             </p>
           </div>
         </div>
-        <div className="flex flex-col items-start gap-1 mt-2">
+        <div className="flex items-start gap-2 mt-2">
           <div className="text-left">
             <label
               htmlFor="lastCallBackDate"
               className="text-black font-semibold nowrap"
             >
-              Last Call Back
+              Last Call Back:
             </label>
           </div>
           <div className="text-left">
@@ -271,13 +272,13 @@ const CallDetails = ({ data: leadDetails, refetchLead }) => {
             </p>
           </div>
         </div>
-        <div className="flex flex-col items-start gap-1 mt-2">
+        <div className="flex items-start gap-2 mt-2">
           <div className="text-left">
             <label
               htmlFor="followUpDate"
               className="text-black font-semibold nowrap"
             >
-              Next Call Back
+              Next Call Back:
             </label>
           </div>
           <div className="text-left">
@@ -324,7 +325,7 @@ const CallDetails = ({ data: leadDetails, refetchLead }) => {
         <Modal>
           <div className="bg-white rounded w-full max-w-2xl border border-gray-200 overflow-auto py-2 lg:pb-4 px-6 relative shadow-xl">
             <div className="flex w-full justify-between items-center py-2">
-              <h2 className="text-base font-semibold">Update</h2>
+              <h2 className="text-base font-semibold">Remarks</h2>
               <button
                 className="relative group"
                 data-lable="update"
@@ -340,12 +341,12 @@ const CallDetails = ({ data: leadDetails, refetchLead }) => {
             <div className="mt-4">
               {/* Remarks Textarea */}
               <div className="mb-4">
-                <label
+                {/* <label
                   htmlFor="remarks"
                   className="block text-sm font-medium text-gray-700 mb-2"
                 >
                   Remarks
-                </label>
+                </label> */}
                 <textarea
                   name="remarks"
                   id="remarks"

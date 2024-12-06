@@ -7,10 +7,11 @@ import ActivityHistory from "./ActivityHistory";
 import ProductDetails from "./ProductDetails";
 import ContractDetails from "./ContractDetails";
 import { useQuery } from "@tanstack/react-query";
+import { AiOutlineClose } from "react-icons/ai";
 
 const tabs = [
-  "Business Details",
   "Contact Details",
+  "Business Details",
   "Activity History",
   "Product Details",
   "Contract Details",
@@ -59,10 +60,10 @@ export default function LeadManager({ onClose, lead }) {
             refetch
           </button> */}
           <button
-            className="absolute right-0 top-0 bg-red-600 text-white text-sm px-3 py-1"
+            className="absolute right-0 top-1 px-3 py-1 group"
             onClick={onClose}
           >
-            close
+            <AiOutlineClose className="text-lg text-gray-500 group-hover:text-gray-600" />
           </button>
           {isLoading ? (
             <div className="w-full h-full flex items-center justify-center">
@@ -73,7 +74,7 @@ export default function LeadManager({ onClose, lead }) {
               />
             </div>
           ) : (
-            <div className="w-full h-full flex gap-2">
+            <div className="w-full h-full flex gap-2 mt-2">
               {/* call details */}
               <CallDetails
                 data={data}
@@ -93,7 +94,7 @@ export default function LeadManager({ onClose, lead }) {
 }
 
 const Tabs = ({ data, refetch }) => {
-  const [currentTab, setCurrentTab] = useState("Business Details");
+  const [currentTab, setCurrentTab] = useState("Contact Details");
 
   const renderTab = (tab) => {
     switch (tab) {
