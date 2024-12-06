@@ -4,7 +4,6 @@ import { useQuery } from "@tanstack/react-query";
 import { dispositions, subDispositions } from "@/lib/data/commonData";
 import { toast } from "react-toastify";
 import MultiLevelDropdown from "../allocateLead/multiLevelDropdown";
-import moment from "moment";
 
 const ManualLeadForm = ({ onClose }) => {
   // Initialize state for each form field
@@ -85,10 +84,9 @@ const ManualLeadForm = ({ onClose }) => {
       !formData.phone ||
       !formData.city ||
       !formData.requirement ||
-      !formData.disposition ||
-      !formData.subDisposition ||
       !selectedSalesMember ||
-      !formData.followUpDate
+      !formData.lookingFor ||
+      !formData.companyName
     ) {
       toast.error("Please fill all required fields");
       setLoading(false);
@@ -162,12 +160,15 @@ const ManualLeadForm = ({ onClose }) => {
         <div className="px-4">
           {/* Date */}
           <div className="mb-4">
-            <label
-              htmlFor="date"
-              className="block text-gray-700 font-semibold mb-2"
-            >
-              Date:
-            </label>
+            <div className="flex items-center gap-1">
+              <label
+                htmlFor="date"
+                className="block text-gray-700 font-semibold mb-2"
+              >
+                Date:
+              </label>
+              <span className="text-lg text-red-500">*</span>
+            </div>
             <input
               type="datetime-local"
               id="date"
@@ -181,12 +182,16 @@ const ManualLeadForm = ({ onClose }) => {
 
           {/* Looking For */}
           <div className="mb-4">
-            <label
-              htmlFor="lookingFor"
-              className="block text-gray-700 font-semibold mb-2"
-            >
-              Looking For:
-            </label>
+            <div className="flex items-center gap-1">
+              <label
+                htmlFor="lookingFor"
+                className="block text-gray-700 font-semibold mb-2"
+              >
+                Looking For:
+              </label>
+              <span className="text-lg text-red-500">*</span>
+            </div>
+
             <input
               type="text"
               id="lookingFor"
@@ -201,12 +206,16 @@ const ManualLeadForm = ({ onClose }) => {
 
           {/* Company Name */}
           <div className="mb-4">
-            <label
-              htmlFor="companyName"
-              className="block text-gray-700 font-semibold mb-2"
-            >
-              Company Name:
-            </label>
+            <div className="flex items-center gap-1">
+              <label
+                htmlFor="companyName"
+                className="block text-gray-700 font-semibold mb-2"
+              >
+                Company Name:
+              </label>
+              <span className="text-lg text-red-500">*</span>
+            </div>
+
             <input
               type="text"
               id="companyName"
@@ -221,12 +230,16 @@ const ManualLeadForm = ({ onClose }) => {
 
           {/* Contact Person */}
           <div className="mb-4">
-            <label
-              htmlFor="contactPerson"
-              className="block text-gray-700 font-semibold mb-2"
-            >
-              Contact Person:
-            </label>
+            <div className="flex items-center gap-1">
+              <label
+                htmlFor="contactPerson"
+                className="block text-gray-700 font-semibold mb-2"
+              >
+                Contact Person:
+              </label>
+              <span className="text-lg text-red-500">*</span>
+            </div>
+
             <input
               type="text"
               id="contactPerson"
@@ -241,12 +254,16 @@ const ManualLeadForm = ({ onClose }) => {
 
           {/* Mobile */}
           <div className="mb-4">
-            <label
-              htmlFor="phone"
-              className="block text-gray-700 font-semibold mb-2"
-            >
-              Default phone:
-            </label>
+            <div className="flex items-center gap-1">
+              <label
+                htmlFor="phone"
+                className="block text-gray-700 font-semibold mb-2"
+              >
+                Default phone:
+              </label>
+              <span className="text-lg text-red-500">*</span>
+            </div>
+
             <input
               type="number"
               id="phone"
@@ -282,12 +299,16 @@ const ManualLeadForm = ({ onClose }) => {
 
           {/* Mail ID */}
           <div className="mb-4">
-            <label
-              htmlFor="mailId"
-              className="block text-gray-700 font-semibold mb-2"
-            >
-              Email ID:
-            </label>
+            <div className="flex items-center gap-1">
+              <label
+                htmlFor="mailId"
+                className="block text-gray-700 font-semibold mb-2"
+              >
+                Email ID:
+              </label>
+              <span className="text-lg text-red-500">*</span>
+            </div>
+
             <input
               type="email"
               id="email"
@@ -302,12 +323,16 @@ const ManualLeadForm = ({ onClose }) => {
 
           {/* City */}
           <div className="mb-4">
-            <label
-              htmlFor="city"
-              className="block text-gray-700 font-semibold mb-2"
-            >
-              City:
-            </label>
+            <div className="flex items-center gap-1">
+              <label
+                htmlFor="city"
+                className="block text-gray-700 font-semibold mb-2"
+              >
+                City:
+              </label>
+              <span className="text-lg text-red-500">*</span>
+            </div>
+
             <input
               type="text"
               id="city"
@@ -322,12 +347,16 @@ const ManualLeadForm = ({ onClose }) => {
 
           {/* Message / Requirement */}
           <div className="mb-4">
-            <label
-              htmlFor="requirement"
-              className="block text-gray-700 font-semibold mb-2"
-            >
-              Message / Requirement:
-            </label>
+            <div className="flex items-center gap-1">
+              <label
+                htmlFor="requirement"
+                className="block text-gray-700 font-semibold mb-2"
+              >
+                Message / Requirement:
+              </label>
+              <span className="text-lg text-red-500">*</span>
+            </div>
+
             <textarea
               id="requirement"
               name="requirement"
@@ -365,12 +394,15 @@ const ManualLeadForm = ({ onClose }) => {
           {/* Allocated To */}
           <div className="mb-4 flex gap-4 relative">
             <div className="flex-1 text-left">
-              <label
-                htmlFor="salesMember"
-                className="block text-gray-700 font-semibold mb-2"
-              >
-                Allocated To:
-              </label>
+              <div className="flex items-center gap-1">
+                <label
+                  htmlFor="salesMember"
+                  className="block text-gray-700 font-semibold mb-2"
+                >
+                  Allocated To:
+                </label>
+                <span className="text-lg text-red-500">*</span>
+              </div>
             </div>
             <div className="flex-1 relative">
               <button

@@ -218,9 +218,7 @@ export default function Sales() {
               Cell: ({ value }) => {
                 return (
                   value && (
-                    <p>
-                      {new Date(value?._seconds * 1000)?.toLocaleDateString()}
-                    </p>
+                    <p>{moment(value?._seconds * 1000).format("DD/MM/YYYY")}</p>
                   )
                 );
               },
