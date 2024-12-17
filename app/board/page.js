@@ -24,8 +24,6 @@ const Page = () => {
   const [showSidebar, setShowSidebar] = useState(false);
   const [headerHeight, setHeaderHeight] = useState(null);
 
-  console.log("header height: ", headerHeight);
-
   useEffect(() => {
     let userToken = localStorage.getItem("authToken");
     setToken(userToken);

@@ -12,7 +12,6 @@ import { panelNames } from "@/lib/data/commonData";
 import { FaChartBar } from "react-icons/fa";
 
 const getIcons = (panelName, selected) => {
-  console.log("panel name is", panelName);
   let d6521f = { color: selected ? "#fff" : "#d6521f", fontSize: 22 };
   switch (panelName) {
     case "allocate_leads":
