@@ -19,8 +19,10 @@ const getIcons = (panelName, selected) => {
       return <MdHowToVote style={d6521f} />;
     case "sales_panel":
       return <img src="/sales.png" className="h-5 w-5" />;
+    case "service_panel":
+      return <img src="/service.png" className="h-5 w-5" />;
     case "manage_users":
-      return <img src="/hrms.png" className="h-5 w-5"/>
+      return <img src="/hrms.png" className="h-5 w-5" />;
     case "roles_and_permissions":
       return <GiSettingsKnobs style={d6521f} />;
     case "dashboard":

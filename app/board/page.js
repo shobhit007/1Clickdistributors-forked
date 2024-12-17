@@ -9,6 +9,7 @@ import ManageRoles from "@/components/homepage/ManageRoles";
 import ManageUsers from "@/components/manageUsers";
 import AllocateLeadsPanel from "@/components/allocateLead";
 import Sales from "@/components/sales/Sales";
+import ServicePanel from "@/components/services/page";
 import { panels } from "@/lib/data/commonData";
 import GlobalSearch from "@/components/globalSearch";
 import Panelsettings from "@/components/panelSettings";
@@ -144,6 +145,7 @@ const Page = () => {
         {displayComponent == "manage_users" && <ManageUsers />}
         {displayComponent == "allocate_leads" && <AllocateLeadsPanel />}
         {displayComponent == "sales_panel" && <Sales />}
+        {displayComponent == "service_panel" && <ServicePanel />}
         {displayComponent == "globalSearch" && <GlobalSearch />}
         {displayComponent == "panel_settings" && <Panelsettings />}
         {displayComponent == "dashboard" && <Dashboard />}
