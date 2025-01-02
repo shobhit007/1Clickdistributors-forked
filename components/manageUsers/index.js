@@ -228,7 +228,7 @@ const ManageUsers = () => {
       )}
       {selectedUserToEdit && (
         <Modal>
-          <div className="min-w-[30vw] p-4 relative bg-white rounded-md">
+          <div className="min-w-[30vw] max-h-[95vh] overflow-auto p-4 relative bg-white rounded-md">
             <button
               onClick={() => setSelectedUserToEdit(false)}
               className="text-white p-1 bg-red-500 absolute top-0 right-0"

@@ -109,13 +109,13 @@ const Page = () => {
 
   useEffect(() => {
     if (userRoles?.length > 0) {
-      setDisplayComponent("dashboard");
-      // let previousComponent = localStorage.getItem("currentDisplayComponent");
-      // if (previousComponent && userRoles.includes(previousComponent)) {
-      //   setDisplayComponent(previousComponent);
-      // } else {
-      //   setDisplayComponent(userRoles[0]);
-      // }
+      // setDisplayComponent("dashboard");
+      let previousComponent = localStorage.getItem("currentDisplayComponent");
+      if (previousComponent && userRoles.includes(previousComponent)) {
+        setDisplayComponent(previousComponent);
+      } else {
+        setDisplayComponent(userRoles[0]);
+      }
     }
   }, [userRoles]);
 

@@ -29,32 +29,22 @@ const ManageRoles = () => {
   const [data, setData] = useState([]);
 
   useEffect(() => {
-    const array1Ids = allUserRoles?.map((obj) => obj.id);
-
+    const array1Ids = allUserRoles?.map((obj) => `${obj.id}_${obj.department}`);
     let filteredArray2 = panelRoles.map((role) => {
       let roles = role.hierarchy;
-      return roles?.filter((role) => !array1Ids.includes(role));
+      return roles
+        ?.filter((item) => {
+          return !array1Ids.includes(`${item}_${role.department}`);
+        })
+        ?.map((item2) => ({
+          id: item2,
+          department: role.department,
+          panels: [],
+        }));
     });
 
-    filteredArray2 = filteredArray2
-      .flat()
-      .map((role) => ({ id: role, panels: [] }));
-    // Combine both arrays
+    filteredArray2 = filteredArray2.flat();
     let resultArray = allUserRoles.concat(filteredArray2);
-
-    let allRoleWithDept = panelRoles?.map((obj) => {
-      return obj.hierarchy?.map((role) => ({
-        department: obj.department,
-        id: role,
-      }));
-    });
-    allRoleWithDept = allRoleWithDept.flat();
-    resultArray = resultArray.map((role) => {
-      let searchDept = allRoleWithDept?.find((obj) => obj.id === role.id);
-      role.department = searchDept?.department;
-
-      return role;
-    });
     setData(resultArray);
   }, [allUserRoles]);
 
@@ -101,7 +91,8 @@ const ManageRoles = () => {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          role: assignToList,
+          role: assignToList.hierarchy,
+          department: assignToList.department,
           panels: panelList,
         }),
       });
@@ -110,7 +101,7 @@ const ManageRoles = () => {
       if (response.status === 200) {
         toast.success("Panels Assigned");
         setPanelList([]);
-        setAssignToList();
+        setAssignToList([]);
         queryClient.invalidateQueries("roles");
       } else {
         toast.error("Something went wrong");
@@ -125,19 +116,19 @@ const ManageRoles = () => {
     if (selectSelected === false) {
       setPanelList(panels.map((item) => item.panel));
     } else {
-      setPanelList([]);
+      // setPanelList([]);
     }
   };
   const openModal = () => {};
 
   return (
-    <div className="w-full mx-auto mt-4">
+    <div className="w-full mx-auto mt-4 h-full">
       {0 ? (
         <div>Loading...</div>
       ) : (
-        <div className="flex justify-between w-[80%] mx-auto">
+        <div className="flex justify-between w-[80%] mx-auto h-[90%] overflow-hidden">
           {/* {clicks !== 2? */}
-          <main className="w-full">
+          <main className="w-full h-full overflow-auto scrollbar-thin">
             <div className="flex flex-col gap-3">
               {Array.isArray(data) &&
                 data?.map((role, index) => {
@@ -160,7 +151,7 @@ const ManageRoles = () => {
             </div>
           </main>
 
-          <aside className="w-[50%] md:flex flex-col justify-start hidden">
+          <aside className="w-[50%] px-3 md:flex flex-col justify-start hidden">
             <h2 className="text-lg font-semibold mb-2">All Panels</h2>
             <div className="flex flex-wrap gap-3">
               {panels.map((panel, index) => {
@@ -174,33 +165,6 @@ const ManageRoles = () => {
                 );
               })}
             </div>
-            {/* <div className="flex justify-end mt-2">
-              <label>
-                {selectSelected === false ? (
-                  <>
-                    <p
-                      className="text-xs mr-1 text-center flex item-center"
-                      onClick={handleSelectAll}
-                    >
-                      Select All
-                      <span className="ml-1 flex items-center">
-                        <GrCheckboxSelected />
-                      </span>
-                    </p>
-                  </>
-                ) : (
-                  <p
-                    className="text-xs mr-1 text-center flex item-center"
-                    onClick={handleSelectAll}
-                  >
-                    Unselect All
-                    <span className="ml-1 flex items-center">
-                      <GrCheckbox />
-                    </span>
-                  </p>
-                )}
-              </label>
-            </div> */}
 
             <div className="mt-10">
               <button
@@ -315,15 +279,15 @@ const RoleTile = ({
   openModal,
 }) => {
   useEffect(() => {
-    if (role.id !== assignToList) {
+    if (role.id !== assignToList?.hierarchy) {
       setPanelList([]);
     }
-  }, [assignToList]);
+  }, [assignToList.hierarchy]);
 
   const handleAddToList = () => {
     openModal();
     setClicks((prev) => prev + 1);
-    setAssignToList(role.id);
+    setAssignToList({ hierarchy: role.id, department: role.department });
     setPanelList([...panelList, ...role.panels]);
     setPanelList((prev) => {
       return [...new Set(prev)];
@@ -334,13 +298,15 @@ const RoleTile = ({
     <div
       className={`flex flex-col justify-between border-2 border-slate-500 h-[5.5rem]
     rounded-md p-2 pb-0 cursor-pointer ${
-      assignToList === role.id ? "bg-colorTransparent" : ""
+      assignToList?.hierarchy === role.id ? "bg-colorTransparent" : ""
     }`}
       onClick={handleAddToList}
     >
       <p className="mb-2 capitalize flex gap-2 items-center">
         {camelToTitle(role.id)}{" "}
-        {role.department && <span className="text-sm text-gray-500">({role.department})</span>}
+        {role.department && (
+          <span className="text-sm text-gray-500">({role.department})</span>
+        )}
       </p>
       <div className="flex flex-wrap overflow-y-auto scrollbar-thin mb-1 gap-1">
         {role.panels.map((panel, index) => {

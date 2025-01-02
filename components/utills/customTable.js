@@ -192,12 +192,12 @@ const CustomTable = ({
           </div>
         </Modal>
       )}
-      <div className="overflow-auto h-[93%] scrollbar-thin">
+      <div className="overflow-auto h-[93%] scrollbar-thin mt-1">
         <table
           {...getTableProps()}
-          className="min-w-full divide-y mt-1 divide-gray-200 max-h-[98%]"
+          className="min-w-full divide-y divide-gray-200 max-h-[98%]"
         >
-          <thead className="bg-blue-100 sticky top-0">
+          <thead className="bg-blue-100 sticky -top-0">
             {headerGroups.map((headerGroup) => (
               <tr {...headerGroup.getHeaderGroupProps()}>
                 {headerGroup.headers.map((column) => (

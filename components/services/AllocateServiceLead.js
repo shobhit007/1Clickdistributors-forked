@@ -4,14 +4,12 @@ import { useQuery } from "@tanstack/react-query";
 import React, { useEffect, useRef, useState } from "react";
 import { MdArrowDropUp, MdArrowRight } from "react-icons/md";
 import { toast } from "react-toastify";
-import MultiLevelDropdown from "./multiLevelDropdown";
+import MultiLevelDropdown from "../allocateLead/multiLevelDropdown";
 
-const AllocateLeadModal = ({ data, onSubmit, loading }) => {
-  const [gettingSalesMembers, setGettingSalesMembers] = useState(false);
-  const [selectedSalesMember, setSelectedSalesMember] = useState(null);
+const AllocateServiceLead = ({ data, onSubmit, loading }) => {
+  const [selectedServiceMember, setSelectedServiceMember] = useState(null);
   const [dropDownVisible, setDropDownVisible] = useState(false);
-  const [subLevelToShow, setSubLevelToShow] = useState(null);
-  const [allSalesMembers, setAllSalesMembers] = useState([]);
+  const [allServiceMembers, setAllServiceMembers] = useState([]);
   const componentRef = useRef(null);
 
   const flattenTeamMembers = (data) => {
@@ -33,8 +31,7 @@ const AllocateLeadModal = ({ data, onSubmit, loading }) => {
   const getallMembers = async () => {
     try {
       const token = localStorage.getItem("authToken");
-      setGettingSalesMembers(true);
-      let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/leads/getSalesTeamMembers`;
+      let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/service/getServiceMembers`;
       const response = await fetch(API_URL, {
         method: "GET",
         headers: {
@@ -43,7 +40,6 @@ const AllocateLeadModal = ({ data, onSubmit, loading }) => {
         },
       });
       const data = await response.json();
-      setGettingSalesMembers(false);
       if (data.success && data.data) {
         return data.data;
       } else {
@@ -51,7 +47,6 @@ const AllocateLeadModal = ({ data, onSubmit, loading }) => {
         return null;
       }
     } catch (error) {
-      setGettingSalesMembers(false);
       console.log("error in getting salesMembers", error.message);
       toast.error(error.message);
       return null;
@@ -59,7 +54,7 @@ const AllocateLeadModal = ({ data, onSubmit, loading }) => {
   };
 
   const { data: allMembers, refetch } = useQuery({
-    queryKey: ["allSalesMembers"],
+    queryKey: ["allServiceMembers"],
     queryFn: getallMembers,
   });
 
@@ -68,20 +63,17 @@ const AllocateLeadModal = ({ data, onSubmit, loading }) => {
       return;
     }
     const data = flattenTeamMembers(allMembers);
-    setAllSalesMembers(data);
+    setAllServiceMembers(data);
   }, [allMembers]);
 
   const onFormSubmit = () => {
-    if (!selectedSalesMember || selectedSalesMember == "") {
+    if (!selectedServiceMember || selectedServiceMember == "") {
       return toast.error("Please select sales member");
     }
-    onSubmit({ id: selectedSalesMember.id, name: selectedSalesMember.name });
-  };
-
-  const onSelectMember = (item) => {
-    setSelectedSalesMember(item);
-    setDropDownVisible(false);
-    setSubLevelToShow(null);
+    onSubmit({
+      id: selectedServiceMember.id,
+      name: selectedServiceMember.name,
+    });
   };
 
   return (
@@ -96,7 +88,7 @@ const AllocateLeadModal = ({ data, onSubmit, loading }) => {
           className="min-w-[200px] py-1 px-2 border border-gray-500 rounded-md text-start flex justify-between"
           onClick={() => setDropDownVisible(!dropDownVisible)}
         >
-          {selectedSalesMember ? selectedSalesMember?.name : "Select"}
+          {selectedServiceMember ? selectedServiceMember?.name : "Select"}
 
           {dropDownVisible ? (
             <MdArrowDropUp className="text-2xl" id="dropdown-icon" />
@@ -113,10 +105,10 @@ const AllocateLeadModal = ({ data, onSubmit, loading }) => {
             <MultiLevelDropdown
               items={allMembers}
               onSelect={(e) => {
-                setSelectedSalesMember(e);
+                setSelectedServiceMember(e);
                 setDropDownVisible(false);
               }}
-              allItems={allSalesMembers}
+              allItems={allServiceMembers}
             />
           </div>
         )}
@@ -145,4 +137,4 @@ const AllocateLeadModal = ({ data, onSubmit, loading }) => {
   );
 };
 
-export default AllocateLeadModal;
+export default AllocateServiceLead;
