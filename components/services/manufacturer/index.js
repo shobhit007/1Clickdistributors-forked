@@ -161,9 +161,6 @@ const index = ({
           setLeads={setLeads}
           originalData={data}
           leads={leads}
-          // userDetails={userDetails}
-          // setMyData={setMyData}
-          // myData={myData}
           selectedSalesMembers={selectedServiceMembers}
         />
       </div>

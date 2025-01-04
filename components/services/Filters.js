@@ -99,13 +99,6 @@ const Filters = ({
           filteredDispositionData.Today_Followup++;
         }
       }
-
-      // if (
-      //   lead.subDisposition &&
-      //   filteredDispositionData.hasOwnProperty(lead.subDisposition)
-      // ) {
-      //   filteredDispositionData[lead.subDisposition]++;
-      // }
     });
 
     setDispositionData({
@@ -304,8 +297,7 @@ const Filters = ({
                 ></span>
               )}
             </div>
-          ))}
-        //{" "}
+          ))}{" "}
       </div>
     </div>
   );

@@ -1,12 +1,12 @@
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
-import DistributorView from "./manufacturer";
+import DistributorView from "./distributor";
 import ManufacturerView from "./manufacturer";
 import panelContext from "@/lib/context/panelContext";
 import moment from "moment";
 import { MdClose } from "react-icons/md";
 
 const page = () => {
-  const [selectedTab, setSelectedTab] = useState("distributors");
+  const [selectedTab, setSelectedTab] = useState("manufaturers");
   const { headerHeight } = useContext(panelContext);
   const [mainBoxHeight, setMainBoxHeight] = useState(null);
   const buttonDivRef = useRef(null);
