@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
-import DistributorView from "./distributor";
+import DistributorView from "./manufacturer";
 import ManufacturerView from "./manufacturer";
 import panelContext from "@/lib/context/panelContext";
 import moment from "moment";
@@ -19,11 +19,11 @@ const page = () => {
   const tabs = [
     {
       tabName: "My Brands",
-      value: "distributors",
+      value: "manufaturers",
     },
     {
-      tabName: "Manufaturers",
-      value: "manufaturers",
+      tabName: "Distributors",
+      value: "distributors",
     },
   ];
 

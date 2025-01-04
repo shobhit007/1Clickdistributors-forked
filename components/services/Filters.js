@@ -256,7 +256,7 @@ const Filters = ({
   };
   return (
     <div className="flex flex-col gap-2 w-full mb-2  mt-2">
-      <div className="flex gap-[6px] items-center w-full overflow-x-auto">
+      <div className="flex gap-[6px] items-center w-full overflow-x-auto scrollbar-none">
         <button
           onClick={resetFilters}
           className="flex text-nowrap items-center gap-1 hover:bg-colorPrimary/20 bg-colorPrimary/10 px-1 py-[2px] rounded-md border border-colorPrimary text-colorPrimary font-semibold text-[12px]"
@@ -264,7 +264,6 @@ const Filters = ({
           Reset filters
           <MdClose className="text-colorPrimary text-base" />
         </button>
-
         {!isSalesPanel && currentLoggedInUser?.hierarchy !== "executive" && (
           <button
             onClick={() =>
@@ -283,7 +282,6 @@ const Filters = ({
             {unallocatedLeadsCount && <span>({unallocatedLeadsCount})</span>}
           </button>
         )}
-
         {dispositionData &&
           Object.keys(dispositionData).map((item) => (
             <div className="flex flex-col">
@@ -307,6 +305,7 @@ const Filters = ({
               )}
             </div>
           ))}
+        //{" "}
       </div>
     </div>
   );

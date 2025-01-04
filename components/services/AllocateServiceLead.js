@@ -72,7 +72,6 @@ const AllocateServiceLead = ({ data, onSubmit, loading }) => {
     }
     onSubmit({
       id: selectedServiceMember.id,
-      name: selectedServiceMember.name,
     });
   };
 
