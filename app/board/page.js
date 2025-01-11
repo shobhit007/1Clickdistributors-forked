@@ -95,7 +95,10 @@ const Page = () => {
     let commonPanels = ["dashboard"];
     if (userDetails?.hierarchy == "superAdmin") {
       let userPanels = panels.map((item) => item.panel);
-      setuserRoles([...commonPanels, ...userPanels]);
+      if (userPanels) {
+        setuserRoles([...commonPanels, ...userPanels]);
+      }
+      // setuserRoles([...commonPanels, ...userPanels]);
       return;
     }
 
@@ -103,7 +106,10 @@ const Page = () => {
       let userPanels = allUserRoles?.filter(
         (item) => item.id == userDetails?.hierarchy
       )?.[0]?.panels;
-      setuserRoles([...commonPanels, ...userPanels]);
+
+      if (userPanels) {
+        setuserRoles([...commonPanels, ...userPanels]);
+      }
     }
   }, [userDetails]);
 

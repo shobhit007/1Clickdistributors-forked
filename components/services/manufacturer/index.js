@@ -8,6 +8,7 @@ import { camelToTitle } from "@/components/utills/commonFunctions";
 import { leadsPanelColumns } from "@/lib/data/commonData";
 import moment from "moment";
 import AllocateServiceLead from "../AllocateServiceLead";
+import UpdateLeadModal from "./UpdateLeadModal";
 const index = ({
   dateObjToSearch,
   searchValue,
@@ -20,6 +21,7 @@ const index = ({
   const [selectedServiceMembers, setSelectedServiceMembers] = useState([]);
   const [selectedSubTab, setSelectedSubTab] = useState("welcome_calls");
   const [allocatingLeads, setAllocatingLeads] = useState(false);
+  const [updateLead, setUpdateLead] = useState(false);
 
   const subTabs = [
     {
@@ -177,6 +179,7 @@ const index = ({
                 selectedRows={selectedRows}
                 setSelectedRows={setSelectedRows}
                 searchValue={searchValue}
+                setUpdateLead={setUpdateLead}
               />
             </div>
           ) : (
@@ -193,13 +196,26 @@ const index = ({
           />
         )}
       </div>
+
+      {updateLead && (
+        <UpdateLeadModal
+          closeModal={() => setUpdateLead(false)}
+          selectedRow={selectedRows[0]}
+        />
+      )}
     </div>
   );
 };
 
 export default index;
 
-const RenderTable = ({ leads, selectedRows, setSelectedRows, searchValue }) => {
+const RenderTable = ({
+  leads,
+  selectedRows,
+  setSelectedRows,
+  searchValue,
+  setUpdateLead,
+}) => {
   const columnsOrder = [
     "createdAt",
     "source",
@@ -279,7 +295,10 @@ const RenderTable = ({ leads, selectedRows, setSelectedRows, searchValue }) => {
             accessor: key,
             Cell: ({ row }) => {
               return (
-                <button className="text-blue-500 font-semibold hover:underline">
+                <button
+                  className="text-blue-500 font-semibold hover:underline"
+                  onClick={() => setUpdateLead(true)}
+                >
                   {row?.original?.profileId}
                 </button>
               );
