@@ -10,6 +10,8 @@ import { IoMdCloudUpload } from "react-icons/io";
 import { uploadFile } from "@/lib/commonFunctions";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "react-toastify";
+import { CiImageOn } from "react-icons/ci";
+import { dispositions, subDispositions } from "@/lib/data/commonData";
 
 const TABS = [
   {
@@ -26,7 +28,7 @@ const TABS = [
   },
 ];
 
-function UpdateLeadModal({ closeModal, selectedRow }) {
+function UpdateLeadModal({ closeModal, selectedRow, serviceType }) {
   if (!selectedRow) {
     return null;
   }
@@ -36,11 +38,13 @@ function UpdateLeadModal({ closeModal, selectedRow }) {
     handleSubmit,
     setValue,
     watch,
+    control,
     formState: { errors },
   } = useForm({
     defaultValues: {
       productName: "",
       productImage: null,
+      brands: [],
     },
   });
 
@@ -49,6 +53,24 @@ function UpdateLeadModal({ closeModal, selectedRow }) {
   const [visibleSubCategoryModal, setVisibleSubCategoryModal] = useState(false);
   const [serviceProducts, setServiceProducts] = useState([]);
   const [imageLoading, setImageLoading] = useState(false);
+  const [isLive, setIsLive] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "brands", // Connects to the `brands` array in the form
+  });
+
+  const addBrands = () => {
+    const brand = watch("brandName");
+    console.log("brand name entered", brand);
+    if (!brand) {
+      toast.error("Please enter a brand name");
+      return;
+    }
+    append({ name: brand });
+    setValue("brandName", "");
+  };
 
   const getWelcomeCallData = async () => {
     try {
@@ -226,7 +248,6 @@ function UpdateLeadModal({ closeModal, selectedRow }) {
   };
 
   const deleteProduct = async (productId) => {
-    console.log("deleteProduct", productId);
     try {
       const token = localStorage.getItem("authToken");
       let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/service/deleteServiceProduct`;
@@ -359,6 +380,7 @@ function UpdateLeadModal({ closeModal, selectedRow }) {
     };
 
     groupedData.leadId = selectedRow?.leadId;
+    groupedData.isLive = isLive;
     const API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/service/updateWelcomeCall`;
 
     try {
@@ -402,523 +424,1539 @@ function UpdateLeadModal({ closeModal, selectedRow }) {
     toggleSubCategoryModal();
   };
 
+  const toggleBrandModal = () => setShowModal((p) => !p);
+
+  const contact = {
+    firstName: "John",
+    lastName: "",
+    companyName: "Tech Solutions Inc.",
+    phone: "+1-555-123-4567",
+    email: "john.doe@example.com",
+    city: "New York",
+  };
+
+  const calculateProgress = () => {
+    const totalFields = Object.keys(contact).length;
+    const completedFields = Object.values(contact).filter(
+      (value) => value
+    ).length;
+    return Math.round((completedFields / totalFields) * 100);
+  };
+
+  const progress = calculateProgress();
+
   return (
-    <div className="absolute inset-0 w-full h-full z-50 bg-white">
-      <div className="flex flex-col h-full">
-        {/* header */}
-        <div className="flex justify-between items-center p-4">
-          <h1 className="text-xl font-semibold">Welcome Call</h1>
-          <button className="text-xl font-semibold" onClick={closeModal}>
-            <IoClose size={24} color="black" />
-          </button>
+    // <div className="absolute inset-0 w-full z-50">
+    //   <div className="flex flex-col bg-gray-100">
+    //     {/* header */}
+    //     <div className="flex justify-between items-center py-6 px-8">
+    //       <h1 className="text-xl font-semibold">Welcome Call</h1>
+    //       <button className="text-xl font-semibold" onClick={closeModal}>
+    //         <IoClose size={24} color="black" />
+    //       </button>
+    //     </div>
+
+    //     <div className="w-full">
+    //       <div className="w-full relative bg-gray-300 h-[3px] overflow-hidden">
+    //         <div
+    //           className="bg-green-600 h-[3px] transition-all duration-500 ease-in-out"
+    //           style={{ width: `${progress}%` }}
+    //         ></div>
+    //       </div>
+    //       <div className="w-full flex justify-end pr-2">
+    //         <p className="text-sm text-gray-600">{`${progress}%`}</p>
+    //       </div>
+    //     </div>
+
+    //     {/* Main content */}
+    //     <div className="w-full overflow-hidden mt-4">
+    //       <div className="container mx-auto p-4 flex flex-col sm:flex-row gap-2">
+    //         <div className="w-1/4 h-full bg-white px-4 py-6 rounded">
+    //           <div>
+    //             <label className="block text-sm font-medium text-gray-500 mb-1">
+    //               Profile Id
+    //             </label>
+    //             <p className="text-sm text-gray-700 font-medium">
+    //               {selectedRow?.profileId}
+    //             </p>
+    //           </div>
+    //           <div className="mt-2">
+    //             <label className="block text-sm font-medium text-gray-500 mb-1">
+    //               Full Name
+    //             </label>
+    //             <p className="text-sm text-gray-700 font-medium">
+    //               {selectedRow?.full_name}
+    //             </p>
+    //           </div>
+    //           <div className="mt-2">
+    //             <label className="block text-sm font-medium text-gray-500 mb-1">
+    //               Phone Number
+    //             </label>
+    //             <p className="text-sm text-gray-700 font-medium">
+    //               {selectedRow?.phone_number}
+    //             </p>
+    //           </div>
+    //           <div className="mt-2">
+    //             <label className="block text-sm font-medium text-gray-500 mb-1">
+    //               Email
+    //             </label>
+    //             <p className="text-sm text-gray-700 font-medium">
+    //               {selectedRow?.email}
+    //             </p>
+    //           </div>
+    //           <div className="mt-2">
+    //             <label className="block text-sm font-medium text-gray-500 mb-1">
+    //               Company Name
+    //             </label>
+    //             <p className="text-sm text-gray-700 font-medium">
+    //               {selectedRow?.company_name}
+    //             </p>
+    //           </div>
+    //         </div>
+    //         <div className="w-3/4 bg-white p-4">
+    //           <h1 className="text-2xl font-bold mb-4">Welcome Call Form</h1>
+    //           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    //             {/* Personal Details */}
+    //             <fieldset className="bg-white p-4">
+    //               <legend className="text-lg font-semibold">
+    //                 Personal Details
+    //               </legend>
+    //               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+    //                 <div>
+    //                   <label className="block text-sm font-medium text-gray-700 mb-1">
+    //                     First Name
+    //                   </label>
+    //                   <input
+    //                     {...register("firstName", { required: true })}
+    //                     placeholder="First Name"
+    //                     className="input w-full border rounded border-gray-300 p-3"
+    //                   />
+    //                   {errors.firstName && (
+    //                     <p className="text-red-500">First Name is required</p>
+    //                   )}
+    //                 </div>
+
+    //                 <div>
+    //                   <label className="block text-sm font-medium text-gray-700 mb-1">
+    //                     Last Name
+    //                   </label>
+    //                   <input
+    //                     {...register("lastName", { required: true })}
+    //                     placeholder="Last Name"
+    //                     className="input w-full border rounded border-gray-300 p-3"
+    //                   />
+    //                 </div>
+
+    //                 <div>
+    //                   <label className="block text-sm font-medium text-gray-700 mb-1">
+    //                     Designation/Job Title
+    //                   </label>
+    //                   <input
+    //                     {...register("jobTitle")}
+    //                     placeholder="Designation/Job Title"
+    //                     className="input w-full border rounded border-gray-300 p-3"
+    //                   />
+    //                 </div>
+
+    //                 <div>
+    //                   <label className="block text-sm font-medium text-gray-700 mb-1">
+    //                     Mobile Number
+    //                   </label>
+    //                   <input
+    //                     {...register("mobile")}
+    //                     placeholder="Mobile Number"
+    //                     className="input w-full border rounded border-gray-300 p-3"
+    //                   />
+    //                 </div>
+
+    //                 <div>
+    //                   <label className="block text-sm font-medium text-gray-700 mb-1">
+    //                     Email
+    //                   </label>
+    //                   <input
+    //                     {...register("email", { pattern: /^\S+@\S+$/i })}
+    //                     placeholder="Email"
+    //                     className="input w-full border rounded border-gray-300 p-3"
+    //                   />
+    //                 </div>
+
+    //                 {serviceType === "distributor" ? (
+    //                   <div>
+    //                     <label className="block text-sm font-medium text-gray-700 mb-1">
+    //                       WhatsApp Number
+    //                     </label>
+    //                     <input
+    //                       {...register("whatsAppNumber")}
+    //                       placeholder="WhatsApp Number"
+    //                       type="number"
+    //                       className="input w-full border rounded border-gray-300 p-3"
+    //                     />
+    //                   </div>
+    //                 ) : (
+    //                   <div>
+    //                     <label className="block text-sm font-medium text-gray-700 mb-1">
+    //                       Alt Email
+    //                     </label>
+    //                     <input
+    //                       {...register("altEmail")}
+    //                       placeholder="Alternative Email"
+    //                       className="input w-full border rounded border-gray-300 p-3"
+    //                     />
+    //                   </div>
+    //                 )}
+
+    //                 <div>
+    //                   <label className="block text-sm font-medium text-gray-700 mb-1">
+    //                     Location/City
+    //                   </label>
+    //                   <input
+    //                     {...register("location")}
+    //                     placeholder="Location/City"
+    //                     className="input w-full border rounded border-gray-300 p-3"
+    //                   />
+    //                 </div>
+    //               </div>
+    //             </fieldset>
+
+    //             {/* Business Details */}
+    //             <fieldset className="bg-white p-4">
+    //               <legend className="text-lg font-semibold">
+    //                 Business Details
+    //               </legend>
+    //               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+    //                 <div>
+    //                   <label className="block text-sm font-medium text-gray-700 mb-1">
+    //                     Company Name
+    //                   </label>
+    //                   <input
+    //                     {...register("companyName", { required: true })}
+    //                     placeholder="Company Name"
+    //                     className="input w-full border rounded border-gray-300 p-3"
+    //                   />
+    //                 </div>
+
+    //                 <div>
+    //                   <label className="block text-sm font-medium text-gray-700 mb-1">
+    //                     Company Type
+    //                   </label>
+    //                   <select
+    //                     {...register("companyType")}
+    //                     className="select w-full border rounded border-gray-300 p-3"
+    //                   >
+    //                     <option value="Proprietorship">Proprietorship</option>
+    //                     <option value="Partnership">Partnership</option>
+    //                     <option value="Private Limited">Private Limited</option>
+    //                     <option value="Public Limited">Public Limited</option>
+    //                     <option value="LLP">LLP</option>
+    //                     <option value="Other">Other</option>
+    //                   </select>
+    //                 </div>
+
+    //                 {serviceType === "distributor" && (
+    //                   <div>
+    //                     <label className="block text-sm font-medium text-gray-700 mb-1">
+    //                       Experience
+    //                     </label>
+    //                     <input
+    //                       {...register("experience", { required: true })}
+    //                       placeholder="Experience (in years)"
+    //                       type="number"
+    //                       className="input w-full border rounded border-gray-300 p-3"
+    //                     />
+    //                   </div>
+    //                 )}
+
+    //                 <div>
+    //                   <label className="block text-sm font-medium text-gray-700 mb-1">
+    //                     Turnover
+    //                   </label>
+    //                   <div className="flex gap-2">
+    //                     <input
+    //                       {...register("turnover")}
+    //                       placeholder="Turnover"
+    //                       className="input w-full border rounded border-gray-300 p-3"
+    //                     />
+    //                     <select
+    //                       {...register("type")}
+    //                       className="select w-full border rounded border-gray-300 p-3"
+    //                     >
+    //                       <option value="lakh">Lakh</option>
+    //                       <option value="crore">Crore</option>
+    //                       <option value="million">Million</option>
+    //                       <option value="billion">Billion</option>
+    //                     </select>
+    //                   </div>
+    //                 </div>
+
+    //                 <div>
+    //                   <label className="block text-sm font-medium text-gray-700 mb-1">
+    //                     Year of Establishment
+    //                   </label>
+    //                   <input
+    //                     {...register("yearOfEstablishment")}
+    //                     placeholder="Year of Establishment"
+    //                     className="input w-full border rounded border-gray-300 p-3"
+    //                   />
+    //                 </div>
+
+    //                 <div>
+    //                   <label className="block text-sm font-medium text-gray-700 mb-1">
+    //                     Full Address
+    //                   </label>
+    //                   <input
+    //                     {...register("address")}
+    //                     placeholder="Full Address"
+    //                     className="input w-full border rounded border-gray-300 p-3"
+    //                   />
+    //                 </div>
+
+    //                 <div>
+    //                   <label className="block text-sm font-medium text-gray-700 mb-1">
+    //                     Pincode
+    //                   </label>
+    //                   <input
+    //                     {...register("pincode")}
+    //                     placeholder="Pincode"
+    //                     className="input w-full border rounded border-gray-300 p-3"
+    //                   />
+    //                 </div>
+    //                 <div>
+    //                   <label className="block text-sm font-medium text-gray-700 mb-1">
+    //                     City
+    //                   </label>
+    //                   <input
+    //                     {...register("city")}
+    //                     placeholder="City"
+    //                     className="input w-full border rounded border-gray-300 p-3"
+    //                   />
+    //                 </div>
+    //                 <div>
+    //                   <label className="block text-sm font-medium text-gray-700 mb-1">
+    //                     State
+    //                   </label>
+    //                   <input
+    //                     {...register("state")}
+    //                     placeholder="State"
+    //                     className="input w-full border rounded border-gray-300 p-3"
+    //                   />
+    //                 </div>
+
+    //                 <div>
+    //                   <label className="block text-sm font-medium text-gray-700 mb-1">
+    //                     Investment Budget
+    //                   </label>
+    //                   <input
+    //                     {...register("investmentBudget")}
+    //                     placeholder="Investment Budget"
+    //                     type="number"
+    //                     className="input w-full border rounded border-gray-300 p-3"
+    //                   />
+    //                 </div>
+
+    //                 {serviceType === "distributor" && (
+    //                   <div>
+    //                     <label className="block text-sm font-medium text-gray-700 mb-1">
+    //                       Visiting Card
+    //                     </label>
+    //                     <div
+    //                       className="w-full flex items-center gap-2 border rounded border-gray-300 p-3 hover:cursor-pointer"
+    //                       onClick={() =>
+    //                         document.getElementById("visitingCard").click()
+    //                       }
+    //                     >
+    //                       <CiImageOn size={24} />
+    //                       <span className="block text-sm font-medium text-gray-700">
+    //                         Select visiting card
+    //                       </span>
+    //                       <input
+    //                         {...register("visitingCard")}
+    //                         id="visitingCard"
+    //                         type="file"
+    //                         accept={"image/*"}
+    //                         className="hidden"
+    //                       />
+    //                     </div>
+    //                   </div>
+    //                 )}
+
+    //                 <div>
+    //                   <label className="block text-sm font-medium text-gray-700 mb-1">
+    //                     Brands Working With
+    //                   </label>
+    //                   <button
+    //                     type="button"
+    //                     className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 flex items-center gap-2"
+    //                     onClick={toggleBrandModal}
+    //                   >
+    //                     <FiPlus size={24} className="text-white" />
+    //                     Add Brand
+    //                   </button>
+
+    //                   {showModal && (
+    //                     <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50">
+    //                       <div className="bg-white p-6 rounded-lg shadow-lg w-96 h-96 overflow-hidden">
+    //                         <div className="w-full flex items-center justify-between">
+    //                           <h3 className="text-lg font-semibold mb-4">
+    //                             Add Brand
+    //                           </h3>
+    //                           <IoClose
+    //                             size={24}
+    //                             color="black"
+    //                             onClick={toggleBrandModal}
+    //                             className="cursor-pointer"
+    //                           />
+    //                         </div>
+    //                         <div className="w-full flex gap-2">
+    //                           <input
+    //                             placeholder="Brand Name"
+    //                             {...register("brandName")}
+    //                             type="text"
+    //                             className="input w-full border rounded border-gray-300 p-2"
+    //                           />
+    //                           <button
+    //                             type="button"
+    //                             className="w-16 border rounded-sm border-gray-300 flex items-center justify-center"
+    //                             onClick={addBrands}
+    //                           >
+    //                             <FiPlus size={24} className="text-black" />
+    //                           </button>
+    //                         </div>
+    //                         <div className="w-full h-64 mt-2 p-2 overflow-x-hidden overflow-y-auto">
+    //                           {fields.map((item, index) => (
+    //                             <div
+    //                               key={item.id} // Use `item.id` provided by `useFieldArray`
+    //                               className="w-full flex items-center justify-between p-2 rounded border border-gray-300 mt-1 first:mt-0"
+    //                             >
+    //                               <span className="block text-sm text-gray-600 break-words max-w-[90%]">
+    //                                 {/* Ensure the text wraps properly and doesn't overflow */}
+    //                                 {item.name}
+    //                               </span>
+    //                               <button
+    //                                 onClick={() => remove(index)}
+    //                                 className="flex-shrink-0" // Ensure button doesn't shrink
+    //                               >
+    //                                 <IoClose
+    //                                   size={18}
+    //                                   className="text-gray-400 hover:text-gray-600"
+    //                                 />
+    //                               </button>
+    //                             </div>
+    //                           ))}
+    //                         </div>
+    //                       </div>
+    //                     </div>
+    //                   )}
+    //                 </div>
+    //               </div>
+    //             </fieldset>
+
+    //             {/* Product Details */}
+    //             <fieldset className="bg-white p-4">
+    //               <legend className="text-lg font-semibold">
+    //                 Products Details
+    //               </legend>
+
+    //               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+    //                 <div>
+    //                   <label className="block text-sm font-medium text-gray-700 mb-1">
+    //                     Category
+    //                   </label>
+    //                   <div className="flex justify-between gap-2">
+    //                     <select
+    //                       {...register("category")}
+    //                       className="select w-[90%] border rounded border-gray-300 p-3"
+    //                     >
+    //                       {categories.map((category) => (
+    //                         <option value={category}>{category}</option>
+    //                       ))}
+    //                     </select>
+    //                     <button
+    //                       className="p-3 border rounded border-gray-300"
+    //                       type="button"
+    //                       onClick={toggleCategoryModal}
+    //                     >
+    //                       <FiPlus size={24} className="text-gray-600" />
+    //                     </button>
+    //                   </div>
+    //                 </div>
+
+    //                 <div>
+    //                   <label className="block text-sm font-medium text-gray-700 mb-1">
+    //                     Sub Category
+    //                   </label>
+    //                   <div className="flex justify-between gap-2">
+    //                     <select
+    //                       {...register("subCategory")}
+    //                       className="select w-[90%] border rounded border-gray-300 p-3"
+    //                       disabled={!selectedCategory} // Disable if no category is selected
+    //                     >
+    //                       <option value="">Select a subcategory</option>
+    //                       {selectedCategory &&
+    //                         subCategories[selectedCategory]?.map((item) => (
+    //                           <option key={item} value={item}>
+    //                             {item}
+    //                           </option>
+    //                         ))}
+    //                     </select>
+    //                     <button
+    //                       className="p-3 border rounded border-gray-300"
+    //                       type="button"
+    //                       onClick={toggleSubCategoryModal}
+    //                     >
+    //                       <FiPlus size={24} className="text-gray-600" />
+    //                     </button>
+    //                   </div>
+    //                 </div>
+
+    //                 <div>
+    //                   <label className="block text-sm font-medium text-gray-700 mb-1">
+    //                     Tag
+    //                   </label>
+    //                   <input
+    //                     {...register("tag")}
+    //                     placeholder="Tag"
+    //                     className="input w-full border rounded border-gray-300 p-3"
+    //                   />
+    //                 </div>
+    //               </div>
+
+    //               <div className="w-full px-6">
+    //                 <div className="flex items-end justify-start gap-2">
+    //                   <div>
+    //                     <label className="block text-sm font-medium text-gray-700 mb-1">
+    //                       Add Product
+    //                     </label>
+    //                     <input
+    //                       type="text"
+    //                       {...register("productName")}
+    //                       placeholder="Enter Product Name"
+    //                       className="input w-52 border rounded border-gray-300 p-3"
+    //                     />
+    //                   </div>
+
+    //                   <div
+    //                     className="flex items-center justify-center w-12 h-12 border-2 border-dashed border-gray-400 rounded-lg cursor-pointer hover:bg-gray-100"
+    //                     onClick={() =>
+    //                       document.getElementById("inputImage").click()
+    //                     }
+    //                   >
+    //                     <input
+    //                       disabled={imageLoading}
+    //                       id="inputImage"
+    //                       type="file"
+    //                       accept={"image/*"}
+    //                       className="hidden"
+    //                       onChange={handleFileChange}
+    //                     />
+    //                     <div className="flex flex-col items-center justify-center">
+    //                       {!selectedImage ? (
+    //                         <FcImageFile className="text-4xl" />
+    //                       ) : (
+    //                         <img
+    //                           src={URL.createObjectURL(selectedImage)}
+    //                           className="h-9 w-9 object-cover rounded"
+    //                         />
+    //                       )}
+    //                     </div>
+    //                   </div>
+    //                   {/* <button
+    //                   type="button"
+    //                   className="w-12 h-12 flex items-center justify-center text-blue-600 border border-blue-500 rounded hover:bg-blue-100"
+    //                   onClick={uploadProduct}
+    //                 >
+    //                   <FiPlus size={20} />
+    //                 </button> */}
+    //                   <button
+    //                     disabled={imageLoading}
+    //                     onClick={uploadProduct}
+    //                     type="button"
+    //                     className="h-12 px-4 py-2 gap-2 flex items-center justify-center text-blue-600 border border-blue-500 rounded hover:bg-blue-100"
+    //                   >
+    //                     {imageLoading ? "Uploading" : "Upload"}
+    //                     <IoMdCloudUpload size={20} />
+    //                   </button>
+    //                 </div>
+    //                 {/* List of Products */}
+    //                 <div className="w-full grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 mt-4">
+    //                   {serviceProducts.slice(0, 4).map((product, index) => (
+    //                     <div
+    //                       key={index}
+    //                       className="flex items-center gap-2 border p-2 rounded"
+    //                     >
+    //                       {product.image && (
+    //                         <img
+    //                           src={product.image}
+    //                           alt={product.title}
+    //                           className="h-20 w-20 object-cover rounded"
+    //                         />
+    //                       )}
+    //                       <div className="flex-1">
+    //                         <p className="text-sm font-medium">
+    //                           Title: {product.title}
+    //                         </p>
+    //                       </div>
+
+    //                       <button
+    //                         type="button"
+    //                         onClick={() => deleteProduct(product.id)}
+    //                         className="p-2 text-red-600 border border-red-500 rounded hover:bg-red-100"
+    //                       >
+    //                         <FiTrash size={20} />
+    //                       </button>
+    //                     </div>
+    //                   ))}
+    //                 </div>
+    //                 {serviceProducts.length > 4 && (
+    //                   <div className="w-full flex justify-end mt-1">
+    //                     <button
+    //                       className="text-sm text-blue-500 hover:text-blue-600"
+    //                       type="button"
+    //                       onClick={() => setVisibleProducts(true)}
+    //                     >
+    //                       View more
+    //                     </button>
+    //                   </div>
+    //                 )}
+    //               </div>
+    //             </fieldset>
+
+    //             {/* Tax Details */}
+    //             <fieldset className="bg-white p-4">
+    //               <legend className="text-lg font-semibold">Tax Details</legend>
+    //               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+    //                 <div>
+    //                   <label className="block text-sm font-medium text-gray-700 mb-1">
+    //                     GST
+    //                   </label>
+    //                   <input
+    //                     {...register("gst")}
+    //                     placeholder="Enter GST Number"
+    //                     className="input w-full border rounded border-gray-300 p-3"
+    //                   />
+    //                   <PDFFileSelector
+    //                     register={register}
+    //                     setValue={setValue}
+    //                     errors={errors}
+    //                     fieldName={"gstPdf"}
+    //                   />
+    //                 </div>
+
+    //                 <div>
+    //                   <label className="block text-sm font-medium text-gray-700 mb-1">
+    //                     PAN
+    //                   </label>
+    //                   <input
+    //                     {...register("pan")}
+    //                     placeholder="Enter PAN Number"
+    //                     className="input w-full border rounded border-gray-300 p-3"
+    //                   />
+    //                   <PDFFileSelector
+    //                     register={register}
+    //                     setValue={setValue}
+    //                     errors={errors}
+    //                     fieldName={"panPdf"}
+    //                   />
+    //                 </div>
+
+    //                 <div>
+    //                   <label className="block text-sm font-medium text-gray-700 mb-1">
+    //                     TAN
+    //                   </label>
+    //                   <input
+    //                     {...register("tan")}
+    //                     placeholder="Enter TAN Number"
+    //                     className="input w-full border rounded border-gray-300 p-3"
+    //                   />
+    //                   <PDFFileSelector
+    //                     register={register}
+    //                     setValue={setValue}
+    //                     errors={errors}
+    //                     fieldName={"tanPdf"}
+    //                   />
+    //                 </div>
+    //               </div>
+    //             </fieldset>
+
+    //             {/* Bank Details */}
+    //             <fieldset className="bg-white p-4">
+    //               <legend className="text-lg font-semibold">
+    //                 Bank Details
+    //               </legend>
+    //               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 p-6">
+    //                 <div>
+    //                   <label className="block text-sm font-medium text-gray-700 mb-1">
+    //                     Account Type
+    //                   </label>
+    //                   <select
+    //                     {...register("accountType")}
+    //                     className="select w-full border rounded border-gray-300 p-3"
+    //                   >
+    //                     <option value="Saving">Saving</option>
+    //                     <option value="Current">Current</option>
+    //                   </select>
+    //                 </div>
+
+    //                 <div>
+    //                   <label className="block text-sm font-medium text-gray-700 mb-1">
+    //                     Account Number
+    //                   </label>
+    //                   <input
+    //                     {...register("accountNumber")}
+    //                     placeholder="Account Number"
+    //                     className="input w-full border rounded border-gray-300 p-3"
+    //                   />
+    //                 </div>
+
+    //                 <div>
+    //                   <label className="block text-sm font-medium text-gray-700 mb-1">
+    //                     Confirm Account Number
+    //                   </label>
+    //                   <input
+    //                     {...register("confirmAccountNumber")}
+    //                     placeholder="Confirm Account Number"
+    //                     className="input w-full border rounded border-gray-300 p-3"
+    //                   />
+    //                 </div>
+
+    //                 <div>
+    //                   <label className="block text-sm font-medium text-gray-700 mb-1">
+    //                     IFSC Code
+    //                   </label>
+    //                   <input
+    //                     {...register("ifsc")}
+    //                     placeholder="IFSC Code"
+    //                     className="input w-full border rounded border-gray-300 p-3"
+    //                   />
+    //                 </div>
+    //                 <div>
+    //                   <label className="block text-sm font-medium text-gray-700 mb-1">
+    //                     Cancel Cheque
+    //                   </label>
+    //                   <PDFFileSelector
+    //                     register={register}
+    //                     setValue={setValue}
+    //                     errors={errors}
+    //                     fieldName={"cancelCheque"}
+    //                   />
+    //                 </div>
+    //               </div>
+    //             </fieldset>
+
+    //             <div className="flex items-center space-x-2 mt-4 w-full bg-white p-4">
+    //               <input
+    //                 type="checkbox"
+    //                 id="terms"
+    //                 checked={isLive}
+    //                 onChange={(e) => setIsLive(e.target.checked)}
+    //                 className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+    //               />
+    //               <label htmlFor="terms" className="text-sm text-gray-700">
+    //                 Mark as Live
+    //               </label>
+    //             </div>
+
+    //             <div className="flex w-full justify-end mt-4 py-2">
+    //               <button
+    //                 type="submit"
+    //                 className="btn btn-primary ml-auto mr-0 w-36 p-3 rounded bg-blue-400 hover:bg-blue-500 text-white font-medium"
+    //               >
+    //                 Submit
+    //               </button>
+    //             </div>
+    //           </form>
+    //         </div>
+    //       </div>
+    //     </div>
+    //   </div>
+
+    //   {visibleProducts && (
+    //     <ProductsList
+    //       products={serviceProducts}
+    //       onClose={() => setVisibleProducts(false)}
+    //       remove={deleteProduct}
+    //     />
+    //   )}
+
+    //   {visibleCategoryModal && (
+    //     <AddCategory
+    //       onClose={toggleCategoryModal}
+    //       handleCategory={handleCategory}
+    //     />
+    //   )}
+
+    //   {visibleSubCategoryModal && (
+    //     <AddSubCategory
+    //       categories={categories}
+    //       onClose={toggleSubCategoryModal}
+    //       handleSubCategory={handleSubCategory}
+    //     />
+    //   )}
+    // </div>
+
+    <div className="absolute inset-0 w-full z-50">
+      <div className="flex flex-col bg-gray-100 h-full">
+        {/* Header */}
+        <div className="sticky top-0 w-full bg-gray-100 z-10">
+          <div className="flex justify-between items-center py-6 px-8">
+            <h1 className="text-xl font-semibold">Welcome Call</h1>
+            <button className="text-xl font-semibold" onClick={closeModal}>
+              <IoClose size={24} color="black" />
+            </button>
+          </div>
+          <div className="w-full">
+            <div className="w-full relative bg-gray-300 h-[3px] overflow-hidden">
+              <div
+                className="bg-green-600 h-[3px] transition-all duration-500 ease-in-out"
+                style={{ width: `${progress}%` }}
+              ></div>
+            </div>
+            <div className="w-full flex justify-end pr-2">
+              <p className="text-sm text-gray-600">{`${progress}%`}</p>
+            </div>
+          </div>
         </div>
 
-        <div className="w-full mt-4">
-          <div className="container mx-auto p-4">
-            <h1 className="text-2xl font-bold mb-4">Welcome Call Form</h1>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              {/* Personal Details */}
-              <fieldset className="border p-4">
-                <legend className="text-lg font-semibold">
-                  Personal Details
-                </legend>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      First Name
-                    </label>
-                    <input
-                      {...register("firstName", { required: true })}
-                      placeholder="First Name"
-                      className="input w-full border rounded border-gray-300 p-3"
-                    />
-                    {errors.firstName && (
-                      <p className="text-red-500">First Name is required</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Last Name
-                    </label>
-                    <input
-                      {...register("lastName", { required: true })}
-                      placeholder="Last Name"
-                      className="input w-full border rounded border-gray-300 p-3"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Designation/Job Title
-                    </label>
-                    <input
-                      {...register("jobTitle")}
-                      placeholder="Designation/Job Title"
-                      className="input w-full border rounded border-gray-300 p-3"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Mobile Number
-                    </label>
-                    <input
-                      {...register("mobile")}
-                      placeholder="Mobile Number"
-                      className="input w-full border rounded border-gray-300 p-3"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Email
-                    </label>
-                    <input
-                      {...register("email", { pattern: /^\S+@\S+$/i })}
-                      placeholder="Email"
-                      className="input w-full border rounded border-gray-300 p-3"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Alt Email
-                    </label>
-                    <input
-                      {...register("altEmail")}
-                      placeholder="Alternative Email"
-                      className="input w-full border rounded border-gray-300 p-3"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Location/City
-                    </label>
-                    <input
-                      {...register("location")}
-                      placeholder="Location/City"
-                      className="input w-full border rounded border-gray-300 p-3"
-                    />
-                  </div>
+        {/* Main Content */}
+        <div className="flex-1 overflow-y-auto mt-4 px-4">
+          <div className="container mx-auto flex flex-col sm:flex-row gap-2">
+            {/* Left Panel */}
+            <div className="w-full sm:w-1/4 h-full bg-transparent">
+              <div className="w-full bg-white px-4 py-6 rounded">
+                <div>
+                  <label className="block text-sm font-medium text-gray-500 mb-1">
+                    Profile Id
+                  </label>
+                  <p className="text-sm text-gray-700 font-medium">
+                    {selectedRow?.profileId}
+                  </p>
                 </div>
-              </fieldset>
+                <div className="mt-2">
+                  <label className="block text-sm font-medium text-gray-500 mb-1">
+                    Full Name
+                  </label>
+                  <p className="text-sm text-gray-700 font-medium">
+                    {selectedRow?.full_name}
+                  </p>
+                </div>
+                <div className="mt-2">
+                  <label className="block text-sm font-medium text-gray-500 mb-1">
+                    Phone Number
+                  </label>
+                  <p className="text-sm text-gray-700 font-medium">
+                    {selectedRow?.phone_number}
+                  </p>
+                </div>
+                <div className="mt-2">
+                  <label className="block text-sm font-medium text-gray-500 mb-1">
+                    Email
+                  </label>
+                  <p className="text-sm text-gray-700 font-medium">
+                    {selectedRow?.email}
+                  </p>
+                </div>
+                <div className="mt-2">
+                  <label className="block text-sm font-medium text-gray-500 mb-1">
+                    Company Name
+                  </label>
+                  <p className="text-sm text-gray-700 font-medium">
+                    {selectedRow?.company_name}
+                  </p>
+                </div>
+              </div>
 
-              {/* Business Details */}
-              <fieldset className="border p-4">
-                <legend className="text-lg font-semibold">
-                  Business Details
-                </legend>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Company Name
-                    </label>
-                    <input
-                      {...register("companyName", { required: true })}
-                      placeholder="Company Name"
-                      className="input w-full border rounded border-gray-300 p-3"
-                    />
-                  </div>
+              <div className="w-full bg-white px-4 py-6 rounded mt-2">
+                <label className="block text-sm font-medium text-gray-500 mb-1">
+                  Remarks
+                </label>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Company Type
+                <textarea
+                  placeholder="Enter Remarks"
+                  className="w-full border rounded border-gray-300 p-3 h-24"
+                />
+
+                <button
+                  className="mt-4 w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                  onClick={() =>
+                    console.log("Add remark functionality not implemented yet")
+                  }
+                >
+                  Add Remark
+                </button>
+
+                {/* <div className="w-full flex flex-col sm:flex-row gap-2 mt-2">
+                  <div className="w-full">
+                    <label className="block text-sm font-medium text-gray-500 mb-1">
+                      Disposition
                     </label>
-                    <select
-                      {...register("companyType")}
-                      className="select w-full border rounded border-gray-300 p-3"
-                    >
-                      <option value="Proprietorship">Proprietorship</option>
-                      <option value="Partnership">Partnership</option>
-                      <option value="Private Limited">Private Limited</option>
-                      <option value="Public Limited">Public Limited</option>
-                      <option value="LLP">LLP</option>
-                      <option value="Other">Other</option>
+                    <select className="select w-full border rounded border-gray-300 p-3">
+                      {dispositions.map((disposition) => (
+                        <option key={disposition} value={disposition}>
+                          {disposition}
+                        </option>
+                      ))}
                     </select>
                   </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Turnover
+                  <div className="w-full">
+                    <label className="block text-sm font-medium text-gray-500 mb-1">
+                      Sub Disposition
                     </label>
-                    <div className="flex gap-2">
-                      <input
-                        {...register("turnover")}
-                        placeholder="Turnover"
-                        className="input w-full border rounded border-gray-300 p-3"
-                      />
-                      <select
-                        {...register("type")}
-                        className="select w-full border rounded border-gray-300 p-3"
-                      >
-                        <option value="lakh">Lakh</option>
-                        <option value="crore">Crore</option>
-                        <option value="million">Million</option>
-                        <option value="billion">Billion</option>
-                      </select>
-                    </div>
+                    <select className="select w-full border rounded border-gray-300 p-3">
+                      {subDispositions[dispositions[0]].map((disposition) => (
+                        <option key={disposition} value={disposition}>
+                          {disposition}
+                        </option>
+                      ))}
+                    </select>
                   </div>
+                </div> */}
+              </div>
+            </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Year of Establishment
-                    </label>
-                    <input
-                      {...register("yearOfEstablishment")}
-                      placeholder="Year of Establishment"
-                      className="input w-full border rounded border-gray-300 p-3"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Full Address
-                    </label>
-                    <input
-                      {...register("address")}
-                      placeholder="Full Address"
-                      className="input w-full border rounded border-gray-300 p-3"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Pincode
-                    </label>
-                    <input
-                      {...register("pincode")}
-                      placeholder="Pincode"
-                      className="input w-full border rounded border-gray-300 p-3"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      City
-                    </label>
-                    <input
-                      {...register("city")}
-                      placeholder="City"
-                      className="input w-full border rounded border-gray-300 p-3"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      State
-                    </label>
-                    <input
-                      {...register("state")}
-                      placeholder="State"
-                      className="input w-full border rounded border-gray-300 p-3"
-                    />
-                  </div>
-                </div>
-              </fieldset>
-
-              {/* Product Details */}
-              <fieldset className="border p-4">
-                <legend className="text-lg font-semibold">
-                  Products Details
-                </legend>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Category
-                    </label>
-                    <div className="flex justify-between gap-2">
-                      <select
-                        {...register("category")}
-                        className="select w-[90%] border rounded border-gray-300 p-3"
-                      >
-                        {categories.map((category) => (
-                          <option value={category}>{category}</option>
-                        ))}
-                      </select>
-                      <button
-                        className="p-3 border rounded border-gray-300"
-                        type="button"
-                        onClick={toggleCategoryModal}
-                      >
-                        <FiPlus size={24} className="text-gray-600" />
-                      </button>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Sub Category
-                    </label>
-                    <div className="flex justify-between gap-2">
-                      <select
-                        {...register("subCategory")}
-                        className="select w-[90%] border rounded border-gray-300 p-3"
-                        disabled={!selectedCategory} // Disable if no category is selected
-                      >
-                        <option value="">Select a subcategory</option>
-                        {selectedCategory &&
-                          subCategories[selectedCategory]?.map((item) => (
-                            <option key={item} value={item}>
-                              {item}
-                            </option>
-                          ))}
-                      </select>
-                      <button
-                        className="p-3 border rounded border-gray-300"
-                        type="button"
-                        onClick={toggleSubCategoryModal}
-                      >
-                        <FiPlus size={24} className="text-gray-600" />
-                      </button>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Tag
-                    </label>
-                    <input
-                      {...register("tag")}
-                      placeholder="Tag"
-                      className="input w-full border rounded border-gray-300 p-3"
-                    />
-                  </div>
-                </div>
-
-                <div className="w-full px-6">
-                  <div className="flex items-end justify-start gap-2">
+            {/* Right Panel - Main form */}
+            <div className="w-full sm:w-3/4 bg-white p-4">
+              <h1 className="text-2xl font-bold mb-4">Welcome Call Form</h1>
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                <fieldset className="bg-white p-4">
+                  <legend className="text-lg font-semibold">
+                    Personal Details
+                  </legend>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Add Product
+                        First Name
                       </label>
                       <input
-                        type="text"
-                        {...register("productName")}
-                        placeholder="Enter Product Name"
-                        className="input w-52 border rounded border-gray-300 p-3"
+                        {...register("firstName", { required: true })}
+                        placeholder="First Name"
+                        className="input w-full border rounded border-gray-300 p-3"
+                      />
+                      {errors.firstName && (
+                        <p className="text-red-500">First Name is required</p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Last Name
+                      </label>
+                      <input
+                        {...register("lastName", { required: true })}
+                        placeholder="Last Name"
+                        className="input w-full border rounded border-gray-300 p-3"
                       />
                     </div>
 
-                    <div
-                      className="flex items-center justify-center w-12 h-12 border-2 border-dashed border-gray-400 rounded-lg cursor-pointer hover:bg-gray-100"
-                      onClick={() =>
-                        document.getElementById("inputImage").click()
-                      }
-                    >
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Designation/Job Title
+                      </label>
                       <input
-                        disabled={imageLoading}
-                        id="inputImage"
-                        type="file"
-                        accept={"image/*"}
-                        className="hidden"
-                        onChange={handleFileChange}
+                        {...register("jobTitle")}
+                        placeholder="Designation/Job Title"
+                        className="input w-full border rounded border-gray-300 p-3"
                       />
-                      <div className="flex flex-col items-center justify-center">
-                        {!selectedImage ? (
-                          <FcImageFile className="text-4xl" />
-                        ) : (
-                          <img
-                            src={URL.createObjectURL(selectedImage)}
-                            className="h-9 w-9 object-cover rounded"
-                          />
-                        )}
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Mobile Number
+                      </label>
+                      <input
+                        {...register("mobile")}
+                        placeholder="Mobile Number"
+                        className="input w-full border rounded border-gray-300 p-3"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Email
+                      </label>
+                      <input
+                        {...register("email", { pattern: /^\S+@\S+$/i })}
+                        placeholder="Email"
+                        className="input w-full border rounded border-gray-300 p-3"
+                      />
+                    </div>
+
+                    {serviceType === "distributor" ? (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          WhatsApp Number
+                        </label>
+                        <input
+                          {...register("whatsAppNumber")}
+                          placeholder="WhatsApp Number"
+                          type="number"
+                          className="input w-full border rounded border-gray-300 p-3"
+                        />
+                      </div>
+                    ) : (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Alt Email
+                        </label>
+                        <input
+                          {...register("altEmail")}
+                          placeholder="Alternative Email"
+                          className="input w-full border rounded border-gray-300 p-3"
+                        />
+                      </div>
+                    )}
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Location/City
+                      </label>
+                      <input
+                        {...register("location")}
+                        placeholder="Location/City"
+                        className="input w-full border rounded border-gray-300 p-3"
+                      />
+                    </div>
+                  </div>
+                </fieldset>
+
+                {/* Business Details */}
+                <fieldset className="bg-white p-4">
+                  <legend className="text-lg font-semibold">
+                    Business Details
+                  </legend>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Company Name
+                      </label>
+                      <input
+                        {...register("companyName", { required: true })}
+                        placeholder="Company Name"
+                        className="input w-full border rounded border-gray-300 p-3"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Company Type
+                      </label>
+                      <select
+                        {...register("companyType")}
+                        className="select w-full border rounded border-gray-300 p-3"
+                      >
+                        <option value="Proprietorship">Proprietorship</option>
+                        <option value="Partnership">Partnership</option>
+                        <option value="Private Limited">Private Limited</option>
+                        <option value="Public Limited">Public Limited</option>
+                        <option value="LLP">LLP</option>
+                        <option value="Other">Other</option>
+                      </select>
+                    </div>
+
+                    {serviceType === "distributor" && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Experience
+                        </label>
+                        <input
+                          {...register("experience", { required: true })}
+                          placeholder="Experience (in years)"
+                          type="number"
+                          className="input w-full border rounded border-gray-300 p-3"
+                        />
+                      </div>
+                    )}
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Turnover
+                      </label>
+                      <div className="flex gap-2">
+                        <input
+                          {...register("turnover")}
+                          placeholder="Turnover"
+                          className="input w-full border rounded border-gray-300 p-3"
+                        />
+                        <select
+                          {...register("type")}
+                          className="select w-full border rounded border-gray-300 p-3"
+                        >
+                          <option value="lakh">Lakh</option>
+                          <option value="crore">Crore</option>
+                          <option value="million">Million</option>
+                          <option value="billion">Billion</option>
+                        </select>
                       </div>
                     </div>
-                    {/* <button
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Year of Establishment
+                      </label>
+                      <input
+                        {...register("yearOfEstablishment")}
+                        placeholder="Year of Establishment"
+                        className="input w-full border rounded border-gray-300 p-3"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Full Address
+                      </label>
+                      <input
+                        {...register("address")}
+                        placeholder="Full Address"
+                        className="input w-full border rounded border-gray-300 p-3"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Pincode
+                      </label>
+                      <input
+                        {...register("pincode")}
+                        placeholder="Pincode"
+                        className="input w-full border rounded border-gray-300 p-3"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        City
+                      </label>
+                      <input
+                        {...register("city")}
+                        placeholder="City"
+                        className="input w-full border rounded border-gray-300 p-3"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        State
+                      </label>
+                      <input
+                        {...register("state")}
+                        placeholder="State"
+                        className="input w-full border rounded border-gray-300 p-3"
+                      />
+                    </div>
+
+                    {serviceType === "distributor" && (
+                      <>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Investment Budget
+                          </label>
+                          <input
+                            {...register("investmentBudget")}
+                            placeholder="Investment Budget"
+                            type="number"
+                            className="input w-full border rounded border-gray-300 p-3"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Visiting Card
+                          </label>
+                          <div
+                            className="w-full flex items-center gap-2 border rounded border-gray-300 p-3 hover:cursor-pointer"
+                            onClick={() =>
+                              document.getElementById("visitingCard").click()
+                            }
+                          >
+                            <CiImageOn size={24} />
+                            <span className="block text-sm font-medium text-gray-700">
+                              Select visiting card
+                            </span>
+                            <input
+                              {...register("visitingCard")}
+                              id="visitingCard"
+                              type="file"
+                              accept={"image/*"}
+                              className="hidden"
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Brands Working With
+                          </label>
+                          <button
+                            type="button"
+                            className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 flex items-center gap-2"
+                            onClick={toggleBrandModal}
+                          >
+                            <FiPlus size={24} className="text-white" />
+                            Add Brand
+                          </button>
+
+                          {showModal && (
+                            <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50">
+                              <div className="bg-white p-6 rounded-lg shadow-lg w-96 h-96 overflow-hidden">
+                                <div className="w-full flex items-center justify-between">
+                                  <h3 className="text-lg font-semibold mb-4">
+                                    Add Brand
+                                  </h3>
+                                  <IoClose
+                                    size={24}
+                                    color="black"
+                                    onClick={toggleBrandModal}
+                                    className="cursor-pointer"
+                                  />
+                                </div>
+                                <div className="w-full flex gap-2">
+                                  <input
+                                    placeholder="Brand Name"
+                                    {...register("brandName")}
+                                    type="text"
+                                    className="input w-full border rounded border-gray-300 p-2"
+                                  />
+                                  <button
+                                    type="button"
+                                    className="w-16 border rounded-sm border-gray-300 flex items-center justify-center"
+                                    onClick={addBrands}
+                                  >
+                                    <FiPlus size={24} className="text-black" />
+                                  </button>
+                                </div>
+                                <div className="w-full h-64 mt-2 p-2 overflow-x-hidden overflow-y-auto">
+                                  {fields.map((item, index) => (
+                                    <div
+                                      key={item.id} // Use `item.id` provided by `useFieldArray`
+                                      className="w-full flex items-center justify-between p-2 rounded border border-gray-300 mt-1 first:mt-0"
+                                    >
+                                      <span className="block text-sm text-gray-600 break-words max-w-[90%]">
+                                        {/* Ensure the text wraps properly and doesn't overflow */}
+                                        {item.name}
+                                      </span>
+                                      <button
+                                        onClick={() => remove(index)}
+                                        className="flex-shrink-0" // Ensure button doesn't shrink
+                                      >
+                                        <IoClose
+                                          size={18}
+                                          className="text-gray-400 hover:text-gray-600"
+                                        />
+                                      </button>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </fieldset>
+
+                {/* Product Details */}
+                <fieldset className="bg-white p-4">
+                  <legend className="text-lg font-semibold">
+                    Products Details
+                  </legend>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Category
+                      </label>
+                      <div className="flex justify-between gap-2">
+                        <select
+                          {...register("category")}
+                          className="select w-[90%] border rounded border-gray-300 p-3"
+                        >
+                          {categories.map((category) => (
+                            <option value={category}>{category}</option>
+                          ))}
+                        </select>
+                        <button
+                          className="p-3 border rounded border-gray-300"
+                          type="button"
+                          onClick={toggleCategoryModal}
+                        >
+                          <FiPlus size={24} className="text-gray-600" />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Sub Category
+                      </label>
+                      <div className="flex justify-between gap-2">
+                        <select
+                          {...register("subCategory")}
+                          className="select w-[90%] border rounded border-gray-300 p-3"
+                          disabled={!selectedCategory} // Disable if no category is selected
+                        >
+                          <option value="">Select a subcategory</option>
+                          {selectedCategory &&
+                            subCategories[selectedCategory]?.map((item) => (
+                              <option key={item} value={item}>
+                                {item}
+                              </option>
+                            ))}
+                        </select>
+                        <button
+                          className="p-3 border rounded border-gray-300"
+                          type="button"
+                          onClick={toggleSubCategoryModal}
+                        >
+                          <FiPlus size={24} className="text-gray-600" />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Tag
+                      </label>
+                      <input
+                        {...register("tag")}
+                        placeholder="Tag"
+                        className="input w-full border rounded border-gray-300 p-3"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="w-full px-6">
+                    <div className="flex items-end justify-start gap-2">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Add Product
+                        </label>
+                        <input
+                          type="text"
+                          {...register("productName")}
+                          placeholder="Enter Product Name"
+                          className="input w-52 border rounded border-gray-300 p-3"
+                        />
+                      </div>
+
+                      <div
+                        className="flex items-center justify-center w-12 h-12 border-2 border-dashed border-gray-400 rounded-lg cursor-pointer hover:bg-gray-100"
+                        onClick={() =>
+                          document.getElementById("inputImage").click()
+                        }
+                      >
+                        <input
+                          disabled={imageLoading}
+                          id="inputImage"
+                          type="file"
+                          accept={"image/*"}
+                          className="hidden"
+                          onChange={handleFileChange}
+                        />
+                        <div className="flex flex-col items-center justify-center">
+                          {!selectedImage ? (
+                            <FcImageFile className="text-4xl" />
+                          ) : (
+                            <img
+                              src={URL.createObjectURL(selectedImage)}
+                              className="h-9 w-9 object-cover rounded"
+                            />
+                          )}
+                        </div>
+                      </div>
+                      {/* <button
                       type="button"
                       className="w-12 h-12 flex items-center justify-center text-blue-600 border border-blue-500 rounded hover:bg-blue-100"
                       onClick={uploadProduct}
                     >
                       <FiPlus size={20} />
                     </button> */}
-                    <button
-                      disabled={imageLoading}
-                      onClick={uploadProduct}
-                      type="button"
-                      className="h-12 px-4 py-2 gap-2 flex items-center justify-center text-blue-600 border border-blue-500 rounded hover:bg-blue-100"
-                    >
-                      {imageLoading ? "Uploading" : "Upload"}
-                      <IoMdCloudUpload size={20} />
-                    </button>
-                  </div>
-                  {/* List of Products */}
-                  <div className="w-full grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 mt-4">
-                    {serviceProducts.slice(0, 4).map((product, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center gap-2 border p-2 rounded"
-                      >
-                        {product.image && (
-                          <img
-                            src={product.image}
-                            alt={product.title}
-                            className="h-20 w-20 object-cover rounded"
-                          />
-                        )}
-                        <div className="flex-1">
-                          <p className="text-sm font-medium">
-                            Title: {product.title}
-                          </p>
-                        </div>
-
-                        <button
-                          type="button"
-                          onClick={() => deleteProduct(product.id)}
-                          className="p-2 text-red-600 border border-red-500 rounded hover:bg-red-100"
-                        >
-                          <FiTrash size={20} />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                  {serviceProducts.length > 4 && (
-                    <div className="w-full flex justify-end mt-1">
                       <button
-                        className="text-sm text-blue-500 hover:text-blue-600"
+                        disabled={imageLoading}
+                        onClick={uploadProduct}
                         type="button"
-                        onClick={() => setVisibleProducts(true)}
+                        className="h-12 px-4 py-2 gap-2 flex items-center justify-center text-blue-600 border border-blue-500 rounded hover:bg-blue-100"
                       >
-                        View more
+                        {imageLoading ? "Uploading" : "Upload"}
+                        <IoMdCloudUpload size={20} />
                       </button>
                     </div>
-                  )}
+                    {/* List of Products */}
+                    <div className="w-full grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 mt-4">
+                      {serviceProducts.slice(0, 4).map((product, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center gap-2 border p-2 rounded"
+                        >
+                          {product.image && (
+                            <img
+                              src={product.image}
+                              alt={product.title}
+                              className="h-20 w-20 object-cover rounded"
+                            />
+                          )}
+                          <div className="flex-1">
+                            <p className="text-sm font-medium">
+                              Title: {product.title}
+                            </p>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => deleteProduct(product.id)}
+                            className="p-2 text-red-600 border border-red-500 rounded hover:bg-red-100"
+                          >
+                            <FiTrash size={20} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                    {serviceProducts.length > 4 && (
+                      <div className="w-full flex justify-end mt-1">
+                        <button
+                          className="text-sm text-blue-500 hover:text-blue-600"
+                          type="button"
+                          onClick={() => setVisibleProducts(true)}
+                        >
+                          View more
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </fieldset>
+
+                {/* Tax Details */}
+                <fieldset className="bg-white p-4">
+                  <legend className="text-lg font-semibold">Tax Details</legend>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        GST
+                      </label>
+                      <input
+                        {...register("gst")}
+                        placeholder="Enter GST Number"
+                        className="input w-full border rounded border-gray-300 p-3"
+                      />
+                      <PDFFileSelector
+                        register={register}
+                        setValue={setValue}
+                        errors={errors}
+                        fieldName={"gstPdf"}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        PAN
+                      </label>
+                      <input
+                        {...register("pan")}
+                        placeholder="Enter PAN Number"
+                        className="input w-full border rounded border-gray-300 p-3"
+                      />
+                      <PDFFileSelector
+                        register={register}
+                        setValue={setValue}
+                        errors={errors}
+                        fieldName={"panPdf"}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        TAN
+                      </label>
+                      <input
+                        {...register("tan")}
+                        placeholder="Enter TAN Number"
+                        className="input w-full border rounded border-gray-300 p-3"
+                      />
+                      <PDFFileSelector
+                        register={register}
+                        setValue={setValue}
+                        errors={errors}
+                        fieldName={"tanPdf"}
+                      />
+                    </div>
+                  </div>
+                </fieldset>
+
+                {/* Bank Details */}
+                <fieldset className="bg-white p-4">
+                  <legend className="text-lg font-semibold">
+                    Bank Details
+                  </legend>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 p-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Account Type
+                      </label>
+                      <select
+                        {...register("accountType")}
+                        className="select w-full border rounded border-gray-300 p-3"
+                      >
+                        <option value="Saving">Saving</option>
+                        <option value="Current">Current</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Account Number
+                      </label>
+                      <input
+                        {...register("accountNumber")}
+                        placeholder="Account Number"
+                        className="input w-full border rounded border-gray-300 p-3"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Confirm Account Number
+                      </label>
+                      <input
+                        {...register("confirmAccountNumber")}
+                        placeholder="Confirm Account Number"
+                        className="input w-full border rounded border-gray-300 p-3"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        IFSC Code
+                      </label>
+                      <input
+                        {...register("ifsc")}
+                        placeholder="IFSC Code"
+                        className="input w-full border rounded border-gray-300 p-3"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Cancel Cheque
+                      </label>
+                      <PDFFileSelector
+                        register={register}
+                        setValue={setValue}
+                        errors={errors}
+                        fieldName={"cancelCheque"}
+                      />
+                    </div>
+                  </div>
+                </fieldset>
+
+                {/* Submit Button */}
+                <div className="flex w-full justify-end mt-4 py-2">
+                  <button
+                    type="submit"
+                    className="btn btn-primary ml-auto mr-0 w-36 p-3 rounded bg-blue-400 hover:bg-blue-500 text-white font-medium"
+                  >
+                    Submit
+                  </button>
                 </div>
-              </fieldset>
-
-              {/* Tax Details */}
-              <fieldset className="border p-4">
-                <legend className="text-lg font-semibold">Tax Details</legend>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      GST
-                    </label>
-                    <input
-                      {...register("gst")}
-                      placeholder="Enter GST Number"
-                      className="input w-full border rounded border-gray-300 p-3"
-                    />
-                    <PDFFileSelector
-                      register={register}
-                      setValue={setValue}
-                      errors={errors}
-                      fieldName={"gstPdf"}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      PAN
-                    </label>
-                    <input
-                      {...register("pan")}
-                      placeholder="Enter PAN Number"
-                      className="input w-full border rounded border-gray-300 p-3"
-                    />
-                    <PDFFileSelector
-                      register={register}
-                      setValue={setValue}
-                      errors={errors}
-                      fieldName={"panPdf"}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      TAN
-                    </label>
-                    <input
-                      {...register("tan")}
-                      placeholder="Enter TAN Number"
-                      className="input w-full border rounded border-gray-300 p-3"
-                    />
-                    <PDFFileSelector
-                      register={register}
-                      setValue={setValue}
-                      errors={errors}
-                      fieldName={"tanPdf"}
-                    />
-                  </div>
-                </div>
-              </fieldset>
-
-              {/* Bank Details */}
-              <fieldset className="border p-4">
-                <legend className="text-lg font-semibold">Bank Details</legend>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 p-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Account Type
-                    </label>
-                    <select
-                      {...register("accountType")}
-                      className="select w-full border rounded border-gray-300 p-3"
-                    >
-                      <option value="Saving">Saving</option>
-                      <option value="Current">Current</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Account Number
-                    </label>
-                    <input
-                      {...register("accountNumber")}
-                      placeholder="Account Number"
-                      className="input w-full border rounded border-gray-300 p-3"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Confirm Account Number
-                    </label>
-                    <input
-                      {...register("confirmAccountNumber")}
-                      placeholder="Confirm Account Number"
-                      className="input w-full border rounded border-gray-300 p-3"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      IFSC Code
-                    </label>
-                    <input
-                      {...register("ifsc")}
-                      placeholder="IFSC Code"
-                      className="input w-full border rounded border-gray-300 p-3"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Cancel Cheque
-                    </label>
-                    <PDFFileSelector
-                      register={register}
-                      setValue={setValue}
-                      errors={errors}
-                      fieldName={"cancelCheque"}
-                    />
-                  </div>
-                </div>
-              </fieldset>
-
-              <div className="flex w-full justify-end mt-4 py-2">
-                <button
-                  type="submit"
-                  className="btn btn-primary ml-auto mr-0 w-36 p-3 rounded bg-blue-400 hover:bg-blue-500 text-white font-medium"
-                >
-                  Submit
-                </button>
-              </div>
-            </form>
+              </form>
+            </div>
           </div>
         </div>
       </div>
 
+      {/* Modal for Product list, Category, SubCategory, etc. */}
       {visibleProducts && (
         <ProductsList
           products={serviceProducts}
@@ -1121,75 +2159,5 @@ function PDFFileSelector({
     </div>
   );
 }
-
-// function UpdateLeadModal({ closeModal }) {
-//   const [activeTab, setActiveTab] = React.useState("personal_details");
-
-//   const {
-//     register,
-//     handleSubmit,
-//     formState: { errors },
-//   } = useForm();
-
-//   const renderTab = () => {
-//     switch (activeTab) {
-//       case "personal_details":
-//         return <PersonalDetails register={register} errors={errors} />;
-//       case "business_details":
-//         return <BusinessDetails register={register} errors={errors} />;
-//       case "about_us":
-//         return <AboutUs register={register} errors={errors} />;
-//       default:
-//         return <PersonalDetails register={register} errors={errors} />;
-//     }
-//   };
-
-//   const onSubmit = (data) => {
-//     console.log(data);
-//   };
-
-//   return (
-//     <div className="absolute inset-0 w-full h-full z-50 bg-white">
-//       <div className="flex flex-col h-full">
-//         {/* header */}
-//         <div className="flex justify-between items-center p-4">
-//           <h1 className="text-xl font-semibold">Update Lead</h1>
-//           <button className="text-xl font-semibold" onClick={closeModal}>
-//             <IoClose size={24} color="black" />
-//           </button>
-//         </div>
-
-//         <div className="w-full mt-4">
-//           {/* Tabs */}
-//           <div className="w-full flex px-4 border-b border-b-gray-400">
-//             {TABS.map((tab) => (
-//               <button
-//                 className={`min-w-32 py-2 px-4 text-base font-semibold border-b-2 ${
-//                   tab.value == activeTab
-//                     ? "border-b-blue-400"
-//                     : "border-transparent"
-//                 }`}
-//                 onClick={() => setActiveTab(tab.value)}
-//               >
-//                 {tab.label}
-//               </button>
-//             ))}
-//           </div>
-//         </div>
-
-//         <div className="flex flex-1 w-full flex-col">
-//           <div className="w-full overflow-y-auto overflow-x-hidden p-4">
-//             <div className="container mx-auto p-4">
-//               <h1 className="text-2xl font-bold mb-4">Service Data Form</h1>
-//               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-//                 {renderTab()}
-//               </form>
-//             </div>
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
 
 export default UpdateLeadModal;

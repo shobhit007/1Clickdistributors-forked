@@ -8,6 +8,9 @@ import { camelToTitle } from "@/components/utills/commonFunctions";
 import { leadsPanelColumns } from "@/lib/data/commonData";
 import moment from "moment";
 import AllocateServiceLead from "../AllocateServiceLead";
+import RenderTable from "../RenderTable";
+import UpdateLeadModal from "../manufacturer/UpdateLeadModal";
+
 const index = ({
   dateObjToSearch,
   searchValue,
@@ -19,6 +22,7 @@ const index = ({
   const [leads, setLeads] = useState(null);
   const [selectedServiceMembers, setSelectedServiceMembers] = useState([]);
   const [selectedSubTab, setSelectedSubTab] = useState("welcome_calls");
+  const [updateLead, setUpdateLead] = useState(false);
 
   const subTabs = [
     {
@@ -43,12 +47,14 @@ const index = ({
     try {
       if (!dateObjToSearch) return null;
       const token = localStorage.getItem("authToken");
-      let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/service/getServiceLeads`;
+      let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/service/distributor/getLeads`;
       setLoading(true);
       let payload = {
         startDate: dateObjToSearch?.selectedStartDate,
         endDate: dateObjToSearch?.selectedEndDate,
+        value: selectedSubTab,
       };
+
       const response = await fetch(API_URL, {
         method: "POST",
         headers: {
@@ -74,7 +80,7 @@ const index = ({
   };
 
   const { data, refetch } = useQuery({
-    queryKey: ["servicePanelLeads", dateObjToSearch],
+    queryKey: ["distributorLeads", dateObjToSearch, selectedSubTab],
     queryFn: getServiceLeads,
   });
 
@@ -108,15 +114,6 @@ const index = ({
 
   return (
     <div className="w-full h-full">
-      {loading && (
-        <div className="w-full flex flex-col items-center justify-center">
-          <img src="/loader.gif" className="h-[30px] w-auto" alt="loading" />
-          <p className="text-xl font-bold text-gray-500 mt-3">
-            Loading leads... please wait
-          </p>
-        </div>
-      )}
-
       <div className="flex gap-1 h-[24px] items-center mt-1 overflow-auto scrollbar-none">
         {subTabs.map((tab) => {
           return (
@@ -135,6 +132,15 @@ const index = ({
       </div>
 
       <div className="h-[95%]">
+        {loading && (
+          <div className="w-full flex flex-col items-center justify-center">
+            <img src="/loader.gif" className="h-[30px] w-auto" alt="loading" />
+            <p className="text-xl font-bold text-gray-500 mt-3">
+              Loading leads... please wait
+            </p>
+          </div>
+        )}
+
         {Array.isArray(data) ? (
           data.length > 0 ? (
             <div
@@ -147,6 +153,7 @@ const index = ({
                 selectedRows={selectedRows}
                 setSelectedRows={setSelectedRows}
                 searchValue={searchValue}
+                setUpdateLead={setUpdateLead}
               />
             </div>
           ) : (
@@ -159,6 +166,14 @@ const index = ({
           <AllocateServiceLead data={selectedRows} />
         )}
       </div>
+
+      {updateLead && (
+        <UpdateLeadModal
+          closeModal={() => setUpdateLead(false)}
+          selectedRow={selectedRows[0]}
+          serviceType="distributor"
+        />
+      )}
     </div>
   );
 };

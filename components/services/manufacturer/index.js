@@ -9,6 +9,7 @@ import { leadsPanelColumns } from "@/lib/data/commonData";
 import moment from "moment";
 import AllocateServiceLead from "../AllocateServiceLead";
 import UpdateLeadModal from "./UpdateLeadModal";
+
 const index = ({
   dateObjToSearch,
   searchValue,
@@ -29,7 +30,7 @@ const index = ({
       value: "welcome_calls",
     },
     {
-      label: "My allocations",
+      label: "My Brand Allocation",
       value: "my_allocations",
     },
   ];
@@ -134,15 +135,6 @@ const index = ({
 
   return (
     <div className="w-full h-full">
-      {loading && (
-        <div className="w-full flex flex-col items-center justify-center">
-          <img src="/loader.gif" className="h-[30px] w-auto" alt="loading" />
-          <p className="text-xl font-bold text-gray-500 mt-3">
-            Loading leads... please wait
-          </p>
-        </div>
-      )}
-
       <div className="flex gap-1 h-[24px] items-center mt-1 overflow-auto scrollbar-none">
         {subTabs.map((tab) => {
           return (
@@ -167,6 +159,14 @@ const index = ({
         />
       </div>
       <div className="h-[95%]">
+        {loading && (
+          <div className="w-full flex flex-col items-center justify-center">
+            <img src="/loader.gif" className="h-[30px] w-auto" alt="loading" />
+            <p className="text-xl font-bold text-gray-500 mt-3">
+              Loading leads... please wait
+            </p>
+          </div>
+        )}
         {Array.isArray(data) ? (
           data.length > 0 ? (
             <div
