@@ -10,6 +10,7 @@ import moment from "moment";
 import AllocateServiceLead from "../AllocateServiceLead";
 import RenderTable from "../RenderTable";
 import UpdateLeadModal from "../manufacturer/UpdateLeadModal";
+import WelcomeCall from "../welcomeCall";
 
 const index = ({
   dateObjToSearch,
@@ -17,6 +18,7 @@ const index = ({
   setSearchValue,
   selectedRows,
   setSelectedRows,
+  selectedTab,
 }) => {
   const [loading, setLoading] = useState(false);
   const [leads, setLeads] = useState(null);
@@ -168,10 +170,11 @@ const index = ({
       </div>
 
       {updateLead && (
-        <UpdateLeadModal
+        <WelcomeCall
           closeModal={() => setUpdateLead(false)}
           selectedRow={selectedRows[0]}
           serviceType="distributor"
+          refetchServiceLeads={refetch}
         />
       )}
     </div>

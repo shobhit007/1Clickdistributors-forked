@@ -2,37 +2,34 @@ import React from "react";
 
 function PersonalDetails({ register, errors }) {
   return (
-    <fieldset className="border p-4">
+    <fieldset className="bg-white p-4">
       <legend className="text-lg font-semibold">Personal Details</legend>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            First Name
+            First Name *
           </label>
           <input
-            {...register("firstName", { required: true })}
-            placeholder="First Name"
+            {...register("full_name")}
+            placeholder="Full Name"
             className="input w-full border rounded border-gray-300 p-3"
           />
-          {errors.firstName && (
-            <p className="text-red-500">First Name is required</p>
-          )}
         </div>
 
-        <div>
+        {/* <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Last Name
           </label>
           <input
-            {...register("lastName", { required: true })}
+            {...register("lastName")}
             placeholder="Last Name"
             className="input w-full border rounded border-gray-300 p-3"
           />
-        </div>
+        </div> */}
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Designation/Job Title
+            Designation/Job Title *
           </label>
           <input
             {...register("jobTitle")}
@@ -43,7 +40,7 @@ function PersonalDetails({ register, errors }) {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Mobile Number
+            Mobile Number *
           </label>
           <input
             {...register("mobile")}
@@ -54,7 +51,19 @@ function PersonalDetails({ register, errors }) {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Email
+            WhatsApp Number
+          </label>
+          <input
+            {...register("whatsAppNumber")}
+            placeholder="WhatsApp Number"
+            type="number"
+            className="input w-full border rounded border-gray-300 p-3"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Email *
           </label>
           <input
             {...register("email", { pattern: /^\S+@\S+$/i })}
@@ -62,7 +71,6 @@ function PersonalDetails({ register, errors }) {
             className="input w-full border rounded border-gray-300 p-3"
           />
         </div>
-
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Alt Email

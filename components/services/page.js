@@ -138,6 +138,7 @@ const page = () => {
             setSearchValue={setSearchValue}
             selectedRows={selectedRows}
             setSelectedRows={setSelectedRows}
+            selectedTab={selectedTab}
           />
         )}
         {selectedTab == "distributors" && (
@@ -147,6 +148,7 @@ const page = () => {
             setSearchValue={setSearchValue}
             selectedRows={selectedRows}
             setSelectedRows={setSelectedRows}
+            selectedTab={selectedTab}
           />
         )}
       </div>
