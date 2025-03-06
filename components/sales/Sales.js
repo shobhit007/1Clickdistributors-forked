@@ -10,6 +10,7 @@ import LeadManager from "../leadManager/index";
 import Filters from "../allocateLead/filters";
 import panelContext from "@/lib/context/panelContext";
 import FilterLeadsByMember from "../FilterLeadsByMember";
+import { IoMdRefresh } from "react-icons/io";
 
 const salesFilters = ["All", "Pendings", "New Leads", "Follow Ups"];
 
@@ -35,6 +36,7 @@ export default function Sales() {
   const userDetails = useContext(panelContext);
   const { headerHeight } = useContext(panelContext);
   const [selectedSalesMembers, setSelectedSalesMembers] = useState([]);
+  const [currentLeadIndex, setCurrentLeadIndex] = useState(0);
 
   useEffect(() => {
     if (headerHeight) {
@@ -155,6 +157,14 @@ export default function Sales() {
 
   const staticColumns = [];
 
+  const handleSelectedLead = (row) => {
+    const leadId = row?.original?.leadId;
+    const indexOfLead = leads?.map((lead) => lead?.leadId).indexOf(leadId);
+    setSelectedRows([row?.original]);
+    setShowLeadManager(true);
+    setCurrentLeadIndex(indexOfLead);
+  };
+
   let updateBtn = ["Select"].map((key) => {
     return {
       Header: camelToTitle(key),
@@ -162,10 +172,7 @@ export default function Sales() {
         <div className="flex justify-center">
           <button
             className="text-blue-500 font-semibold hover:underline"
-            onClick={() => {
-              setSelectedRows([row?.original]);
-              setShowLeadManager(true);
-            }}
+            onClick={() => handleSelectedLead(row)}
           >
             Update
           </button>
@@ -193,10 +200,7 @@ export default function Sales() {
               Cell: ({ row }) => {
                 return (
                   <button
-                    onClick={() => {
-                      setSelectedRows([row?.original]);
-                      setShowLeadManager(true);
-                    }}
+                    onClick={() => handleSelectedLead(row)}
                     className="text-blue-500 font-semibold hover:underline"
                   >
                     {row?.original?.profileId}
@@ -382,6 +386,47 @@ export default function Sales() {
     refetchLeads();
   };
 
+  const getCountOfAssignedLeads = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+      let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/sales/getTotalAssignedLeads`;
+      const response = await fetch(API_URL, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.log("error in getting roles", error.message);
+    }
+  };
+
+  const { data: assignedData, refetch: refreshAssigned } = useQuery({
+    queryKey: ["assignedLeadsCount"],
+    queryFn: getCountOfAssignedLeads,
+  });
+
+  const goToNextLead = () => {
+    if (currentLeadIndex < leads?.length) {
+      const newIndex = currentLeadIndex + 1;
+      const currentLead = leads[newIndex];
+      setSelectedRows([currentLead]);
+      setCurrentLeadIndex(newIndex);
+    }
+  };
+
+  const goToPreviousLead = async () => {
+    if (currentLeadIndex > 0) {
+      const newIndex = currentLeadIndex - 1;
+      const currentLead = leads[newIndex];
+      setSelectedRows([currentLead]);
+      setCurrentLeadIndex(newIndex);
+    }
+  };
+
   return (
     <div className="pt-1" style={{ height: pageHeight || "auto" }}>
       <div className="px-1" ref={filterBtnsRef}>
@@ -433,6 +478,14 @@ export default function Sales() {
             >
               My Data
             </button>
+            {assignedData?.totalLeads && (
+              <div className="flex-row flex items-center gap-1">
+                <span className="text-gray-700 font-medium text-lg">{`(${assignedData?.totalLeads})`}</span>
+                <button onClick={refreshAssigned}>
+                  <IoMdRefresh size={20} />
+                </button>
+              </div>
+            )}
           </div>
 
           <Filters
@@ -513,6 +566,10 @@ export default function Sales() {
           onClose={() => setShowLeadManager(false)}
           lead={selectedRows[0]}
           fetchLeadsAgain={fetchLeadsAgain}
+          goToNextLead={goToNextLead}
+          goToPreviousLead={goToPreviousLead}
+          currentLeadIndex={currentLeadIndex}
+          totalLeads={leads?.length}
         />
       )}
 

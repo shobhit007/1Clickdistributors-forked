@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { dispositions, subDispositions } from "@/lib/data/commonData";
-import { MdEdit } from "react-icons/md";
-import moment from "moment";
 import { toast } from "react-toastify";
 import { convertTimeStamp, convertToTimeStamp } from "@/lib/commonFunctions";
 import { useQuery } from "@tanstack/react-query";
@@ -79,11 +77,6 @@ const CallDetails = ({ data: leadDetails, refetchLead, type, selectedTab }) => {
 
   const updateLeadStage = async () => {
     try {
-      if (!fields.remarks) {
-        toast.error("Please Enter Remarks");
-        return;
-      }
-
       const body = {
         leadId: leadDetails?.leadData?.leadId,
         followUpDate: fields.followUpDate,
@@ -118,7 +111,7 @@ const CallDetails = ({ data: leadDetails, refetchLead, type, selectedTab }) => {
           followUpDate: "",
           remarks: "",
         });
-        selectedValue("");
+        onClose();
       } else {
         toast.error("Something went wrong");
       }

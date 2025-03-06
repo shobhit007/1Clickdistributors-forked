@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import Table from "../utills/Table";
-import { convertTimeStamp } from "@/lib/commonFunctions";
+import { convertToTimeStamp } from "@/lib/commonFunctions";
 
 const ActivityHistory = ({ data, type }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
