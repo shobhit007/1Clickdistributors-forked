@@ -324,8 +324,6 @@ export default function Sales() {
     }
   }, [followUps]);
 
-  console.log("followups", followUps);
-
   // Lock leads
   const getLockLeadsStatus = async () => {
     try {

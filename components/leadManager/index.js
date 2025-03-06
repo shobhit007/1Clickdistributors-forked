@@ -17,7 +17,12 @@ const tabs = [
   "Contract Details",
 ];
 
-export default function LeadManager({ onClose, lead }) {
+export default function LeadManager({
+  onClose,
+  lead,
+  type: panelType,
+  selectedTab,
+}) {
   const { leadId } = lead;
 
   const getLeadDetails = async () => {
@@ -45,7 +50,7 @@ export default function LeadManager({ onClose, lead }) {
   };
 
   const { data, refetch, isLoading } = useQuery({
-    queryKey: ["fetchLeadDetails", leadId],
+    queryKey: ["fetchLeadDetails", leadId, panelType],
     queryFn: getLeadDetails,
   });
 
@@ -80,10 +85,12 @@ export default function LeadManager({ onClose, lead }) {
                 data={data}
                 onClose={onClose}
                 refetchLead={refetch}
+                type={panelType}
+                selectedTab={selectedTab}
               />
               {/* Tabs */}
               <div className="bg-white flex flex-1 border border-gray-200">
-                <Tabs data={data} refetch={refetch} />
+                <Tabs data={data} refetch={refetch} panelType={panelType} />
               </div>
             </div>
           )}
@@ -93,21 +100,31 @@ export default function LeadManager({ onClose, lead }) {
   );
 }
 
-const Tabs = ({ data, refetch }) => {
+const Tabs = ({ data, refetch, panelType }) => {
   const [currentTab, setCurrentTab] = useState("Contact Details");
 
   const renderTab = (tab) => {
     switch (tab) {
       case "Business Details":
-        return <BusinessDetails data={data} refetch={refetch} />;
+        return (
+          <BusinessDetails data={data} refetch={refetch} type={panelType} />
+        );
       case "Contact Details":
-        return <ContactDetails data={data} refetch={refetch} />;
+        return (
+          <ContactDetails data={data} refetch={refetch} type={panelType} />
+        );
       case "Activity History":
-        return <ActivityHistory data={data} refetch={refetch} />;
+        return (
+          <ActivityHistory data={data} refetch={refetch} type={panelType} />
+        );
       case "Product Details":
-        return <ProductDetails data={data} refetch={refetch} />;
+        return (
+          <ProductDetails data={data} refetch={refetch} type={panelType} />
+        );
       case "Contract Details":
-        return <ContractDetails data={data} refetch={refetch} />;
+        return (
+          <ContractDetails data={data} refetch={refetch} type={panelType} />
+        );
     }
   };
 

@@ -3,17 +3,19 @@ import { dispositions, subDispositions } from "@/lib/data/commonData";
 import { MdEdit } from "react-icons/md";
 import moment from "moment";
 import { toast } from "react-toastify";
-import { convertTimeStamp } from "@/lib/commonFunctions";
+import { convertTimeStamp, convertToTimeStamp } from "@/lib/commonFunctions";
 import { useQuery } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
 import { authSelector } from "@/store/auth/selector";
 import Modal from "../utills/Modal";
 import { AiOutlineClose } from "react-icons/ai";
+import { ComboBox } from "../uiCompoents/ComboBox";
 
-const CallDetails = ({ data: leadDetails, refetchLead }) => {
+const CallDetails = ({ data: leadDetails, refetchLead, type, selectedTab }) => {
   const userData = useSelector(authSelector);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [visible, setVisible] = useState(false);
+  const [selectedValue, setSelectedValue] = useState("");
 
   const toggleDialog = () => {
     setIsDialogOpen(!isDialogOpen);
@@ -82,26 +84,20 @@ const CallDetails = ({ data: leadDetails, refetchLead }) => {
         return;
       }
 
-      if (
-        fields.disposition !== "Not Interested" &&
-        fields.disposition !== "Become Distributor" &&
-        fields.disposition !== "No Contactable" &&
-        !fields.followUpDate
-      ) {
-        toast.error("Please select follow up date");
-        return;
-      }
-
       const body = {
         leadId: leadDetails?.leadData?.leadId,
         followUpDate: fields.followUpDate,
         disposition: fields.disposition,
         subDisposition: fields.subDisposition,
         remarks: fields.remarks,
+        member: selectedValue,
       };
 
       const token = localStorage.getItem("authToken");
-      let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/sales/updateLead`;
+      let API_URL =
+        type === "service"
+          ? `${process.env.NEXT_PUBLIC_BASEURL}/admin/service/updateServiceLead`
+          : `${process.env.NEXT_PUBLIC_BASEURL}/admin/sales/updateLead`;
       const response = await fetch(API_URL, {
         method: "POST",
         headers: {
@@ -122,6 +118,7 @@ const CallDetails = ({ data: leadDetails, refetchLead }) => {
           followUpDate: "",
           remarks: "",
         });
+        selectedValue("");
       } else {
         toast.error("Something went wrong");
       }
@@ -129,6 +126,65 @@ const CallDetails = ({ data: leadDetails, refetchLead }) => {
       console.log("error in updateLead", error.message);
       toast.error(error.message);
     }
+  };
+
+  const getRemarks = () => {
+    let remark = "";
+    if (type === "service") {
+      remark =
+        leadDetails?.leadData?.serviceRemarks?.length > 30
+          ? leadDetails?.leadData?.serviceRemarks?.slice(0, 30) + "..."
+          : leadDetails?.leadData?.serviceRemarks;
+    } else {
+      remark =
+        leadDetails?.leadData?.remarks?.length > 30
+          ? leadDetails?.leadData?.remarks?.slice(0, 30) + "..."
+          : leadDetails?.leadData?.remarks;
+    }
+
+    return remark || "NA";
+  };
+
+  // Work of today
+  const fetchDistributorsOrManufacturers = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+      let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/service/getDistributorsOrManufacturers`;
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ type: selectedTab }),
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        return result.data;
+      } else {
+        return [];
+      }
+    } catch (error) {
+      console.log("error in fetchDistributorsOrManufacturers", error.message);
+      return [];
+    }
+  };
+
+  let { data: distributorsOrManufacturers } = useQuery({
+    queryKey: ["fetchDistributorsOrManufacturers", selectedTab],
+    queryFn: fetchDistributorsOrManufacturers,
+    enabled: selectedTab !== undefined,
+  });
+
+  distributorsOrManufacturers = distributorsOrManufacturers?.map((item) => ({
+    label: item.full_name,
+    value: item.profileId,
+    tag: item.tag || "",
+  }));
+
+  const handleSelectedValue = (value) => {
+    setSelectedValue(value);
   };
 
   return (
@@ -236,7 +292,9 @@ const CallDetails = ({ data: leadDetails, refetchLead }) => {
           </div>
           <div className="text-left">
             <p className="text-gray-700">
-              {leadDetails?.leadData?.disposition || "NA"}
+              {type === "service"
+                ? leadDetails?.leadData?.serviceDisposition || "NA"
+                : leadDetails?.leadData?.disposition || "NA"}
             </p>
           </div>
         </div>
@@ -251,27 +309,31 @@ const CallDetails = ({ data: leadDetails, refetchLead }) => {
           </div>
           <div className="text-left">
             <p className="text-gray-700">
-              {leadDetails?.leadData?.subDisposition || "NA"}
+              {type === "service"
+                ? leadDetails?.leadData?.serviceSubDisposition || "NA"
+                : leadDetails?.leadData?.subDisposition || "NA"}
             </p>
           </div>
         </div>
-        <div className="flex items-start gap-2 mt-2">
-          <div className="text-left">
-            <label
-              htmlFor="lastCallBackDate"
-              className="text-black font-semibold nowrap"
-            >
-              Last Call Back:
-            </label>
+        {type !== "service" && (
+          <div className="flex items-start gap-2 mt-2">
+            <div className="text-left">
+              <label
+                htmlFor="lastCallBackDate"
+                className="text-black font-semibold nowrap"
+              >
+                Last Call Back:
+              </label>
+            </div>
+            <div className="text-left">
+              <p className="text-gray-700">
+                {leadDetails?.leadData?.lastCallBackDate
+                  ? convertTimeStamp(leadDetails?.leadData?.lastCallBackDate)
+                  : "NA"}
+              </p>
+            </div>
           </div>
-          <div className="text-left">
-            <p className="text-gray-700">
-              {leadDetails?.leadData?.lastCallBackDate
-                ? convertTimeStamp(leadDetails?.leadData?.lastCallBackDate)
-                : "NA"}
-            </p>
-          </div>
-        </div>
+        )}
         <div className="flex items-start gap-2 mt-2">
           <div className="text-left">
             <label
@@ -283,7 +345,13 @@ const CallDetails = ({ data: leadDetails, refetchLead }) => {
           </div>
           <div className="text-left">
             <p className="text-gray-700">
-              {leadDetails?.leadData?.followUpDate
+              {type === "service"
+                ? leadDetails?.leadData?.serviceFollowUpDate
+                  ? convertToTimeStamp(
+                      leadDetails?.leadData?.serviceFollowUpDate
+                    )
+                  : "NA"
+                : leadDetails?.leadData?.followUpDate
                 ? convertTimeStamp(leadDetails?.leadData?.followUpDate)
                 : "NA"}
             </p>
@@ -300,11 +368,11 @@ const CallDetails = ({ data: leadDetails, refetchLead }) => {
           </div>
           <div className="text-left flex items-end">
             <p className="text-gray-800 leading-relaxed w-fit">
-              {leadDetails?.leadData?.remarks?.length > 30
-                ? leadDetails?.leadData?.remarks?.slice(0, 30) + "..."
-                : leadDetails?.leadData?.remarks}
+              {getRemarks()}
             </p>
-            {leadDetails?.leadData?.remarks?.length > 30 && (
+            {(type === "service"
+              ? leadDetails?.leadData?.serviceRemarks?.length > 30
+              : leadDetails?.leadData?.remarks?.length > 30) && (
               <button
                 onClick={toggleDialog}
                 className="ml-1 text-[11px] text-blue-600 hover:underline focus:outline-none"
@@ -422,6 +490,17 @@ const CallDetails = ({ data: leadDetails, refetchLead }) => {
                     onChange={handleChange}
                   />
                 </div>
+
+                {type === "service" && (
+                  <div className="w-full md:w-1/3 px-2 mt-2">
+                    <ComboBox
+                      items={distributorsOrManufacturers || []}
+                      placeholder={`Select ${selectedTab}`}
+                      onChange={handleSelectedValue}
+                    />
+                  </div>
+                )}
+
                 <div className="mt-6 flex w-full justify-end">
                   <button
                     onClick={updateLeadStage}
