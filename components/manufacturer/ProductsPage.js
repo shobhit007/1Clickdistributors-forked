@@ -165,7 +165,7 @@ const ProductsPage = () => {
                         {item.description}
                       </p>
 
-                      <div className="flex items-center gap-2 mt-2 hidden">
+                      <div className="flex items-center gap-2 mt-2">
                         <CiEdit className="text-blue-700 text-lg cursor-pointer" />
                         <MdDeleteOutline className="text-red-700 text-lg cursor-pointer" />
                       </div>

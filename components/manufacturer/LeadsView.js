@@ -6,7 +6,7 @@ import { Tooltip } from "react-tooltip";
 import manufacturerContext from "@/lib/context/manufacturerContext";
 import { MdOutlineMailOutline } from "react-icons/md";
 import { CiLocationOn } from "react-icons/ci";
-import LeadDetailView from "./leadDetailView";
+import LeadDetailView from "./LeadDetailView";
 import {
   dispositions,
   service_manufacturer_dispositions,
