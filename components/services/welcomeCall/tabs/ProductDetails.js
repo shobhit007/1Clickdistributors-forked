@@ -13,7 +13,10 @@ function ProductDetails({
   imageLoading,
   uploadProduct,
   selectedCategory,
+  selectedSubCategory,
   selectedImage,
+  setSelectedCategory,
+  setSelectedSubCategory,
 }) {
   return (
     <fieldset className="bg-white p-4">
@@ -26,8 +29,9 @@ function ProductDetails({
           </label>
           <div className="flex justify-between gap-2">
             <select
-              {...register("category")}
+              value={selectedCategory}
               className="select w-[90%] border rounded border-gray-300 p-3"
+              onChange={(e) => setSelectedCategory(e.target.value)}
             >
               {categories.map((category) => (
                 <option value={category}>{category}</option>
@@ -49,9 +53,10 @@ function ProductDetails({
           </label>
           <div className="flex justify-between gap-2">
             <select
-              {...register("subCategory")}
+              value={selectedSubCategory}
               className="select w-[90%] border rounded border-gray-300 p-3"
               disabled={!selectedCategory} // Disable if no category is selected
+              onChange={(e) => setSelectedSubCategory(e.target.value)}
             >
               <option value="">Select a subcategory</option>
               {selectedCategory &&
