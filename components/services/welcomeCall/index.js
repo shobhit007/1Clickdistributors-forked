@@ -72,9 +72,14 @@ function WelcomeCall({
   const [isLive, setIsLive] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [currentTab, setCurrentTab] = useState("personal_details");
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedSubCategory, setSelectedSubCategory] = useState("");
   const [selectedDisposition, setSelectedDisposition] = useState(
     welcomeCallDispositions[0].value
   );
+  const [categories, setCategories] = useState([]);
+  const [subCategories, setSubCategories] = useState({});
+  const [isLoadingCategories, setIsLoadingCategories] = useState(false);
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -126,11 +131,8 @@ function WelcomeCall({
 
   // setting data
   useEffect(() => {
-    // // Set product details
-    // setValue("category", productdDetails?.category);
-    // setValue("subCategory", productdDetails?.subCategory);
-    // setValue("tag", productdDetails?.tag);
     // Set personal details
+    setValue("tag", selectedRow?.tag || "");
     setValue("full_name", selectedRow?.full_name || "");
     setValue("jobTitle", selectedRow?.jobTitle || "");
     setValue("mobile", selectedRow?.phone_number || "");
@@ -164,6 +166,21 @@ function WelcomeCall({
     setValue("cancelCheque", selectedRow?.bankDetails?.cancelCheque || "");
   }, [setValue, selectedRow]);
 
+  // set category and sub category
+  useEffect(() => {
+    if (categories.length > 0) {
+      const category = selectedRow?.category || categories[0];
+      const subCategory =
+        selectedRow?.subCategory ||
+        (subCategories[category] && subCategories[category].length > 0
+          ? subCategories[category][0]
+          : "");
+
+      setSelectedCategory(category);
+      setSelectedSubCategory(subCategory);
+    }
+  }, [categories, subCategories, selectedRow]);
+
   // set default company name
   useEffect(() => {
     const welcomeCallData = data?.welcomeCallData;
@@ -180,24 +197,45 @@ function WelcomeCall({
     }
   }, [data]);
 
-  const selectedCategory = watch("category");
-  const selectedImage = watch("productImage");
+  const fetchCategoriesAndSubCategories = async () => {
+    try {
+      setIsLoadingCategories(true);
+      const token = localStorage.getItem("authToken");
+      const API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/service/getCategoriesAndSubCategories`;
 
-  const [categories, setCategories] = useState([
-    "Electronics",
-    "Clothing",
-    "Furniture",
-  ]);
+      const response = await fetch(API_URL, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-  const [subCategories, setSubCategories] = useState({
-    Electronics: ["Mobile", "Laptop"],
-    Clothing: ["Men", "Women"],
-    Furniture: ["Table", "Chair"],
-  });
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          // Update the states with fetched data
+          setCategories(data.categories || []);
+          setSubCategories(data.subCategories || {});
+        } else {
+          toast.error(data.message || "Failed to fetch categories");
+        }
+      } else {
+        toast.error("Failed to fetch categories");
+      }
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+      toast.error("Error fetching categories");
+    } finally {
+      setIsLoadingCategories(false);
+    }
+  };
 
   useEffect(() => {
-    setValue("category", categories[0]);
-  }, []);
+    fetchCategoriesAndSubCategories();
+  }, []); // Empty dependency array means this runs once when component mounts
+
+  const selectedImage = watch("productImage");
 
   const uploadProduct = async () => {
     const title = watch("productName");
@@ -279,126 +317,6 @@ function WelcomeCall({
     setValue("productImage", file);
   };
 
-  // const onSubmit = async (data) => {
-  //   const leadId = selectedRow.leadId;
-
-  //   let gstPdfUrl = "";
-  //   let tanPdfUrl = "";
-  //   let panPdfUrl = "";
-  //   let cancelChequeUrl = "";
-
-  //   if (data?.gstPdf?.length !== 0) {
-  //     const url = await uploadFile({
-  //       file: data.gstPdf,
-  //       path: `service/${leadId}/documents/${data.gstPdf.originalName}`,
-  //     });
-
-  //     if (url.success) {
-  //       gstPdfUrl = url.downloadURL;
-  //     }
-  //   }
-
-  //   if (data?.panPdf?.length !== 0) {
-  //     console.log("panPdf", data.panPdf);
-  //     const url = await uploadFile({
-  //       file: data.panPdf,
-  //       path: `service/${leadId}/documents/${data.panPdf.originalName}`,
-  //     });
-
-  //     if (url.success) {
-  //       panPdfUrl = url.downloadURL;
-  //     }
-  //   }
-  //   if (data?.tanPdf?.length !== 0) {
-  //     console.log("tanPdf", data.tanPdf);
-  //     const url = await uploadFile({
-  //       file: data.tanPdf,
-  //       path: `service/${leadId}/documents/${data.tanPdf.originalName}`,
-  //     });
-
-  //     if (url.success) {
-  //       tanPdfUrl = url.downloadURL;
-  //     }
-  //   }
-  //   if (data?.cancelCheque?.length !== 0) {
-  //     console.log("cancelCheque", data.cancelCheque);
-  //     const url = await uploadFile({
-  //       file: data.cancelCheque,
-  //       path: `service/${leadId}/documents/${data.cancelCheque.originalName}`,
-  //     });
-
-  //     if (url.success) {
-  //       cancelChequeUrl = url.downloadURL;
-  //     }
-  //   }
-
-  //   const groupedData = {
-  //     full_name: data.full_name,
-  //     jobTitle: data.jobTitle,
-  //     mobile: data.phone_number,
-  //     email: data.email,
-  //     altEmail: data.altEmail,
-  //     location: data.location,
-  //     companyName: data.companyName,
-  //     companyType: data.companyType,
-  //     turnover: data.turnover,
-  //     turnover_type: data.turnover_type,
-  //     yearOfEstablishment: data.yearOfEstablishment,
-  //     address: data.address,
-  //     pincode: data.pincode,
-  //     city: data.city,
-  //     state: data.state,
-  //     category: data.category,
-  //     subCategory: data.subCategory,
-  //     tag: data.tag,
-  //     taxDetails: {
-  //       gst: {
-  //         gstNumber: data.gst,
-  //         document: gstPdfUrl,
-  //       },
-  //       pan: {
-  //         panNumber: data.pan,
-  //         document: panPdfUrl,
-  //       },
-  //       tan: {
-  //         tanNumber: data.tan,
-  //         document: tanPdfUrl,
-  //       },
-  //     },
-  //     bankDetails: {
-  //       accountType: data.accountType,
-  //       accountNumber: data.accountNumber,
-  //       confirmAccountNumber: data.confirmAccountNumber,
-  //       ifsc: data.ifsc,
-  //       cancelCheque: cancelChequeUrl,
-  //     },
-  //   };
-
-  //   groupedData.leadId = selectedRow?.leadId;
-
-  //   const API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/service/updateWelcomeCall`;
-
-  //   try {
-  //     const response = await fetch(API_URL, {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify({ data: groupedData }),
-  //     });
-
-  //     if (response.ok) {
-  //       toast.success("Lead updated successfully");
-  //       refetch();
-  //     } else {
-  //       const error = await response.json();
-  //       console.error("Error submitting form:", error.message);
-  //     }
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // };
-
   const onSubmit = async (data) => {
     const leadId = selectedRow.leadId;
 
@@ -453,8 +371,8 @@ function WelcomeCall({
       pincode: data.pincode,
       city: data.city,
       state: data.state,
-      category: data.category,
-      subCategory: data.subCategory,
+      category: selectedCategory,
+      subCategory: selectedSubCategory,
       whatsAppNumber: data.whatsAppNumber,
       tag: data.tag,
       taxDetails: {
@@ -545,6 +463,9 @@ function WelcomeCall({
   const toggleSubCategoryModal = () => setVisibleSubCategoryModal((p) => !p);
 
   const handleCategory = (val) => {
+    if (!val) {
+      toast.error("Please enter a category");
+    }
     setCategories((prev) => [...prev, val]);
     toggleCategoryModal();
   };
@@ -568,8 +489,6 @@ function WelcomeCall({
   const designation = watch("jobTitle");
   const mobile = watch("mobile");
   const email = watch("email");
-  const category = selectedCategory;
-  const subCategory = watch("subCategory");
   const tag = watch("tag");
   const companyName = watch("companyName");
   const turnover = watch("turnover");
@@ -583,8 +502,8 @@ function WelcomeCall({
     phone: mobile,
     email: email,
     designation: designation,
-    category: category,
-    subCategory: subCategory,
+    category: selectedCategory,
+    subCategory: selectedSubCategory,
     tag: tag,
     turnover: turnover,
     establishmentYear: establishmentYear,
@@ -601,6 +520,36 @@ function WelcomeCall({
   };
 
   const progress = calculateProgress();
+
+  // remove category
+  const removeCategory = async (categoryToRemove) => {
+    try {
+      const token = localStorage.getItem("authToken");
+      const API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/service/removeProductCategory`;
+
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          category: categoryToRemove,
+        }),
+      });
+
+      if (response.ok) {
+        toast.success("Category removed successfully");
+        setCategories((prev) => prev.filter((cat) => cat !== categoryToRemove));
+      } else {
+        const error = await response.json();
+        toast.error(error.message || "Failed to remove category");
+      }
+    } catch (error) {
+      toast.error("Error removing category");
+      console.error(error);
+    }
+  };
 
   const render = () => (
     <>
@@ -646,7 +595,10 @@ function WelcomeCall({
           imageLoading={imageLoading}
           uploadProduct={uploadProduct}
           selectedCategory={selectedCategory}
+          selectedSubCategory={selectedSubCategory}
           selectedImage={selectedImage}
+          setSelectedCategory={setSelectedCategory}
+          setSelectedSubCategory={setSelectedSubCategory}
         />
       </div>
       <div style={{ display: currentTab === "tax_details" ? "block" : "none" }}>
@@ -682,7 +634,10 @@ function WelcomeCall({
         {/* Header */}
         <div className="sticky top-0 w-full bg-gray-100 z-10">
           <div className="flex justify-between items-center py-6 px-8">
-            <h1 className="text-xl font-semibold">Welcome Call</h1>
+            <h1 className="text-xl font-semibold">
+              Welcome Call
+              <span className="ml-2">{`(Profile Completion ${progress}%)`}</span>
+            </h1>
             <button className="text-xl font-semibold" onClick={closeModal}>
               <IoClose size={24} color="black" />
             </button>
@@ -694,9 +649,9 @@ function WelcomeCall({
                 style={{ width: `${progress}%` }}
               ></div>
             </div>
-            <div className="w-full flex justify-end pr-2">
+            {/* <div className="w-full flex justify-end pr-2">
               <p className="text-sm text-gray-600">{`${progress}%`}</p>
-            </div>
+            </div> */}
           </div>
         </div>
 
@@ -834,623 +789,6 @@ function WelcomeCall({
                   ))}
                 </div>
                 {render()}
-                {/* <fieldset className="bg-white p-4">
-                  <legend className="text-lg font-semibold">
-                    Personal Details
-                  </legend>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        First Name *
-                      </label>
-                      <input
-                        {...register("firstName", { required: true })}
-                        placeholder="First Name"
-                        className="input w-full border rounded border-gray-300 p-3"
-                      />
-                      {errors.firstName && (
-                        <p className="text-red-500">First Name is required</p>
-                      )}
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Last Name
-                      </label>
-                      <input
-                        {...register("lastName", { required: true })}
-                        placeholder="Last Name"
-                        className="input w-full border rounded border-gray-300 p-3"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Designation/Job Title *
-                      </label>
-                      <input
-                        {...register("jobTitle")}
-                        placeholder="Designation/Job Title"
-                        className="input w-full border rounded border-gray-300 p-3"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Mobile Number *
-                      </label>
-                      <input
-                        {...register("mobile")}
-                        placeholder="Mobile Number"
-                        className="input w-full border rounded border-gray-300 p-3"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        WhatsApp Number
-                      </label>
-                      <input
-                        {...register("whatsAppNumber")}
-                        placeholder="WhatsApp Number"
-                        type="number"
-                        className="input w-full border rounded border-gray-300 p-3"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Email *
-                      </label>
-                      <input
-                        {...register("email", { pattern: /^\S+@\S+$/i })}
-                        placeholder="Email"
-                        className="input w-full border rounded border-gray-300 p-3"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Alt Email
-                      </label>
-                      <input
-                        {...register("altEmail")}
-                        placeholder="Alternative Email"
-                        className="input w-full border rounded border-gray-300 p-3"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Location/City
-                      </label>
-                      <input
-                        {...register("location")}
-                        placeholder="Location/City"
-                        className="input w-full border rounded border-gray-300 p-3"
-                      />
-                    </div>
-                  </div>
-                </fieldset> */}
-
-                {/* Business Details */}
-                {/* <fieldset className="bg-white p-4">
-                  <legend className="text-lg font-semibold">
-                    Business Details
-                  </legend>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Company Name *
-                      </label>
-                      <input
-                        {...register("companyName", { required: true })}
-                        placeholder="Company Name"
-                        className="input w-full border rounded border-gray-300 p-3"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Company Type
-                      </label>
-                      <select
-                        {...register("companyType")}
-                        className="select w-full border rounded border-gray-300 p-3"
-                      >
-                        <option value="Proprietorship">Proprietorship</option>
-                        <option value="Partnership">Partnership</option>
-                        <option value="Private Limited">Private Limited</option>
-                        <option value="Public Limited">Public Limited</option>
-                        <option value="LLP">LLP</option>
-                        <option value="Other">Other</option>
-                      </select>
-                    </div>
-
-                    {serviceType === "distributor" && (
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Experience *
-                        </label>
-                        <input
-                          {...register("experience", { required: true })}
-                          placeholder="Experience (in years)"
-                          type="number"
-                          className="input w-full border rounded border-gray-300 p-3"
-                        />
-                      </div>
-                    )}
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Turnover *
-                      </label>
-                      <div className="flex gap-2">
-                        <input
-                          {...register("turnover")}
-                          placeholder="Turnover"
-                          className="input w-full border rounded border-gray-300 p-3"
-                        />
-                        <select
-                          {...register("type")}
-                          className="select w-full border rounded border-gray-300 p-3"
-                        >
-                          <option value="lakh">Lakh</option>
-                          <option value="crore">Crore</option>
-                          <option value="million">Million</option>
-                          <option value="billion">Billion</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Year of Establishment *
-                      </label>
-                      <input
-                        {...register("yearOfEstablishment")}
-                        placeholder="Year of Establishment"
-                        type="number"
-                        className="input w-full border rounded border-gray-300 p-3"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Full Address
-                      </label>
-                      <input
-                        {...register("address")}
-                        placeholder="Full Address"
-                        className="input w-full border rounded border-gray-300 p-3"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Pincode *
-                      </label>
-                      <input
-                        {...register("pincode")}
-                        placeholder="Pincode"
-                        className="input w-full border rounded border-gray-300 p-3"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        City *
-                      </label>
-                      <input
-                        {...register("city")}
-                        placeholder="City"
-                        className="input w-full border rounded border-gray-300 p-3"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        State *
-                      </label>
-                      <input
-                        {...register("state")}
-                        placeholder="State"
-                        className="input w-full border rounded border-gray-300 p-3"
-                      />
-                    </div>
-
-                    {serviceType === "distributor" && (
-                      <>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Investment Budget *
-                          </label>
-                          <input
-                            {...register("investmentBudget")}
-                            placeholder="Investment Budget"
-                            type="number"
-                            className="input w-full border rounded border-gray-300 p-3"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Visiting Card
-                          </label>
-                          <div
-                            className="w-full flex items-center gap-2 border rounded border-gray-300 p-3 hover:cursor-pointer"
-                            onClick={() =>
-                              document.getElementById("visitingCard").click()
-                            }
-                          >
-                            <CiImageOn size={24} />
-                            <span className="block text-sm font-medium text-gray-700">
-                              Select visiting card
-                            </span>
-                            <input
-                              {...register("visitingCard")}
-                              id="visitingCard"
-                              type="file"
-                              accept={"image/*"}
-                              className="hidden"
-                            />
-                          </div>
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Brands Working With *
-                          </label>
-                          <button
-                            type="button"
-                            className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 flex items-center gap-2"
-                            onClick={toggleBrandModal}
-                          >
-                            <FiPlus size={24} className="text-white" />
-                            Add Brand
-                          </button>
-
-                          {showModal && (
-                            <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50">
-                              <div className="bg-white p-6 rounded-lg shadow-lg w-96 h-96 overflow-hidden">
-                                <div className="w-full flex items-center justify-between">
-                                  <h3 className="text-lg font-semibold mb-4">
-                                    Add Brand
-                                  </h3>
-                                  <IoClose
-                                    size={24}
-                                    color="black"
-                                    onClick={toggleBrandModal}
-                                    className="cursor-pointer"
-                                  />
-                                </div>
-                                <div className="w-full flex gap-2">
-                                  <input
-                                    placeholder="Brand Name"
-                                    {...register("brandName")}
-                                    type="text"
-                                    className="input w-full border rounded border-gray-300 p-2"
-                                  />
-                                  <button
-                                    type="button"
-                                    className="w-16 border rounded-sm border-gray-300 flex items-center justify-center"
-                                    onClick={addBrands}
-                                  >
-                                    <FiPlus size={24} className="text-black" />
-                                  </button>
-                                </div>
-                                <div className="w-full h-64 mt-2 p-2 overflow-x-hidden overflow-y-auto">
-                                  {fields.map((item, index) => (
-                                    <div
-                                      key={item.id}
-                                      className="w-full flex items-center justify-between p-2 rounded border border-gray-300 mt-1 first:mt-0"
-                                    >
-                                      <span className="block text-sm text-gray-600 break-words max-w-[90%]">
-                                        
-                                        {item.name}
-                                      </span>
-                                      <button
-                                        onClick={() => remove(index)}
-                                        className="flex-shrink-0" 
-                                      >
-                                        <IoClose
-                                          size={18}
-                                          className="text-gray-400 hover:text-gray-600"
-                                        />
-                                      </button>
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </>
-                    )}
-                  </div>
-                </fieldset> */}
-
-                {/* Product Details */}
-                {/* <fieldset className="bg-white p-4">
-                  <legend className="text-lg font-semibold">
-                    Products Details
-                  </legend>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Category *
-                      </label>
-                      <div className="flex justify-between gap-2">
-                        <select
-                          {...register("category")}
-                          className="select w-[90%] border rounded border-gray-300 p-3"
-                        >
-                          {categories.map((category) => (
-                            <option value={category}>{category}</option>
-                          ))}
-                        </select>
-                        <button
-                          className="p-3 border rounded border-gray-300"
-                          type="button"
-                          onClick={toggleCategoryModal}
-                        >
-                          <FiPlus size={24} className="text-gray-600" />
-                        </button>
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Sub Category *
-                      </label>
-                      <div className="flex justify-between gap-2">
-                        <select
-                          {...register("subCategory")}
-                          className="select w-[90%] border rounded border-gray-300 p-3"
-                          disabled={!selectedCategory} 
-                        >
-                          <option value="">Select a subcategory</option>
-                          {selectedCategory &&
-                            subCategories[selectedCategory]?.map((item) => (
-                              <option key={item} value={item}>
-                                {item}
-                              </option>
-                            ))}
-                        </select>
-                        <button
-                          className="p-3 border rounded border-gray-300"
-                          type="button"
-                          onClick={toggleSubCategoryModal}
-                        >
-                          <FiPlus size={24} className="text-gray-600" />
-                        </button>
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Tag *
-                      </label>
-                      <input
-                        {...register("tag")}
-                        placeholder="Tag"
-                        className="input w-full border rounded border-gray-300 p-3"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="w-full px-6">
-                    <div className="flex items-end justify-start gap-2">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Add Product
-                        </label>
-                        <input
-                          type="text"
-                          {...register("productName")}
-                          placeholder="Enter Product Name"
-                          className="input w-52 border rounded border-gray-300 p-3"
-                        />
-                      </div>
-
-                      <div
-                        className="flex items-center justify-center w-12 h-12 border-2 border-dashed border-gray-400 rounded-lg cursor-pointer hover:bg-gray-100"
-                        onClick={() =>
-                          document.getElementById("inputImage").click()
-                        }
-                      >
-                        <input
-                          disabled={imageLoading}
-                          id="inputImage"
-                          type="file"
-                          accept={"image/*"}
-                          className="hidden"
-                          onChange={handleFileChange}
-                        />
-                        <div className="flex flex-col items-center justify-center">
-                          {!selectedImage ? (
-                            <FcImageFile className="text-4xl" />
-                          ) : (
-                            <img
-                              src={URL.createObjectURL(selectedImage)}
-                              className="h-9 w-9 object-cover rounded"
-                            />
-                          )}
-                        </div>
-                      </div>
-                      <button
-                        disabled={imageLoading}
-                        onClick={uploadProduct}
-                        type="button"
-                        className="h-12 px-4 py-2 gap-2 flex items-center justify-center text-blue-600 border border-blue-500 rounded hover:bg-blue-100"
-                      >
-                        {imageLoading ? "Uploading" : "Upload"}
-                        <IoMdCloudUpload size={20} />
-                      </button>
-                    </div>
-                    <div className="w-full grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 mt-4">
-                      {serviceProducts.slice(0, 4).map((product, index) => (
-                        <div
-                          key={index}
-                          className="flex items-center gap-2 border p-2 rounded"
-                        >
-                          {product.image && (
-                            <img
-                              src={product.image}
-                              alt={product.title}
-                              className="h-20 w-20 object-cover rounded"
-                            />
-                          )}
-                          <div className="flex-1">
-                            <p className="text-sm font-medium">
-                              Title: {product.title}
-                            </p>
-                          </div>
-
-                          <button
-                            type="button"
-                            onClick={() => deleteProduct(product.id)}
-                            className="p-2 text-red-600 border border-red-500 rounded hover:bg-red-100"
-                          >
-                            <FiTrash size={20} />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                    {serviceProducts.length > 4 && (
-                      <div className="w-full flex justify-end mt-1">
-                        <button
-                          className="text-sm text-blue-500 hover:text-blue-600"
-                          type="button"
-                          onClick={() => setVisibleProducts(true)}
-                        >
-                          View more
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </fieldset> */}
-
-                {/* Tax Details */}
-                {/* <fieldset className="bg-white p-4">
-                  <legend className="text-lg font-semibold">Tax Details</legend>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        GST *
-                      </label>
-                      <input
-                        {...register("gst")}
-                        placeholder="Enter GST Number"
-                        className="input w-full border rounded border-gray-300 p-3"
-                      />
-                      <PDFFileSelector
-                        register={register}
-                        setValue={setValue}
-                        errors={errors}
-                        fieldName={"gstPdf"}
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        PAN *
-                      </label>
-                      <input
-                        {...register("pan")}
-                        placeholder="Enter PAN Number"
-                        className="input w-full border rounded border-gray-300 p-3"
-                      />
-                      <PDFFileSelector
-                        register={register}
-                        setValue={setValue}
-                        errors={errors}
-                        fieldName={"panPdf"}
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        TAN
-                      </label>
-                      <input
-                        {...register("tan")}
-                        placeholder="Enter TAN Number"
-                        className="input w-full border rounded border-gray-300 p-3"
-                      />
-                      <PDFFileSelector
-                        register={register}
-                        setValue={setValue}
-                        errors={errors}
-                        fieldName={"tanPdf"}
-                      />
-                    </div>
-                  </div>
-                </fieldset> */}
-
-                {/* Bank Details */}
-                {/* {serviceType === "manufacture" && (
-                  <fieldset className="bg-white p-4">
-                    <legend className="text-lg font-semibold">
-                      Bank Details
-                    </legend>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 p-6">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Account Type
-                        </label>
-                        <select
-                          {...register("accountType")}
-                          className="select w-full border rounded border-gray-300 p-3"
-                        >
-                          <option value="Saving">Saving</option>
-                          <option value="Current">Current</option>
-                        </select>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Account Number
-                        </label>
-                        <input
-                          {...register("accountNumber")}
-                          placeholder="Account Number"
-                          className="input w-full border rounded border-gray-300 p-3"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Confirm Account Number
-                        </label>
-                        <input
-                          {...register("confirmAccountNumber")}
-                          placeholder="Confirm Account Number"
-                          className="input w-full border rounded border-gray-300 p-3"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          IFSC Code
-                        </label>
-                        <input
-                          {...register("ifsc")}
-                          placeholder="IFSC Code"
-                          className="input w-full border rounded border-gray-300 p-3"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Cancel Cheque
-                        </label>
-                        <PDFFileSelector
-                          register={register}
-                          setValue={setValue}
-                          errors={errors}
-                          fieldName={"cancelCheque"}
-                        />
-                      </div>
-                    </div>
-                  </fieldset>
-                )} */}
-
                 <div className="flex w-full justify-end mt-4 py-2">
                   <button
                     type="submit"
@@ -1478,6 +816,8 @@ function WelcomeCall({
         <AddCategory
           onClose={toggleCategoryModal}
           handleCategory={handleCategory}
+          categories={categories}
+          removeCategory={removeCategory}
         />
       )}
 
@@ -1486,66 +826,58 @@ function WelcomeCall({
           categories={categories}
           onClose={toggleSubCategoryModal}
           handleSubCategory={handleSubCategory}
+          subCategories={subCategories}
+          setSubCategories={setSubCategories}
         />
       )}
     </div>
   );
 }
 
-const AddCategory = ({ onClose, handleCategory }) => {
+const AddCategory = ({
+  onClose,
+  handleCategory,
+  categories,
+  removeCategory,
+}) => {
   const [text, setText] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  return (
-    <div className="fixed inset-0 flex items-center justify-center w-full bg-black/35 z-[100]">
-      <div className="w-full max-w-96 mx-auto bg-white rounded-lg overflow-x-hidden overflow-y-auto p-6">
-        <div className="flex w-full p-2 justify-end">
-          <button onClick={onClose}>
-            <IoClose size={24} color="black" />
-          </button>
-        </div>
-        <div className="flex flex-col items-center gap-2 mt-2">
-          <input
-            type="text"
-            placeholder={"Enter Category Name"}
-            className="input w-full border rounded border-gray-300 p-3"
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-          />
-          <button
-            onClick={() => {
-              if (!text) {
-                alert("Please enter category name");
-                return;
-              }
-              handleCategory(text);
-            }}
-            type="button"
-            className="w-full h-12 flex gap-2 items-center justify-center text-blue-600 border border-blue-500 rounded hover:bg-blue-100"
-          >
-            <FiPlus size={20} />
-            Add
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const AddSubCategory = ({ onClose, categories, handleSubCategory }) => {
-  const [text, setText] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("");
-
-  const handleChange = () => {
+  const addNewCategory = async () => {
     if (!text) {
-      alert("Please enter sub category name");
+      toast.error("Please enter a category name");
       return;
     }
 
-    if (!selectedCategory) {
-      alert("Please select a category");
-    }
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("authToken");
+      const API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/service/addProductCategory`;
 
-    handleSubCategory(selectedCategory, text);
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          category: text,
+        }),
+      });
+
+      if (response.ok) {
+        toast.success("Category added successfully");
+        handleCategory(text);
+      } else {
+        const error = await response.json();
+        toast.error(error.message || "Failed to add category");
+      }
+    } catch (error) {
+      toast.error("Error adding category");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -1556,30 +888,216 @@ const AddSubCategory = ({ onClose, categories, handleSubCategory }) => {
             <IoClose size={24} color="black" />
           </button>
         </div>
-        <div className="flex flex-col items-center gap-2 mt-2">
-          <select
-            className="select w-full border rounded border-gray-300 p-3 mb-2"
-            onChange={(e) => setSelectedCategory(e.target.value)}
-          >
-            <option value={""}>Select Category</option>
-            {categories.map((category) => (
-              <option value={category}>{category}</option>
+
+        {/* Category List */}
+        <div className="mb-4">
+          <h3 className="text-sm font-medium text-gray-600 mb-2">
+            Existing Categories
+          </h3>
+          <div className="max-h-40 overflow-y-auto">
+            {categories.map((category, index) => (
+              <div
+                key={index}
+                className="flex items-center justify-between p-2 border-b hover:bg-gray-50"
+              >
+                <span className="text-sm text-gray-700">{category}</span>
+                <button
+                  onClick={() => removeCategory(category)}
+                  className="p-1.5 text-red-600 hover:bg-red-50 rounded"
+                >
+                  <FiTrash size={16} />
+                </button>
+              </div>
             ))}
-          </select>
+          </div>
+        </div>
+
+        {/* Add New Category Form */}
+        <div className="flex flex-col items-center gap-2 mt-4">
           <input
             type="text"
-            placeholder={"Enter Sub Category Name"}
+            placeholder="Enter Category Name"
             className="input w-full border rounded border-gray-300 p-3"
             value={text}
             onChange={(e) => setText(e.target.value)}
           />
           <button
-            onClick={handleChange}
+            onClick={addNewCategory}
+            disabled={loading}
             type="button"
-            className="w-full h-12 flex gap-2 items-center justify-center text-blue-600 border border-blue-500 rounded hover:bg-blue-100"
+            className={`w-full h-12 flex gap-2 items-center justify-center text-blue-600 border border-blue-500 rounded hover:bg-blue-100 ${
+              loading ? "opacity-50 cursor-not-allowed" : ""
+            }`}
           >
-            <FiPlus size={20} />
-            Add
+            {loading ? (
+              "Adding..."
+            ) : (
+              <>
+                <FiPlus size={20} />
+                Add Category
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const AddSubCategory = ({
+  onClose,
+  categories,
+  handleSubCategory,
+  subCategories,
+  setSubCategories,
+}) => {
+  const [text, setText] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const addNewSubCategory = async () => {
+    if (!text || !selectedCategory) {
+      toast.error("Please select category and enter subcategory name");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("authToken");
+      const API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/service/addProductSubCategory`;
+
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          category: selectedCategory,
+          subCategory: text,
+        }),
+      });
+
+      if (response.ok) {
+        toast.success("Subcategory added successfully");
+        handleSubCategory(selectedCategory, text);
+        setText("");
+      } else {
+        const error = await response.json();
+        toast.error(error.message || "Failed to add subcategory");
+      }
+    } catch (error) {
+      toast.error("Error adding subcategory");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const removeSubCategory = async (category, subCategory) => {
+    try {
+      const token = localStorage.getItem("authToken");
+      const API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/service/removeProductSubCategory`;
+
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          category,
+          subCategory,
+        }),
+      });
+
+      if (response.ok) {
+        toast.success("Subcategory removed successfully");
+        setSubCategories((prev) => ({
+          ...prev,
+          [category]: prev[category].filter((sub) => sub !== subCategory),
+        }));
+      } else {
+        const error = await response.json();
+        toast.error(error.message || "Failed to remove subcategory");
+      }
+    } catch (error) {
+      toast.error("Error removing subcategory");
+      console.error(error);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 flex items-center justify-center w-full bg-black/35 z-[100]">
+      <div className="w-full max-w-96 mx-auto bg-white rounded-lg overflow-x-hidden overflow-y-auto p-6">
+        <div className="flex w-full p-2 justify-end">
+          <button onClick={onClose}>
+            <IoClose size={24} color="black" />
+          </button>
+        </div>
+
+        {/* Existing SubCategories List */}
+        {selectedCategory && subCategories[selectedCategory]?.length > 0 && (
+          <div className="mb-4">
+            <h3 className="text-sm font-medium text-gray-600 mb-2">
+              Existing Subcategories for {selectedCategory}
+            </h3>
+            <div className="max-h-40 overflow-y-auto">
+              {subCategories[selectedCategory]?.map((subCat, index) => (
+                <div
+                  key={index}
+                  className="flex items-center justify-between p-2 border-b hover:bg-gray-50"
+                >
+                  <span className="text-sm text-gray-700">{subCat}</span>
+                  <button
+                    onClick={() => removeSubCategory(selectedCategory, subCat)}
+                    className="p-1.5 text-red-600 hover:bg-red-50 rounded"
+                  >
+                    <FiTrash size={16} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Add New SubCategory Form */}
+        <div className="flex flex-col items-center gap-2 mt-2">
+          <select
+            className="select w-full border rounded border-gray-300 p-3 mb-2"
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+          >
+            <option value="">Select Category</option>
+            {categories.map((category, index) => (
+              <option key={index} value={category}>
+                {category}
+              </option>
+            ))}
+          </select>
+          <input
+            type="text"
+            placeholder="Enter Sub Category Name"
+            className="input w-full border rounded border-gray-300 p-3"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+          />
+          <button
+            onClick={addNewSubCategory}
+            disabled={loading}
+            type="button"
+            className={`w-full h-12 flex gap-2 items-center justify-center text-blue-600 border border-blue-500 rounded hover:bg-blue-100 ${
+              loading ? "opacity-50 cursor-not-allowed" : ""
+            }`}
+          >
+            {loading ? (
+              "Adding..."
+            ) : (
+              <>
+                <FiPlus size={20} />
+                Add Subcategory
+              </>
+            )}
           </button>
         </div>
       </div>
