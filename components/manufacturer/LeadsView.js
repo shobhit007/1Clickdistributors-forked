@@ -352,12 +352,12 @@ const ListView = ({ leads, setLeads, originalData }) => {
                   <span class="absolute left-full top-1/2 -translate-y-1/2 w-0 h-0 border-t-[8px] border-b-[8px] border-l-[8px] border-l-colorPrimary border-t-transparent border-b-transparent"></span>
                 )}
 
-                <div className="w-full flex items-center gap-2 px-2">
+                <div className="w-full flex items-center gap-4 px-2">
                   <div
                     style={{
                       background: vibrantColors[index % vibrantColors.length],
                     }}
-                    className="h-[30px] w-[30px] rounded-full flex items-center justify-center text-white text-[20px]"
+                    className="h-[50px] w-[50px] rounded-full flex items-center justify-center text-white text-[20px]"
                   >
                     {lead.full_name?.slice(0, 1)}
                   </div>
@@ -370,6 +370,19 @@ const ListView = ({ leads, setLeads, originalData }) => {
                       <MdOutlineMailOutline />
                       {lead?.email || "...."}
                     </span>
+                    {lead?.disposition && (
+                      <span
+                        className="text-white w-fit px-3 rounded text-[11px] mt-[2px] capitalize"
+                        style={{
+                          backgroundColor:
+                            serviceDispositionColors[
+                              lead.disposition || "gray"
+                            ],
+                        }}
+                      >
+                        {formatValue(lead.disposition)}
+                      </span>
+                    )}
                   </div>
                 </div>
 
@@ -378,18 +391,6 @@ const ListView = ({ leads, setLeads, originalData }) => {
                     <CiLocationOn className="text-lg" />
                     <span>{lead.city}, India</span>
                   </p>
-
-                  {lead?.disposition && (
-                    <span
-                      className="text-white py-[2px] px-3 rounded text-xs capitalize"
-                      style={{
-                        backgroundColor:
-                          serviceDispositionColors[lead.disposition || "gray"],
-                      }}
-                    >
-                      {formatValue(lead.disposition)}
-                    </span>
-                  )}
 
                   {lead?.archived && (
                     <span className="text-white py-[2px] px-3 rounded text-xs capitalize bg-red-500">

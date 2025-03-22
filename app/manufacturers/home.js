@@ -262,7 +262,9 @@ const Home = () => {
                 </div>
               </div>
 
-              <div className="w-full h-full flex-col relative">
+              <div
+                className={`h-full flex-col relative w-full`}
+              >
                 <div className="w-full h-full">
                   {selectedPanel == "profile" && <Profile />}
                   {selectedPanel == "leads&Enquiries" && <LeadsView />}

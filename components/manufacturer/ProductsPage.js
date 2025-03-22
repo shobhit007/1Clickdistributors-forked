@@ -11,12 +11,19 @@ import Image from "next/image";
 import { useQuery } from "@tanstack/react-query";
 import Modal from "../utills/Modal";
 import AddNewProductView from "./AddNewProductView";
+import Tooltip from "@mui/material/Tooltip";
+import useModal from "../hooks/useModal";
+import AnimatedModal from "../utills/AnimatedModal";
+import ConfirmationModal from "../uiCompoents/ConfirmationModal";
+import { toast } from "react-toastify";
 
 const ProductsPage = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [deletingProduct, setDeletingProduct] = useState(false);
   const [isSmallDevice, setIsSmallDevice] = useState(false);
   const [showAddNewProductModal, setShowAddNewProductModal] = useState(false);
   const [loading, setLoading] = useState(false);
+  const { open, close, modalOpen } = useModal();
 
   const getUserProducts = async () => {
     try {
@@ -56,6 +63,34 @@ const ProductsPage = () => {
     }
   };
 
+  const handleDeleteProduct = async (productId) => {
+    try {
+      setDeletingProduct(true);
+      const token = localStorage.getItem("authToken");
+      const API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/service/manufacturer/deleteProduct/${productId}`;
+      const response = await fetch(API_URL, {
+        method: "DELETE",
+        headers: {
+          "Content-type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        toast.success("Product deleted successfully");
+        refetchProducts();
+      } else {
+        toast.error(data.message || "Failed to delete product");
+      }
+    } catch (error) {
+      console.error("Error deleting product:", error.message);
+      toast.error("Error deleting product");
+    } finally {
+      setDeletingProduct(false);
+    }
+  };
+
   const { data: products, refetch: refetchProducts } = useQuery({
     queryKey: ["userProducts"],
     queryFn: getUserProducts,
@@ -79,6 +114,22 @@ const ProductsPage = () => {
 
   return (
     <div className="w-full h-full pt-5 flex flex-row px-1 md:px-3 overflow-hidden">
+      <AnimatedModal close={close} open={open} modalOpen={modalOpen}>
+        <ConfirmationModal
+          heading="Are you sure?"
+          subHeading={`You really want to delete this product?\nThis cannot be undone later.`}
+          confirmationText="Yes, delete"
+          cancelText="Not now"
+          onConfirm={() => {
+            if (selectedProduct) {
+              handleDeleteProduct(selectedProduct.productId);
+              close();
+            }
+          }}
+          onCancel={close}
+          loading={deletingProduct}
+        />
+      </AnimatedModal>
       {showAddNewProductModal && (
         <Modal>
           <div className="h-[85vh] w-[90vw] sm:w-[45vw] md:w-[30vw] bg-white relative rounded-md overflow-hidden">
@@ -165,9 +216,20 @@ const ProductsPage = () => {
                         {item.description}
                       </p>
 
-                      <div className="flex items-center gap-2 mt-2">
+                      <div className="flex items-center gap-4 mt-2">
                         <CiEdit className="text-blue-700 text-lg cursor-pointer" />
-                        <MdDeleteOutline className="text-red-700 text-lg cursor-pointer" />
+
+                        <Tooltip title="Delete item" placement="top">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedProduct(item);
+                              open();
+                            }}
+                          >
+                            <MdDeleteOutline className="text-red-700 text-lg cursor-pointer" />
+                          </button>
+                        </Tooltip>
                       </div>
                     </div>
                   </div>

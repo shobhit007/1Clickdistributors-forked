@@ -1,5 +1,5 @@
 import manufacturerContext from "@/lib/context/manufacturerContext";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import CustomInput from "@/components/uiCompoents/CustomInput";
 import {
   MdOutlineCurrencyRupee,
@@ -12,13 +12,14 @@ import { toast } from "react-toastify";
 import { useQueryClient } from "@tanstack/react-query";
 import { IoIosSave } from "react-icons/io";
 import { bank_accountTypes, company_types } from "@/lib/data/commonData";
-import { fileToBlob } from "@/lib/commonFunctions";
+import { uploadMediaFileToDB } from "@/lib/commonFunctions";
+import { current } from "@reduxjs/toolkit";
 
 const rowStyle = "w-full flex justify-between py-1 flex-col md:flex-row gap-4";
 const rowItemStyle = "w-full md:w-[46%]";
 const iconStyle = "text-[10px]";
 
-const BankDetails = () => {
+const BankDetails = ({ showFilePreview }) => {
   const { userDetails } = useContext(manufacturerContext);
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -26,14 +27,15 @@ const BankDetails = () => {
   const [tempImageURL, setTempImageURL] = useState(null);
   const [cancelledChequeImage, setCancelledChequeImage] = useState(null);
   const queryClient = useQueryClient();
+  const [fileUploading, setFileUploading] = useState(false);
+  const imageref1 = useRef(null);
+  const imageref2 = useRef(null);
 
   const [data, setData] = useState({
     bankAccountType: "",
     bankAccountNumber: null,
     bankIFSC_code: "",
   });
-
-  console.log("user deatails", userDetails);
 
   useEffect(() => {
     if (userDetails) {
@@ -43,6 +45,7 @@ const BankDetails = () => {
         bankIFSC_code: userDetails?.bankIFSC_code || null,
       });
 
+      console.log("user details", userDetails);
       if (userDetails.cancelledChequeImage) {
         setCancelledChequeImage(userDetails.cancelledChequeImage);
       }
@@ -108,10 +111,48 @@ const BankDetails = () => {
     }
   };
 
-  const handleUpload = () => {
-    setFile(null);
-    setTempImageURL(null);
-    setCancelledChequeImage(tempImageURL);
+  const handleUpload = async () => {
+    try {
+      if (!file) {
+        return toast.error("No file detected");
+      }
+      const fileExtension = file.name.split(".").pop();
+      const fileName = `${userDetails?.docId}.${fileExtension}`;
+      const storagePath = `userDocuments/${userDetails?.docId}/cancelledCheque.${fileExtension}`;
+      const uploadRes = await uploadMediaFileToDB(file, storagePath);
+      if (uploadRes.success) {
+        let { downloadURL } = uploadRes;
+        setFileUploading(true);
+        const token = localStorage.getItem("authToken");
+        let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/auth/updateUserProfile`;
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: {
+            "Content-type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ cancelledChequeImage: downloadURL }),
+        });
+        const ress = await response.json();
+        if (ress.success) {
+          toast.success(ress.message);
+          queryClient.invalidateQueries(["currentUserDetail"]);
+          setFile(null);
+          setTempImageURL(null);
+        } else {
+          toast.error(ress.message || "Something went wrong");
+        }
+      } else {
+        toast.error("Failed to update profile picture.");
+      }
+    } catch (error) {
+      console.log("Error in handleUpload:", error.message);
+      toast.error(
+        "An error occurred while uploading the cancelled cheque image."
+      );
+    } finally {
+      setFileUploading(false);
+    }
   };
 
   return (
@@ -174,6 +215,11 @@ const BankDetails = () => {
                     <img
                       className="max-h-[220px] max-w-[400px] bg-contain object-contain rounded-md"
                       src={tempImageURL || cancelledChequeImage}
+                      onClick={() =>
+                        showFilePreview({
+                          url: tempImageURL || cancelledChequeImage,
+                        })
+                      }
                     />
                     <div className="flex items-center gap-3 mt-2">
                       <input
@@ -181,6 +227,7 @@ const BankDetails = () => {
                         onChange={handleImageChange}
                         className="hidden"
                         id={"uploadFile"}
+                        ref={imageref1}
                       />
                       <label
                         htmlFor={"uploadFile"}
@@ -192,9 +239,26 @@ const BankDetails = () => {
                       {file && (
                         <button
                           onClick={handleUpload}
-                          className="text-white font-semibold text-xs bg-colorPrimary py-[1px] px-3 rounded"
+                          disabled={fileUploading}
+                          className="text-white font-semibold text-xs bg-colorPrimary py-[1px] px-3 rounded disabled:animate-pulse"
                         >
-                          Upload
+                          {fileUploading ? "Uploading" : "Upload"}
+                        </button>
+                      )}
+
+                      {file && (
+                        <button
+                          onClick={() => {
+                            setFile(null);
+                            setTempImageURL(null);
+                            if (imageref1?.current) {
+                              imageref1.current.value = null;
+                            }
+                          }}
+                          disabled={fileUploading}
+                          className="text-white font-semibold text-xs bg-gray-500 py-[1px] px-3 rounded disabled:animate-pulse"
+                        >
+                          Cancel
                         </button>
                       )}
                     </div>
@@ -205,6 +269,7 @@ const BankDetails = () => {
                       <img
                         className="max-h-[220px] max-w-[400px] bg-contain rounded-md object-contain"
                         src={tempImageURL}
+                        onClick={() => showFilePreview({ url: tempImageURL })}
                       />
                     )}
                     <div className="flex items-center gap-3 mt-2">
@@ -213,6 +278,7 @@ const BankDetails = () => {
                         onChange={handleImageChange}
                         className="hidden"
                         id={"uploadFile"}
+                        ref={imageref2}
                       />
                       <label
                         htmlFor={"uploadFile"}
@@ -227,6 +293,21 @@ const BankDetails = () => {
                           className="text-white font-semibold text-xs bg-colorPrimary py-[1px] px-3 rounded"
                         >
                           Upload
+                        </button>
+                      )}
+
+                      {file && (
+                        <button
+                          onClick={() => {
+                            setFile(null);
+                            setTempImageURL(null);
+                            if (imageref2?.current) {
+                              imageref2.current.value = null;
+                            }
+                          }}
+                          className="text-white font-semibold text-xs bg-gray-500 py-[1px] px-3 rounded"
+                        >
+                          Cancel
                         </button>
                       )}
                     </div>

@@ -25,6 +25,19 @@ import { useQueryClient } from "@tanstack/react-query";
 import { formatValue } from "@/lib/commonFunctions";
 import Tooltip from "@mui/material/Tooltip";
 import Image from "next/image";
+import { Swiper, SwiperSlide } from "swiper/react";
+import {
+  Autoplay,
+  EffectFade,
+  Keyboard,
+  Navigation,
+  Pagination,
+} from "swiper/modules";
+import "swiper/css";
+import "swiper/css/autoplay";
+import "swiper/css/effect-fade";
+import "swiper/css/pagination";
+import ManualSwiper from "./ManualSwiper";
 
 const LeadDetailView = ({
   isSmallDevice,
@@ -113,6 +126,30 @@ const LeadDetailView = ({
 
   const imageUrl =
     "https://images.unsplash.com/photo-1543304216-b46be324b571?q=80&w=2181&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D";
+
+  let imagesToShow = [
+    {
+      url: "https://images.unsplash.com/photo-1543304216-b46be324b571?q=80&w=2181&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      heading: "First Image",
+      hyperLink: "http://images.unsplash.com/photo-154330",
+    },
+    {
+      url: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      heading: "Second Image",
+      hyperLink: "http://images.unsplash.com/photo-150674",
+    },
+    {
+      url: "https://plus.unsplash.com/premium_photo-1709895873240-75894c152be0?q=80&w=1932&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      heading: "Third Image",
+      hyperLink: "http://images.unsplash.com/photo-151781",
+    },
+    {
+      url: "https://images.unsplash.com/photo-1503197979108-c824168d51a8?q=80&w=1933&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      heading: "Fourth Image",
+      hyperLink: "http://images.unsplash.com/photo-152220",
+    },
+  ];
+
   return (
     <div className="w-full h-full p-0 md:p-2 lg:pt-5">
       <AnimatedModal open={open} close={close} modalOpen={modalOpen}>
@@ -126,7 +163,7 @@ const LeadDetailView = ({
       </AnimatedModal>
 
       <div className="w-full h-full rounded-md bg-white rounded-t-2xl overflow-hidden">
-        <div className="h-[10%] bg-gradient-to-r from-[#cc6f11] to-[#cd4030] p-1 pt-3 flex flex-col items-center">
+        <div className="bg-gradient-to-r from-[#cc6f11] to-[#cd4030] p-1 pt-3 flex flex-col items-center">
           <div className="flex justify-between px-1 border-b border-orange-800/30 pb-2 w-[98%]">
             <div className="gap-2 flex items-center">
               <MdArrowBack
@@ -217,35 +254,8 @@ const LeadDetailView = ({
               </div>
             </div>
 
-            <div className="relative w-full md:w-[48%] h-[120px] overflow-hidden rounded-md">
-              {/* Blurred Background */}
-              <div
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  backgroundImage: `url(${imageUrl})`,
-                  backgroundSize: "cover",
-                  backgroundPosition: "center",
-                  filter: "blur(8px)",
-                }}
-              ></div>
-              {/* Sharp Foreground Image */}
-              <Image
-                src={imageUrl}
-                alt="Foreground Image"
-                width={2181}
-                height={120}
-                style={{
-                  width: "100%",
-                  height: "120px",
-                  objectFit: "contain",
-                  position: "relative",
-                  zIndex: 10,
-                }}
-              />
+            <div className="md:w-[48%] h-[160px] md:h-[120px]">
+              <ManualSwiper />
             </div>
           </div>
 
@@ -297,6 +307,61 @@ const LeadDetailView = ({
 };
 
 export default LeadDetailView;
+
+const ImageSwiper = ({ images }) => {
+  return (
+    <div className="w-[90%] h-[120px] overflow-hidden rounded-md">
+      <Swiper
+        slidesPerView={1}
+        autoplay={{
+          delay: 2500,
+        }}
+        pagination={{
+          clickable: true,
+        }}
+        modules={[Keyboard, Pagination, Autoplay]}
+        className="mySwiper"
+      >
+        {images.map((image, index) => (
+          <SwiperSlide key={index}>
+            {/* <a href={image.hyperLink} target="_blank" rel="noopener noreferrer"> */}
+            <div className="w-full h-[120px]">
+              {/* Blurred Background */}
+              <div
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  backgroundImage: `url(${image.url})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                  filter: "blur(8px)",
+                }}
+              />
+              {/* Sharp Foreground Image */}
+              <Image
+                src={image.url}
+                alt={image.heading}
+                width={281}
+                height={120}
+                style={{
+                  width: "100%",
+                  height: "120px",
+                  objectFit: "contain",
+                  position: "relative",
+                  zIndex: 10,
+                }}
+              />
+            </div>
+            {/* </a> */}
+          </SwiperSlide>
+        ))}
+      </Swiper>
+    </div>
+  );
+};
 
 const UpdateLeadModal = ({ updateLoading, setUpdateLoading, close }) => {
   const { selectedLead } = useContext(manufacturerContext);

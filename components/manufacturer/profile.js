@@ -1,5 +1,5 @@
 import manufacturerContext from "@/lib/context/manufacturerContext";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import CustomInput from "../uiCompoents/CustomInput";
 import { FaPhoneAlt } from "react-icons/fa";
 import { FaUser } from "react-icons/fa";
@@ -15,6 +15,13 @@ import { IoIosSave } from "react-icons/io";
 import TaxDetails from "./profileComponents/TaxDetails";
 import BankDetails from "./profileComponents/BankDetails";
 import BusinessDetails from "./profileComponents/BusinessDetails";
+import CustomSelector from "../uiCompoents/CustomSelector";
+import { IoCamera } from "react-icons/io5";
+import { Tooltip } from "@mui/material";
+import { uploadMediaFileToDB } from "@/lib/commonFunctions";
+import AnimatedModal from "../utills/AnimatedModal";
+import ViewUploadedPicture from "./profileComponents/ViewUploadedPicture";
+import useModal from "../hooks/useModal";
 
 const rowStyle = "w-full flex justify-between py-1 flex-col md:flex-row gap-4";
 const rowItemStyle = "w-full md:w-[46%]";
@@ -25,7 +32,11 @@ const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [showSections, setShowSections] = useState([]);
   const [loading, setLoading] = useState(false);
+  const profilePicRef = useRef(null);
   const queryClient = useQueryClient();
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const { open, close, modalOpen } = useModal();
+  const [selectedFileToShow, setSelectedFileToShow] = useState(null);
 
   const [data, setData] = useState({
     full_name: "",
@@ -43,6 +54,7 @@ const Profile = () => {
         email: userDetails?.email,
         password: userDetails.password,
         city: userDetails.city,
+        designation: userDetails?.designation,
       });
     }
   }, [userDetails]);
@@ -82,13 +94,65 @@ const Profile = () => {
     setData((pre) => ({ ...pre, [fieldName]: value }));
   };
 
+  const handleChangeProfilePic = async (file) => {
+    try {
+      setUploadingImage(true);
+      const fileExtension = file.name.split(".").pop();
+      const fileName = `${userDetails?.docId}.${fileExtension}`;
+      const storagePath = `service_profiles/${fileName}`;
+      const uploadRes = await uploadMediaFileToDB(file, storagePath);
+      if (uploadRes.success) {
+        let { downloadURL } = uploadRes;
+        setLoading(true);
+        const token = localStorage.getItem("authToken");
+        let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/auth/updateUserProfile`;
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: {
+            "Content-type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ profileImageURL: downloadURL }),
+        });
+        const ress = await response.json();
+        if (ress.success) {
+          toast.success(ress.message);
+          queryClient.invalidateQueries(["currentUserDetail"]);
+        } else {
+          toast.error(ress.message || "Something went wrong");
+        }
+      } else {
+        toast.error("Failed to update profile picture.");
+      }
+    } catch (error) {
+      console.error("Error in handleChangeProfilePic:", error.message);
+      toast.error("An error occurred while uploading the profile picture.");
+    } finally {
+      setUploadingImage(false);
+      if (profilePicRef.current) {
+        profilePicRef.current.value = null;
+      }
+    }
+  };
+
+  const showFilePreview = (data) => {
+    setSelectedFileToShow(data);
+    open();
+  };
+
   return (
     <div className="w-full h-full p-2 flex flex-col items-center gap-2">
-      {/* {loading && (
+      <AnimatedModal open={open} close={close} modalOpen={modalOpen}>
+        {selectedFileToShow && (
+          <ViewUploadedPicture {...selectedFileToShow} close={close} />
+        )}
+      </AnimatedModal>
+
+      {uploadingImage && (
         <div className="my-1 w-full flex justify-center absolute top-0 left-0">
           <img src="/loader.gif" className="h-10 w-10" />
         </div>
-      )} */}
+      )}
       <div className="w-[95%] lg:w-[80%] mt-2 ">
         <h1 className="text-gray-700 font-semibold text-xl px-2">
           Personal Details
@@ -97,15 +161,46 @@ const Profile = () => {
           {/* user small details */}
           <div className="w-full flex justify-between items-center">
             <div className="flex gap-2 items-center">
-              <img
-                className="h-[70px] w-auto border border-blue-200 shadow-large rounded-full"
-                src={userDetails?.userImageLink}
-              />
+              {userDetails?.profileImageURL ? (
+                <img
+                  className="h-[70px] w-[70px] border border-blue-200 shadow-large rounded-full object-cover"
+                  src={userDetails?.profileImageURL}
+                  onClick={() =>
+                    showFilePreview({ url: userDetails?.profileImageURL })
+                  }
+                />
+              ) : (
+                <div className="h-[70px] w-[70px] border border-blue-200 bg-gray-200 rounded-full flex items-center justify-center">
+                  <FaUser className="text-3xl text-gray-700" />
+                </div>
+              )}
 
               <div className="flex flex-col gap-[2px]">
-                <span className="text-gray-500 font-semibold text-base">
-                  {userDetails?.full_name}
-                </span>
+                <div className="flex gap-2 items-center">
+                  <span className="text-gray-500 font-semibold text-base">
+                    {userDetails?.full_name}
+                  </span>
+                  <Tooltip
+                    title="change your profile picture. Images with size upto 1024x1024 are allowed"
+                    placement="top"
+                  >
+                    <button
+                      disabled={uploadingImage}
+                      onClick={() => profilePicRef?.current?.click()}
+                      className="flex items-center hover:bg-blue-500/20 gap-1 mt-[2px] text-xs rounded text-blue-600"
+                    >
+                      <IoCamera />
+                      <span>Change picture</span>
+                    </button>
+                  </Tooltip>
+
+                  <input
+                    type="file"
+                    ref={profilePicRef}
+                    onChange={(e) => handleChangeProfilePic(e.target.files[0])}
+                    className="hidden"
+                  />
+                </div>
                 <span className="text-sm text-orange-800 bg-orange-200/30 py-[1px] px-2 rounded-full w-fit">
                   Manufacturer
                 </span>
@@ -142,11 +237,22 @@ const Profile = () => {
               </div>
 
               <div className={`${rowItemStyle}`}>
-                <CustomInput
+                {/* <CustomInput
+                 
+                /> */}
+
+                <CustomSelector
                   label={"Designation"}
                   value={data?.designation}
-                  disabled={true}
+                  disabled={!isEditing}
                   icon={<FaNetworkWired className={`${iconStyle}`} />}
+                  onChangeValue={(value) => onChangeValue(value, "designation")}
+                  options={[
+                    { label: "Manager", value: "manager" },
+                    { label: "Executive", value: "executive" },
+                    { label: "Sales", value: "sales" },
+                    { label: "Admin", value: "admin" },
+                  ]}
                 />
               </div>
             </div>
@@ -296,7 +402,9 @@ const Profile = () => {
             </button>
           )}
         </div>
-        {showSections.includes("taxDetails") && <TaxDetails />}
+        {showSections.includes("taxDetails") && (
+          <TaxDetails showFilePreview={showFilePreview} />
+        )}
       </div>
 
       {/* Bank details */}
@@ -326,7 +434,9 @@ const Profile = () => {
             </button>
           )}
         </div>
-        {showSections.includes("bankDetail") && <BankDetails />}
+        {showSections.includes("bankDetail") && (
+          <BankDetails showFilePreview={showFilePreview} />
+        )}
       </div>
     </div>
   );
