@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import {
   MdArrowBack,
   MdEdit,
@@ -19,6 +19,7 @@ import { toast } from "react-toastify";
 import CustomSelector from "../uiCompoents/CustomSelector";
 import { units } from "@/lib/data/servicePanelData";
 import { useQueryClient } from "@tanstack/react-query";
+import manufacturerContext from "@/lib/context/manufacturerContext";
 
 const ProductDetailView = ({ product, close }) => {
   const [selectedView, setSelectedView] = useState("specifications");
@@ -149,6 +150,8 @@ export const getIcon = (key) => {
 export const EditProduct = ({ data, close }) => {
   const [uploading, setUploading] = useState(false);
   const queryClient = useQueryClient();
+  const { userDetails } = useContext(manufacturerContext);
+
   const productSchema = {
     title: "",
     brand: "",
@@ -188,6 +191,11 @@ export const EditProduct = ({ data, close }) => {
   const [product, setProduct] = useState(productSchema);
   const inputRef = useRef(null);
   const [file, setFile] = useState(null);
+  const [otherDataFields, setOtherDataFields] = useState({});
+
+  const handleOtherFieldsChange = (value, key) => {
+    setOtherDataFields((pre) => ({ ...pre, [key]: value }));
+  };
 
   const simpleFields = [
     "title",
@@ -212,7 +220,7 @@ export const EditProduct = ({ data, close }) => {
           { label: "Dumbbells", value: "dumbbells" },
           { label: "Supplements", value: "supplements" },
           { label: "Wearables", value: "wearables" },
-          { label: "Others", value: "fitness_others" },
+          { label: "Others", value: "others" },
         ],
       },
       {
@@ -224,7 +232,7 @@ export const EditProduct = ({ data, close }) => {
           { label: "Headphones", value: "headphones" },
           { label: "Smartwatches", value: "smartwatches" },
           { label: "Gaming Consoles", value: "gaming_consoles" },
-          { label: "Others", value: "electronics_others" },
+          { label: "Others", value: "others" },
         ],
       },
       {
@@ -236,7 +244,7 @@ export const EditProduct = ({ data, close }) => {
           { label: "Footwear", value: "footwear" },
           { label: "Accessories", value: "accessories" },
           { label: "Jewelry", value: "jewelry" },
-          { label: "Others", value: "fashion_others" },
+          { label: "Others", value: "others" },
         ],
       },
       {
@@ -248,7 +256,7 @@ export const EditProduct = ({ data, close }) => {
           { label: "Cookware", value: "cookware" },
           { label: "Home Decor", value: "home_decor" },
           { label: "Storage & Organization", value: "storage_organization" },
-          { label: "Others", value: "home_kitchen_others" },
+          { label: "Others", value: "others" },
         ],
       },
       {
@@ -260,7 +268,7 @@ export const EditProduct = ({ data, close }) => {
           { label: "Makeup", value: "makeup" },
           { label: "Fragrances", value: "fragrances" },
           { label: "Grooming Essentials", value: "grooming_essentials" },
-          { label: "Others", value: "beauty_personal_care_others" },
+          { label: "Others", value: "others" },
         ],
       },
       {
@@ -272,7 +280,7 @@ export const EditProduct = ({ data, close }) => {
           { label: "Team Sports", value: "team_sports" },
           { label: "Water Sports", value: "water_sports" },
           { label: "Outdoor Gear", value: "outdoor_gear" },
-          { label: "Others", value: "sports_outdoors_others" },
+          { label: "Others", value: "others" },
         ],
       },
       {
@@ -284,7 +292,7 @@ export const EditProduct = ({ data, close }) => {
           { label: "Car Maintenance", value: "car_maintenance" },
           { label: "Motorcycle Gear", value: "motorcycle_gear" },
           { label: "Tires & Wheels", value: "tires_wheels" },
-          { label: "Others", value: "automotive_others" },
+          { label: "Others", value: "others" },
         ],
       },
       {
@@ -296,7 +304,7 @@ export const EditProduct = ({ data, close }) => {
           { label: "Educational Toys", value: "educational_toys" },
           { label: "Dolls & Plush Toys", value: "dolls_plush_toys" },
           { label: "Outdoor Play", value: "outdoor_play" },
-          { label: "Others", value: "toys_games_others" },
+          { label: "Others", value: "others" },
         ],
       },
       {
@@ -308,7 +316,7 @@ export const EditProduct = ({ data, close }) => {
           { label: "Educational Books", value: "educational_books" },
           { label: "Notebooks & Journals", value: "notebooks_journals" },
           { label: "Art Supplies", value: "art_supplies" },
-          { label: "Others", value: "books_stationery_others" },
+          { label: "Others", value: "others" },
         ],
       },
       {
@@ -320,8 +328,13 @@ export const EditProduct = ({ data, close }) => {
           { label: "Mental Wellness", value: "mental_wellness" },
           { label: "Pain Relief", value: "pain_relief" },
           { label: "Weight Management", value: "weight_management" },
-          { label: "Others", value: "health_wellness_others" },
+          { label: "Others", value: "others" },
         ],
+      },
+      {
+        label: "Other",
+        value: "others",
+        subCategory: [{ label: "Other", value: "others" }],
       },
     ],
     subCategory: [
@@ -364,20 +377,20 @@ export const EditProduct = ({ data, close }) => {
       return;
     }
 
-    const isValid = await isValidImageSize(file);
+    // const isValid = await isValidImageSize(file);
 
-    if (!isValid) {
-      toast.error("Image dimensions must be between 500x500 and 1000x1000.");
-      return;
-    }
+    // if (!isValid) {
+    //   toast.error("Image dimensions must be between 500x500 and 1000x1000.");
+    //   return;
+    // }
 
     if (inputRef?.current?.value) {
       inputRef.current.value = "";
     }
-    const { url, message } = await uploadFile(file);
-    if (url) {
+    const tempURL = URL.createObjectURL(file);
+    if (tempURL) {
       setFile(file);
-      setProduct((pre) => ({ ...pre, tempImageURL: url }));
+      setProduct((pre) => ({ ...pre, tempImageURL: tempURL }));
     } else {
       toast.error(message || "Error uploading file");
     }
@@ -420,6 +433,32 @@ export const EditProduct = ({ data, close }) => {
 
       let body = { ...product };
 
+      if (body.category == "others") {
+        body.category = otherDataFields?.category;
+        body.subCategory = otherDataFields?.subCategory;
+      } else if (body.subCategory == "others") {
+        body.subCategory = otherDataFields?.subCategory;
+      }
+
+      return console.log(body);
+
+      setUploading(true);
+      if (file) {
+        const fileExtension = file.name.split(".").pop();
+        const fileName = `${Date.now()}.${fileExtension}`;
+        const storagePath = `userProducts/${userDetails?.docId}/${fileName}`;
+        const uploadRes = await uploadMediaFileToDB(file, storagePath);
+        console.log("upload res is", uploadRes);
+        if (uploadRes.success) {
+          let { downloadURL } = uploadRes;
+          body.image = downloadURL;
+          delete body.tempImageURL;
+          setFile(null);
+        } else {
+          throw new Error("Failed to upload image");
+        }
+      }
+
       // uncomment later
       // if (file) {
       //   console.log("file is", file);
@@ -430,7 +469,6 @@ export const EditProduct = ({ data, close }) => {
       // }
 
       delete body.tempImageURL;
-      setUploading(true);
       const token = localStorage.getItem("authToken");
       let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/service/manufacturer/updateProduct`;
       const response = await fetch(API_URL, {
@@ -455,6 +493,11 @@ export const EditProduct = ({ data, close }) => {
       setUploading(false);
     }
   };
+
+  useEffect(() => {
+    setOtherDataFields({});
+    setProduct((product) => ({ ...pre, subCategory: "" }));
+  }, [product?.category]);
 
   const getSubCategories = () => {
     if (!product.category) {
@@ -513,6 +556,90 @@ export const EditProduct = ({ data, close }) => {
               </div>
             );
           } else if (selectors[key]) {
+            if (key == "category" && product.category == "others") {
+              return (
+                <>
+                  <div className={`${rowItemStyle} my-2 pt-3`}>
+                    <CustomSelector
+                      label={productFieldNames[key] || key}
+                      options={
+                        key == "subCategory"
+                          ? product?.category
+                            ? getSubCategories()
+                            : []
+                          : selectors[key]
+                      }
+                      value={product[key]}
+                      onChangeValue={(value) => onChangeValue(value, key)}
+                      icon={getIcon(key)}
+                    />
+                  </div>
+
+                  <div className={`${rowItemStyle} my-2 pt-3`}>
+                    <CustomInput
+                      label={"Type category"}
+                      value={otherDataFields[key]}
+                      type={"string"}
+                      onChangeValue={(value) =>
+                        handleOtherFieldsChange(value, key)
+                      }
+                      icon={getIcon("category")}
+                    />
+                  </div>
+
+                  <div className={`${rowItemStyle} my-2 pt-3`}>
+                    <CustomInput
+                      label={"Type sub category"}
+                      value={otherDataFields["subCategory"]}
+                      type={"string"}
+                      onChangeValue={(value) =>
+                        handleOtherFieldsChange(value, "subCategory")
+                      }
+                      icon={getIcon("subCategory")}
+                    />
+                  </div>
+                </>
+              );
+            }
+
+            if (key == "subCategory" && product["category"] == "others") {
+              return null;
+            }
+
+            if (key == "subCategory" && product["subCategory"] == "others") {
+              return (
+                <>
+                  <div className={`${rowItemStyle} my-2 pt-3`}>
+                    <CustomSelector
+                      label={productFieldNames[key] || key}
+                      options={
+                        key == "subCategory"
+                          ? product?.category
+                            ? getSubCategories()
+                            : []
+                          : selectors[key]
+                      }
+                      value={product[key]}
+                      onChangeValue={(value) => onChangeValue(value, key)}
+                      icon={getIcon(key)}
+                    />
+                  </div>
+
+                  <div className={`${rowItemStyle} my-2 pt-3`}>
+                    <CustomInput
+                      label={"Type sub category"}
+                      value={otherDataFields["subCategory"]}
+                      type={"string"}
+                      onChangeValue={(value) =>
+                        handleOtherFieldsChange(value, "subCategory")
+                      }
+                      icon={getIcon("subCategory")}
+                    />
+                  </div>
+                </>
+              );
+            }
+
             return (
               <div className={`${rowItemStyle} my-2 pt-3`}>
                 <CustomSelector

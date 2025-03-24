@@ -141,7 +141,10 @@ const ProductsPage = () => {
             </button>
 
             {/* <AddNewProductView /> */}
-            <EditProduct product={null} close={() => {}} is />
+            <EditProduct
+              product={null}
+              close={() => setShowAddNewProductModal(false)}
+            />
           </div>
         </Modal>
       )}

@@ -268,8 +268,8 @@ const Profile = () => {
               <div className={`${rowItemStyle}`}>
                 <CustomInput
                   label={"Alt Email"}
-                  onChangeValue={(value) => onChangeValue(value, "altEmail")}
-                  value={data?.altEmail}
+                  onChangeValue={(value) => onChangeValue(value, "email_2")}
+                  value={data?.["email_2"]}
                   disabled={!isEditing}
                   icon={<MdEmail className={`${iconStyle}`} />}
                 />

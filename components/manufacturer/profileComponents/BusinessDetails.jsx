@@ -28,8 +28,8 @@ const BusinessDetails = () => {
     company_type: null,
     turnOver: null,
     address: "",
-    pinCode: null,
-    companyEstablishedAt: null,
+    pincode: null,
+    yearOfEstablishment: null,
     businessCity: "",
     businessState: "",
     country: "",
@@ -42,8 +42,8 @@ const BusinessDetails = () => {
         company_type: userDetails?.company_type || "",
         turnOver: userDetails?.turnOver || null,
         address: userDetails.address || "",
-        pinCode: userDetails.pinCode || null,
-        companyEstablishedAt: userDetails.companyEstablishedAt || null,
+        pincode: userDetails.pincode || null,
+        yearOfEstablishment: userDetails.yearOfEstablishment || null,
         businessState: userDetails.businessState,
         businessCity: userDetails.businessCity,
         country: userDetails.country,
@@ -54,7 +54,7 @@ const BusinessDetails = () => {
   const saveChanges = async () => {
     try {
       let body = { ...data };
-      body.pinCode = parseInt(body.pinCode) || null;
+      body.pincode = parseInt(body.pincode) || null;
       body.turnOver = parseInt(body.turnOver) || null;
       setLoading(true);
 
@@ -145,10 +145,10 @@ const BusinessDetails = () => {
                 <CustomInput
                   label={"Year of establishment"}
                   onChangeValue={(value) =>
-                    onChangeValue(value, "companyEstablishedAt")
+                    onChangeValue(value, "yearOfEstablishment")
                   }
-                  type="number"
-                  value={data?.companyEstablishedAt}
+                  type="string"
+                  value={data?.yearOfEstablishment}
                   disabled={!isEditing}
                   icon={<FaAddressCard className={`${iconStyle}`} />}
                 />
@@ -166,10 +166,10 @@ const BusinessDetails = () => {
               </div>
               <div className={`${rowItemStyle}`}>
                 <CustomInput
-                  label={"Pincode"}
-                  value={data?.pinCode}
-                  onChangeValue={(value) => onChangeValue(value, "pinCode")}
-                  type="number"
+                  label={"pincode"}
+                  value={data?.pincode}
+                  onChangeValue={(value) => onChangeValue(value, "pincode")}
+                  type="string"
                   disabled={!isEditing}
                   icon={<MdOutlinePersonPinCircle className={`${iconStyle}`} />}
                 />

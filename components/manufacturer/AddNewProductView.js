@@ -21,6 +21,7 @@ const AddNewProductView = () => {
     shelfLife: "",
     FSSAI_Lic_No: null,
     countryOfOrigin: "",
+    image: "",
   };
   const productFieldNames = {
     title: "Prduct title",
@@ -89,20 +90,21 @@ const AddNewProductView = () => {
       return;
     }
 
-    const isValid = await isValidImageSize(file);
+    // const isValid = await isValidImageSize(file);
 
-    if (!isValid) {
-      toast.error("Image dimensions must be between 500x500 and 1000x1000.");
-      return;
-    }
+    // if (!isValid) {
+    //   toast.error("Image dimensions must be between 500x500 and 1000x1000.");
+    //   return;
+    // }
 
     if (inputRef?.current?.value) {
       inputRef.current.value = "";
     }
-    const { url, message } = await uploadFile(file);
-    if (url) {
+    const tempURL = URL.createObjectURL(file);
+    console.log("tempurl is",tempURL)
+    if (tempURL) {
       setFile(file);
-      setProduct((pre) => ({ ...pre, tempImageURL: url }));
+      setProduct((pre) => ({ ...pre, tempImageURL: tempURL }));
     } else {
       toast.error(message || "Error uploading file");
     }
