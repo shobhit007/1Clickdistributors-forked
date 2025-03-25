@@ -1,10 +1,21 @@
-import FileSelector from "../FileSelector";
+import { FiImage } from "react-icons/fi";
 
-const BankDetails = ({ register, setValue, errors }) => {
+const BankDetails = ({ register, setValue, errors, watch }) => {
+  const cancelChequeImage = watch("cancelCheque");
+
+  const handleImageChange = (e, field) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => setValue(field, e.target.result);
+      reader.readAsDataURL(file);
+    }
+  };
+
   return (
     <fieldset className="bg-white p-4">
       <legend className="text-lg font-semibold">Bank Details</legend>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 p-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Account Type
@@ -29,7 +40,7 @@ const BankDetails = ({ register, setValue, errors }) => {
           />
         </div>
 
-        <div>
+        {/* <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Confirm Account Number
           </label>
@@ -38,7 +49,7 @@ const BankDetails = ({ register, setValue, errors }) => {
             placeholder="Confirm Account Number"
             className="input w-full border rounded border-gray-300 p-3"
           />
-        </div>
+        </div> */}
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -50,17 +61,30 @@ const BankDetails = ({ register, setValue, errors }) => {
             className="input w-full border rounded border-gray-300 p-3"
           />
         </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Cancel Cheque
-          </label>
-          <FileSelector
-            register={register}
-            setValue={setValue}
-            errors={errors}
-            fieldName={"cancelCheque"}
+        <label className="block mt-2 cursor-pointer">
+          <input
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => handleImageChange(e, "cancelChequeUrl")}
           />
-        </div>
+          <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-gray-400 transition-colors">
+            {cancelChequeImage ? (
+              <img
+                src={cancelChequeImage}
+                alt="Cancel cheque"
+                className="mx-auto h-20 object-contain"
+              />
+            ) : (
+              <>
+                <FiImage className="mx-auto h-8 w-8 text-gray-400" />
+                <span className="mt-2 block text-sm text-gray-600">
+                  Select Image
+                </span>
+              </>
+            )}
+          </div>
+        </label>
       </div>
     </fieldset>
   );

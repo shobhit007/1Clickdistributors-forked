@@ -14,7 +14,7 @@ import ProductDetails from "./tabs/ProductDetails";
 import TaxDetails from "./tabs/TaxDetails";
 import BankDetails from "./tabs/BankDetails";
 import { toggle } from "@nextui-org/theme";
-import { welcomeCallDispositions } from "@/lib/data/commonData";
+import { company_types, welcomeCallDispositions } from "@/lib/data/commonData";
 
 const TABS = [
   {
@@ -48,6 +48,8 @@ function WelcomeCall({
   if (!selectedRow) {
     return null;
   }
+
+  // console.log("selected row", selectedRow);
 
   const {
     register,
@@ -134,36 +136,36 @@ function WelcomeCall({
     // Set personal details
     setValue("tag", selectedRow?.tag || "");
     setValue("full_name", selectedRow?.full_name || "");
-    setValue("jobTitle", selectedRow?.jobTitle || "");
+    setValue("designation", selectedRow?.designation || "");
     setValue("mobile", selectedRow?.phone_number || "");
-    setValue("location", selectedRow?.location || "");
+    setValue("city", selectedRow?.city || "");
     setValue("email", selectedRow?.email || "");
     setValue("altEmail", selectedRow?.email_2 || "");
 
     // Set business details
     setValue("companyName", selectedRow?.companyName || "");
-    setValue("companyType", selectedRow?.companyType || "");
-    setValue("turnover", selectedRow?.turnover || "");
+    setValue("company_type", selectedRow?.company_type || "");
+    setValue("turnOver", selectedRow?.turnOver || "");
     setValue("turnover_type", selectedRow?.turnover_type || "");
     setValue("yearOfEstablishment", selectedRow?.yearOfEstablishment || "");
     setValue("address", selectedRow?.address || "");
     setValue("pincode", selectedRow?.pincode || "");
-    setValue("city", selectedRow?.city || "");
-    setValue("state", selectedRow?.state || "");
+    setValue("businessCity", selectedRow?.businessCity || "");
+    setValue("businessState", selectedRow?.businessState || "");
 
     // Set tax details
-    setValue("gstNumber", selectedRow?.taxDetails?.gst?.gstNumber || "");
-    setValue("gstDocument", selectedRow?.taxDetails?.gst?.document || "");
-    setValue("panNumber", selectedRow?.taxDetails?.pan?.panNumber || "");
-    setValue("panDocument", selectedRow?.taxDetails?.pan?.document || "");
-    setValue("tanNumber", selectedRow?.taxDetails?.tan?.tanNumber || "");
-    setValue("tanDocument", selectedRow?.taxDetails?.tan?.document || "");
+    setValue("gstNumber", selectedRow?.taxDetails?.gst?.number || "");
+    setValue("gstImage", selectedRow?.taxDetails?.gst?.image || "");
+    setValue("panNumber", selectedRow?.taxDetails?.pan?.number || "");
+    setValue("panImage", selectedRow?.taxDetails?.pan?.image || "");
+    setValue("tanNumber", selectedRow?.taxDetails?.tan?.number || "");
+    setValue("tanImage", selectedRow?.taxDetails?.tan?.image || "");
 
     // Set bank details
-    setValue("accountType", selectedRow?.bankDetails?.accountType || "");
-    setValue("accountNumber", selectedRow?.bankDetails?.accountNumber || "");
-    setValue("ifsc", selectedRow?.bankDetails?.ifsc || "");
-    setValue("cancelCheque", selectedRow?.bankDetails?.cancelCheque || "");
+    setValue("accountType", selectedRow?.bankAccountType || "");
+    setValue("accountNumber", selectedRow?.bankAccountNumber || "");
+    setValue("ifsc", selectedRow?.bankIFSC_code || "");
+    setValue("cancelCheque", selectedRow?.cancelledChequeImage || "");
   }, [setValue, selectedRow]);
 
   // set category and sub category
@@ -327,8 +329,6 @@ function WelcomeCall({
 
     let gstPdfUrl = "";
     let panPdfUrl = "";
-    let tanPdfUrl = "";
-    let cancelChequeUrl = "";
 
     // Helper to upload a file if provided
     const uploadIfExists = async (fileData, label) => {
@@ -357,44 +357,42 @@ function WelcomeCall({
 
     const groupedData = {
       full_name: data.full_name,
-      jobTitle: data.jobTitle,
+      designation: data.designation,
       phone_number: data.mobile,
       email: data.email,
       email_2: data.altEmail,
-      location: data.location,
+      city: data.city,
       companyName: data.companyName,
-      companyType: data.companyType,
-      turnover: data.turnover,
+      company_type: data.company_type,
+      turnOver: data.turnOver,
       turnover_type: data.turnover_type,
       yearOfEstablishment: data.yearOfEstablishment,
       address: data.address,
       pincode: data.pincode,
-      city: data.city,
-      state: data.state,
+      businessCity: data.businessCity,
+      businessState: data.businessState,
       category: selectedCategory,
       subCategory: selectedSubCategory,
-      whatsAppNumber: data.whatsAppNumber,
+      // whatsAppNumber: data.whatsAppNumber,
       tag: data.tag,
       taxDetails: {
         gst: {
-          gstNumber: data.gst,
-          document: gstPdfUrl,
+          number: data.gst,
+          image: gstPdfUrl,
         },
         pan: {
-          panNumber: data.pan,
-          document: panPdfUrl,
+          number: data.pan,
+          image: panPdfUrl,
         },
         tan: {
-          tanNumber: data.tan,
-          document: tanPdfUrl,
+          number: data.tan,
+          image: tanPdfUrl,
         },
       },
-      bankDetails: {
-        accountType: data.accountType,
-        accountNumber: data.accountNumber,
-        ifsc: data.ifsc,
-        cancelCheque: cancelChequeUrl,
-      },
+      bankAccountNumber: data.accountNumber,
+      bankAccountType: data.accountType,
+      bankIFSC_code: data.ifsc,
+      cancelledChequeImage: data.cancelChequeUrl,
       leadId: leadId,
     };
 
@@ -485,19 +483,24 @@ function WelcomeCall({
   const toggleBrandModal = () => setShowModal((p) => !p);
 
   // fields
-  const firstName = watch("firstName");
-  const designation = watch("jobTitle");
+  const full_name = watch("full_name");
+  const designation = watch("designation");
   const mobile = watch("mobile");
   const email = watch("email");
   const tag = watch("tag");
   const companyName = watch("companyName");
-  const turnover = watch("turnover");
+  const turnOver = watch("turnOver");
   const establishmentYear = watch("yearOfEstablishment");
-  const gstNumber = watch("gst");
-  const pantNumber = watch("pan");
+  const gstNumber = watch("gstNumber");
+  const pantNumber = watch("panNumber");
+  const businessState = watch("businessState");
+  const businessCity = watch("businessCity");
+  const pincode = watch("pincode");
+  const category = watch("category");
+  const subCategory = watch("subCategory");
 
   const progressFields = {
-    firstName: firstName,
+    full_name: full_name,
     companyName: companyName,
     phone: mobile,
     email: email,
@@ -505,10 +508,15 @@ function WelcomeCall({
     category: selectedCategory,
     subCategory: selectedSubCategory,
     tag: tag,
-    turnover: turnover,
+    turnOver: turnOver,
     establishmentYear: establishmentYear,
     gstNumber: gstNumber,
     pantNumber: pantNumber,
+    pincode,
+    businessState,
+    businessCity,
+    category,
+    subCategory,
   };
 
   const calculateProgress = () => {
@@ -607,6 +615,7 @@ function WelcomeCall({
           errors={errors}
           serviceType={serviceType}
           setValue={setValue}
+          watch={watch}
         />
       </div>
       <div
@@ -617,6 +626,7 @@ function WelcomeCall({
           errors={errors}
           serviceType={serviceType}
           setValue={setValue}
+          watch={watch}
         />
       </div>
     </>
