@@ -1,22 +1,52 @@
 import React, { useEffect, useState } from "react";
-import { RxDashboard, RxHamburgerMenu } from "react-icons/rx";
 import { CgProfile } from "react-icons/cg";
 import { GoDatabase } from "react-icons/go";
 import { IoPeople } from "react-icons/io5";
 import { LuBadgeDollarSign } from "react-icons/lu";
 import { IoIosLogOut } from "react-icons/io";
-import { logout } from "@/store/auth/authReducer";
 import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
-import { toast } from "react-toastify";
 import { handleLogout } from "@/lib/commonFunctions";
+import { useQuery } from "@tanstack/react-query";
+import Header from "./Header";
+import { IoMdClose } from "react-icons/io";
+import { AiFillProduct } from "react-icons/ai";
+import { MdArrowForward } from "react-icons/md";
+import { SiProsieben } from "react-icons/si";
+import distributorContext from "@/lib/context/distributorContext";
+import Profile from "@/components/distributor/profile";
+import LeadsView from "@/components/distributor/LeadsView";
 
 const Home = () => {
   const [containerHeight, setContainerHeight] = useState(null);
   const [selectedPanel, setSelectedPanel] = useState(null);
   const router = useRouter();
   const dispatch = useDispatch();
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(true);
+  const [mainPanelHeight, setMainPanelHeight] = useState(null);
+  const [showSidebar, setShowSidebar] = useState(true);
+  const [isSmallDevice, setIsSmallDevice] = useState(false);
+
+  // context states
+  const [selectedLead, setSelectedLead] = useState(null);
+  useEffect(() => {
+    const check = () => {
+      let h = window.innerHeight - 50;
+      setMainPanelHeight(h);
+      if (window.innerWidth < 1025) {
+        setShowSidebar(false);
+        setIsSmallDevice(true);
+      } else {
+        setIsSmallDevice(false);
+      }
+    };
+
+    check();
+
+    window.addEventListener("resize", check);
+
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
   const panels = [
     {
@@ -24,16 +54,12 @@ const Home = () => {
       value: "profile",
     },
     {
-      name: "Dashboard",
-      value: "dashboard",
+      name: "Leads & Enquiries",
+      value: "leads&Enquiries",
     },
     {
-      name: "New leads",
-      value: "new_Leads",
-    },
-    {
-      name: "My allocations",
-      value: "my_allocations",
+      name: "Prospects",
+      value: "prospects",
     },
     {
       name: "Deals",
@@ -59,11 +85,13 @@ const Home = () => {
     switch (panel) {
       case "profile":
         return <CgProfile className={`${iconStyle}`} />;
-      case "dashboard":
-        return <RxDashboard className={`${iconStyle}`} />;
+      case "my_products":
+        return <AiFillProduct className={`${iconStyle}`} />;
+      case "prospects":
+        return <SiProsieben className={`${iconStyle} text-base`} />;
       case "my_allocations":
         return <GoDatabase className={`${iconStyle}`} />;
-      case "new_Leads":
+      case "leads&Enquiries":
         return <IoPeople className={`${iconStyle}`} />;
       case "deals":
         return <LuBadgeDollarSign className={`${iconStyle}`} />;
@@ -79,80 +107,172 @@ const Home = () => {
     localStorage.setItem("currentDisplayComponent", panel);
   };
 
+  const getUserDetails = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+      let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/auth/getUserDetails`;
+      const response = await fetch(API_URL, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        return data.data;
+      } else {
+        return null;
+      }
+    } catch (error) {
+      console.log("error in getting roles", error.message);
+      return null;
+    }
+  };
+
+  // Fetch user roles using react-query
+  const {
+    data: userDetails,
+    isLoading,
+    refetch: refetchUser,
+  } = useQuery({
+    queryKey: ["currentUserDetail"],
+    queryFn: getUserDetails,
+  });
+
   return (
-    <div
-      className={`flex overflow-hidden relative pl-[45px] sm:pl-[75px] h-screen`}
+    <distributorContext.Provider
+      value={{ userDetails, setShowSidebar, selectedLead, setSelectedLead }}
     >
-      <div
-        className={`${
-          expanded ? "w-[250px] backdrop-blur-md" : "w-[40px] sm:w-[70px]"
-        } transition-all h-screen z-20 bg-[#00000012] flex flex-col justify-between fixed top-0 left-0 p-1`}
-      >
-        <div className="w-full flex flex-col gap-3 mt-4">
-          {panels?.map((item) => {
-            return (
-              <div
-                onClick={() => onSelectPanel(item.value)}
-                className={`w-full overflow-hidden flex  cursor-pointer transition-all hover:bg-white py-2 px-1 rounded-md  ${
-                  expanded
-                    ? "justify-start gap-3 items-center"
-                    : "flex-col items-center delay-150"
-                } ${
-                  selectedPanel == item.value
-                    ? "bg-white hover:bg-gray-400"
-                    : ""
-                }`}
-              >
-                {getIcon(item.value)}
-                <span
-                  className={`${
-                    expanded ? "text-sm" : "text-[10px] hidden sm:block"
-                  } text-center text-wrap text-orange-900 font-semibold mt-1 transition-all`}
-                >
-                  {item.name}
-                </span>
-              </div>
-            );
-          })}
+      {isLoading ? (
+        <div className="w-full mt-5 flex justify-center flex-col items-center">
+          <img src="/loader.gif" className="h-12 w-12" />
+          <span className="text-gray-500 text-xl">Feching user info...</span>
         </div>
-
-        <div className="w-full flex flex-col gap-2 items-center">
+      ) : (
+        userDetails && (
           <div
-            onClick={onLogOut}
-            className={`w-full overflow-hidden flex  cursor-pointer transition-all bg-white hover:bg-gray-200 py-2 px-1 rounded-md  ${
-              expanded
-                ? "justify-start gap-3 items-center"
-                : "flex-col items-center delay-150"
-            }`}
+            className={`flex flex-col items-center overflow-hidden bg-blue-100/40 w-full h-screen relative`}
+            // className={`flex overflow-hidden relative pl-[45px] sm:pl-[75px] h-screen`}
           >
-            <IoIosLogOut className="text-2xl text-orange-700" />
-            <span
-              className={`${
-                expanded ? "text-sm" : "text-[10px] hidden sm:block"
-              } text-center text-wrap text-orange-900 font-semibold mt-1 transition-all`}
+            <div className="w-full h-[50px] bg-white shadow-md top-0 flex items-center">
+              <Header />
+            </div>
+
+            <div
+              style={{ height: mainPanelHeight }}
+              className="w-full flex overflow-auto"
             >
-              Logout
-            </span>
+              <div
+                className={` bg-[#fffafa73] md:bg-[#0000000d]  z-[1] lg:z-0 ${
+                  isSmallDevice
+                    ? showSidebar
+                      ? "w-[250px] fixed top-0 left-0 backdrop-blur-lg"
+                      : "w-[0px] fixed top-0 left-0"
+                    : expanded
+                    ? "w-[300px] sticky top-0"
+                    : "w-[60px] sticky top-0"
+                }  flex items-center justify-center overflow-hidden transition-all h-full`}
+              >
+                <button
+                  className="lg:hidden absolute top-1 right-0 bg-colorPrimary rounded-l-md py-[2px] px-2 text-white flex items-center gap-1"
+                  onClick={() => setShowSidebar(false)}
+                >
+                  <IoMdClose />
+                  Close
+                </button>
+
+                <div
+                  className={`w-full absolute top-2 left-0 flex ${
+                    !isSmallDevice && !expanded
+                      ? "justify-center"
+                      : "justify-end"
+                  }`}
+                >
+                  <button
+                    className={`hidden lg:flex h-[30px] w-[30px] justify-center items-center gap-1 text-gray-700`}
+                    onClick={() => setExpanded(!expanded)}
+                  >
+                    <MdArrowForward className="text-2xl" />
+                  </button>
+                </div>
+
+                <div
+                  className={`${
+                    isSmallDevice ? "w-full h-full py-8" : "w-full h-[90%]"
+                  }  transition-all rounded-md p-1 flex flex-col justify-between `}
+                >
+                  <div className="w-full flex flex-col gap-3 mt-4">
+                    {panels?.map((item) => {
+                      return (
+                        <div
+                          onClick={() => onSelectPanel(item.value)}
+                          className={`w-full overflow-hidden flex  cursor-pointer transition-all hover:bg-white py-2 px-1 rounded-md  ${
+                            expanded
+                              ? "justify-start gap-3 items-center"
+                              : "flex-col items-center delay-150"
+                          } ${
+                            selectedPanel == item.value
+                              ? "bg-white hover:bg-gray-400"
+                              : ""
+                          }`}
+                        >
+                          {getIcon(item.value)}
+                          <span
+                            className={`${
+                              expanded
+                                ? "text-sm"
+                                : "text-[10px] hidden sm:block"
+                            } text-center text-wrap text-orange-900 font-semibold mt-1 transition-all`}
+                          >
+                            {item.name}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <div className="w-full flex flex-col gap-2 items-center">
+                    <div
+                      onClick={onLogOut}
+                      className={`w-full overflow-hidden flex  cursor-pointer transition-all bg-white hover:bg-gray-200 py-2 px-1 rounded-md  ${
+                        expanded
+                          ? "justify-start gap-3 items-center"
+                          : "flex-col items-center delay-150"
+                      }`}
+                    >
+                      <IoIosLogOut className="text-2xl text-orange-700" />
+                      <span
+                        className={`${
+                          expanded ? "text-sm" : "text-[10px] hidden sm:block"
+                        } text-center text-wrap text-orange-900 font-semibold mt-1 transition-all`}
+                      >
+                        Logout
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className={`h-full flex-col relative w-full`}>
+                <div className="w-full h-full">
+                  {selectedPanel == "profile" && <Profile />}
+                  {selectedPanel == "leads&Enquiries" && <LeadsView />}
+                  {/* {selectedPanel == "my_products" && <ProductsPage />} */}
+                  {/* {selectedPanel == "deals" && <LeadsView place={"deals"} />} */}
+                  {/* {selectedPanel == "prospects" && (
+                    <LeadsView place="prospects" />
+                  )} */}
+                </div>
+              </div>
+            </div>
           </div>
-          {/* <img src="/expendico.png" /> */}
-        </div>
-      </div>
-
-      <div className="w-full h-full overflow-auto flex flex-1 flex-col relative">
-        <RxHamburgerMenu
-          className="text-2xl text-blue-900 cursor-pointer absolute top-3 right-3"
-          onClick={() => setExpanded(!expanded)}
-        />
-
-        <div className="w-full h-full">
-          <h1 className="text-gray-700 text-2xl text-center">
-            Distributor Panel
-          </h1>
-          {selectedPanel == "profile"}
-        </div>
-      </div>
-    </div>
+        )
+      )}
+    </distributorContext.Provider>
   );
 };
 
 export default Home;
+
+// fixed top-0 left-0 p-1

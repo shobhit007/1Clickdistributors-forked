@@ -3,7 +3,7 @@ import AnimatedModal from "@/components/utills/AnimatedModal";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { MdClose, MdOutlineVerified } from "react-icons/md";
 import ViewUploadedPicture from "./ViewUploadedPicture";
-import manufacturerContext from "@/lib/context/manufacturerContext";
+import distributorContext from "@/lib/context/distributorContext";
 import { toast } from "react-toastify";
 import { uploadMediaFileToDB } from "@/lib/commonFunctions";
 import { useQueryClient } from "@tanstack/react-query";
@@ -12,7 +12,7 @@ const TaxDetails = ({ showFilePreview }) => {
   const queryClient = useQueryClient();
   const [fileToShow, setFileToShow] = useState(null);
   const { open, close, modalOpen } = useModal();
-  const { userDetails } = useContext(manufacturerContext);
+  const { userDetails } = useContext(distributorContext);
   const inputFileRef = useRef({});
   const [loading, setLoading] = useState(false);
   const [taxDetails, setTaxDetails] = useState({

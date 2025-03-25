@@ -1,4 +1,4 @@
-import manufacturerContext from "@/lib/context/manufacturerContext";
+import distributorContext from "@/lib/context/distributorContext";
 import React, { useContext, useEffect, useState } from "react";
 import CustomInput from "@/components/uiCompoents/CustomInput";
 import {
@@ -18,7 +18,7 @@ const rowItemStyle = "w-full md:w-[46%]";
 const iconStyle = "text-[10px]";
 
 const BusinessDetails = () => {
-  const { userDetails } = useContext(manufacturerContext);
+  const { userDetails } = useContext(distributorContext);
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const queryClient = useQueryClient();

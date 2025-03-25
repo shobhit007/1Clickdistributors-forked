@@ -1,4 +1,4 @@
-import manufacturerContext from "@/lib/context/manufacturerContext";
+import distributorContext from "@/lib/context/distributorContext";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import CustomInput from "../uiCompoents/CustomInput";
 import { FaPhoneAlt } from "react-icons/fa";
@@ -28,7 +28,7 @@ const rowItemStyle = "w-full md:w-[46%]";
 const iconStyle = "text-[10px]";
 
 const Profile = () => {
-  const { userDetails } = useContext(manufacturerContext);
+  const { userDetails } = useContext(distributorContext);
   const [isEditing, setIsEditing] = useState(false);
   const [showSections, setShowSections] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -55,6 +55,7 @@ const Profile = () => {
         password: userDetails.password,
         city: userDetails.city,
         designation: userDetails?.designation,
+        email_2: userDetails?.email_2,
       });
     }
   }, [userDetails]);
@@ -177,7 +178,7 @@ const Profile = () => {
 
               <div className="flex flex-col gap-[2px]">
                 <div className="flex gap-2 items-center">
-                  <span className="text-gray-500 font-semibold text-base">
+                  <span className="text-gray-500 font-semibold text-base capitalize">
                     {userDetails?.full_name}
                   </span>
                   <Tooltip
@@ -202,7 +203,7 @@ const Profile = () => {
                   />
                 </div>
                 <span className="text-sm text-orange-800 bg-orange-200/30 py-[1px] px-2 rounded-full w-fit">
-                  Manufacturer
+                  Distributor
                 </span>
                 <span className="text-sm text-[#1b4c7d] rounded-full flex gap-1 items-center">
                   <CiLocationOn />

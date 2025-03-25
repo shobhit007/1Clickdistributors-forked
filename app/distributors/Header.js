@@ -1,9 +1,8 @@
-import manufacturerContext from "@/lib/context/manufacturerContext";
+import distributorContext from "@/lib/context/distributorContext";
 import Image from "next/image";
 import React, { useContext } from "react";
 import { FaPhone, FaRegUser, FaWhatsapp } from "react-icons/fa6";
 import { RxDashboard, RxHamburgerMenu } from "react-icons/rx";
-import Tooltip from "@mui/material/Tooltip";
 
 import {
   Popover,
@@ -14,7 +13,9 @@ import { MdCopyAll, MdEmail } from "react-icons/md";
 import { copyToClipboard } from "@/lib/commonFunctions";
 
 const Header = () => {
-  const { userDetails, setShowSidebar } = useContext(manufacturerContext);
+  const { userDetails, setShowSidebar } = useContext(distributorContext);
+
+  console.log("userdetails", userDetails);
 
   return (
     <div className="w-full flex justify-between  px-4 py-1 items-center">
@@ -116,7 +117,9 @@ const Header = () => {
 
         <div className="hidden md:flex flex-col text-xs items-start font-semibold text-slate-600 mr-6">
           <span className="">Hi, Welcome</span>
-          <span className="-mt-[2px] font-bold capitalize text-slate-800 text-sm">{userDetails?.full_name}</span>
+          <span className="-mt-[2px] font-bold capitalize text-slate-800 text-sm">
+            {userDetails?.full_name}
+          </span>
         </div>
       </div>
     </div>

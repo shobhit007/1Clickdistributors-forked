@@ -38,8 +38,6 @@ input[type="number"] {
   height: auto !important;
 }
 
-
-
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -96,12 +94,6 @@ input[type="number"] {
   }
 }
 
-
-
-
-
-
-
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -109,4 +101,15 @@ input[type="number"] {
   body {
     @apply bg-background text-foreground;
   }
+}
+
+.swiper-pagination-bullet {
+  background-color: #b8b2b2d0 !important;
+  border: 1px solid black;
+  opacity: 1 !important;
+}
+
+.swiper-pagination-bullet-active {
+  background-color: #fff !important;
+  border: 1px solid black;
 }

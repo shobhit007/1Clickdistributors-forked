@@ -3,7 +3,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { MdFilter1, MdSearch } from "react-icons/md";
 import { FaFilter, FaFirstAid } from "react-icons/fa";
 import { Tooltip } from "react-tooltip";
-import manufacturerContext from "@/lib/context/manufacturerContext";
+import distributorContext from "@/lib/context/distributorContext";
 import { MdOutlineMailOutline } from "react-icons/md";
 import { CiLocationOn } from "react-icons/ci";
 import LeadDetailView from "./LeadDetailView";
@@ -23,7 +23,7 @@ const LeadsView = ({ place }) => {
   const [loading, setLoading] = useState(false);
   const [leads, setLeads] = useState(null);
   const [isSmallDevice, setIsSmallDevice] = useState(false);
-  const { selectedLead, setSelectedLead } = useContext(manufacturerContext);
+  const { selectedLead, setSelectedLead } = useContext(distributorContext);
 
   useEffect(() => {
     const check = () => {
@@ -45,7 +45,7 @@ const LeadsView = ({ place }) => {
     try {
       setLoading(true);
       const token = localStorage.getItem("authToken");
-      let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/service/manufacturer/getAllocatedLeads`;
+      let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/service/distributor/getAllocatedLeads`;
       const response = await fetch(API_URL, {
         method: "POST",
         headers: {
@@ -67,9 +67,9 @@ const LeadsView = ({ place }) => {
 
         let filtered = data.data;
         if (place == "prospects") {
-          filtered = filtered.filter((item) => item.disposition == "prospect");
+          filtered = filtered.filter((item) => item.distributor_disposition == "prospect");
         } else if (place == "deals") {
-          filtered = filtered.filter((item) => item.disposition == "deal");
+          filtered = filtered.filter((item) => item.distributor_disposition == "deal");
         }
         return filtered;
       } else {
@@ -125,7 +125,12 @@ const LeadsView = ({ place }) => {
         }  h-full flex flex-col gap-2 items-center`}
       >
         {loading && <img src="/loader.gif" className="h-8 w-8" />}
-        <ListView leads={leads || []} setLeads={setLeads} originalData={data} />
+        <ListView
+          leads={leads || []}
+          setLeads={setLeads}
+          originalData={data}
+          refetch={refetch}
+        />
       </div>
 
       <div
@@ -150,9 +155,9 @@ const LeadsView = ({ place }) => {
 
 export default LeadsView;
 
-const ListView = ({ leads, setLeads, originalData }) => {
+const ListView = ({ leads, setLeads, originalData, refetch }) => {
   const [leadTypFilter, setLeadTypFilter] = useState("all");
-  const { selectedLead, setSelectedLead } = useContext(manufacturerContext);
+  const { selectedLead, setSelectedLead } = useContext(distributorContext);
   const [showFilters, setShowFilters] = useState(false);
   const { open, close, modalOpen } = useModal();
   const [appliedFilters, setAppliedFilters] = useState({});
@@ -210,15 +215,15 @@ const ListView = ({ leads, setLeads, originalData }) => {
         // Condition 2: Match `Dispositions`
         if (appliedFilters?.dispositions?.length) {
           dispositionsCheckPass = appliedFilters?.dispositions?.includes(
-            lead.disposition
+            lead.distributor_disposition
           );
         }
 
         // condition 3: if leadTypFilter is applied
         if (leadTypFilter == "read") {
-          leadTypeCheckPass = lead?.readStatus == "read" && !lead?.archived;
+          leadTypeCheckPass = lead?.distributor_readStatus == "read" && !lead?.archived;
         } else if (leadTypFilter == "unread") {
-          leadTypeCheckPass = !lead?.readStatus && !lead?.archived;
+          leadTypeCheckPass = !lead?.distributor_readStatus && !lead?.archived;
         } else if (leadTypFilter == "archived") {
           leadTypeCheckPass = lead?.archived == true;
         } else {
@@ -254,7 +259,7 @@ const ListView = ({ leads, setLeads, originalData }) => {
 
     data.forEach((item) => {
       count["all"]++;
-      if (item.readStatus == "read") {
+      if (item.distributor_readStatus == "read") {
         count["read"]++;
       } else {
         count["unread"]++;
@@ -289,7 +294,8 @@ const ListView = ({ leads, setLeads, originalData }) => {
 
       <div className="w-full flex flex-col gap-1">
         <h1 className="text-lg font-semibold text-gray-700">
-          Total Leads ({leads.length})
+          Total Leads ({leads.length}){" "}
+          <button onClick={refetch}>REfetch</button>
         </h1>
         <div className="w-full flex items-center gap-3">
           <div className="w-[220px] border flex items-center px-1 justify-between border-orange-400 rounded overflow-hidden h-auto">
@@ -370,17 +376,17 @@ const ListView = ({ leads, setLeads, originalData }) => {
                       <MdOutlineMailOutline />
                       {lead?.email || "...."}
                     </span>
-                    {lead?.disposition && (
+                    {lead?.distributor_disposition && (
                       <span
                         className="text-white w-fit px-3 rounded text-[11px] mt-[2px] capitalize"
                         style={{
                           backgroundColor:
                             serviceDispositionColors[
-                              lead.disposition || "gray"
+                              lead.distributor_disposition || "gray"
                             ],
                         }}
                       >
-                        {formatValue(lead.disposition)}
+                        {formatValue(lead.distributor_disposition)}
                       </span>
                     )}
                   </div>

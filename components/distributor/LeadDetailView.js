@@ -1,4 +1,4 @@
-import manufacturerContext from "@/lib/context/manufacturerContext";
+import distributorContext from "@/lib/context/distributorContext";
 import { dispositions, vibrantColors } from "@/lib/data/commonData";
 import React, { useContext, useEffect, useState } from "react";
 import { IoArchiveOutline, IoCallOutline } from "react-icons/io5";
@@ -44,7 +44,7 @@ const LeadDetailView = ({
   jumpToPreviousLead,
   jumpToNextLead,
 }) => {
-  const { selectedLead, setSelectedLead } = useContext(manufacturerContext);
+  const { selectedLead, setSelectedLead } = useContext(distributorContext);
   const { open, close, modalOpen } = useModal();
   const [updateLoading, setUpdateLoading] = useState(false);
   const queryClient = useQueryClient();
@@ -278,13 +278,13 @@ const LeadDetailView = ({
               <div className={`${boxStyle}`}>
                 <span className={`${keyStyle}`}>Disposition:</span>
                 <span className={`${valueStyle} capitalize`}>
-                  {formatValue(selectedLead?.disposition)}
+                  {formatValue(selectedLead?.distributor_disposition)}
                 </span>
               </div>
               <div className={`${boxStyle}`}>
                 <span className={`${keyStyle}`}>Sub Disposition:</span>
                 <span className={`${valueStyle} capitalize`}>
-                  {formatValue(selectedLead?.subDisposition) || "_"}
+                  {formatValue(selectedLead?.distributor_subDisposition) || "_"}
                 </span>
               </div>
             </div>
@@ -364,7 +364,7 @@ const ImageSwiper = ({ images }) => {
 };
 
 const UpdateLeadModal = ({ updateLoading, setUpdateLoading, close }) => {
-  const { selectedLead } = useContext(manufacturerContext);
+  const { selectedLead } = useContext(distributorContext);
   const [selectedDisposition, setSelectedDisposition] = useState(null);
   const [remarks, setRemarks] = useState(null);
   const dispositions = service_manufacturer_dispositions;
@@ -374,8 +374,10 @@ const UpdateLeadModal = ({ updateLoading, setUpdateLoading, close }) => {
 
   useEffect(() => {
     if (selectedLead) {
-      setSelectedDisposition(selectedLead?.disposition || null);
-      setSelectedSubDisposition(selectedLead?.subDisposition || null);
+      setSelectedDisposition(selectedLead?.distributor_disposition || null);
+      setSelectedSubDisposition(
+        selectedLead?.distributor_subDisposition || null
+      );
     }
   }, [selectedLead]);
 
@@ -401,7 +403,7 @@ const UpdateLeadModal = ({ updateLoading, setUpdateLoading, close }) => {
       }
       setUpdateLoading(true);
       const token = localStorage.getItem("authToken");
-      let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/service/manufacturer/updateAllocatedLead`;
+      let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/service/distributor/updateAllocatedLead`;
       const body = {
         disposition: selectedDisposition,
         subDisposition: selectedSubDisposition || null,
