@@ -38,6 +38,7 @@ import "swiper/css/autoplay";
 import "swiper/css/effect-fade";
 import "swiper/css/pagination";
 import ManualSwiper from "./ManualSwiper";
+import { CiMinimize2 } from "react-icons/ci";
 
 const LeadDetailView = ({
   isSmallDevice,
@@ -153,7 +154,13 @@ const LeadDetailView = ({
   return (
     <div className="w-full h-full p-0 md:p-2 lg:pt-5">
       <AnimatedModal open={open} close={close} modalOpen={modalOpen}>
-        <div className="min-w-[20vw] min-h-[50vh] bg-white rounded-md p-4">
+        <div className="min-w-[45vw] min-h-[60vh] bg-white rounded-md p-4 relative">
+          <button
+            onClick={close}
+            className="h-8 w-8 bg-gray-400/20 absolute top-0 right-0 flex items-center justify-center"
+          >
+            <CiMinimize2 className="text-slate-700 text-xl" />
+          </button>
           <UpdateLeadModal
             updateLoading={updateLoading}
             setUpdateLoading={setUpdateLoading}
