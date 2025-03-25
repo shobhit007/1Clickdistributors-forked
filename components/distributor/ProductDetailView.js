@@ -1,0 +1,681 @@
+import React, { useContext, useEffect, useRef, useState } from "react";
+import {
+  MdArrowBack,
+  MdEdit,
+  MdOutlineCurrencyRupee,
+  MdOutlineDescription,
+} from "react-icons/md";
+import CustomInput from "../uiCompoents/CustomInput";
+import { CiLocationOn, CiShoppingBasket } from "react-icons/ci";
+import { SiBrandfolder, SiCodeclimate } from "react-icons/si";
+import { IoCartOutline } from "react-icons/io5";
+import { GiBookshelf, GiSaltShaker } from "react-icons/gi";
+import { RxDimensions } from "react-icons/rx";
+import { IoIosResize } from "react-icons/io";
+import { FaBowlFood } from "react-icons/fa6";
+import { GrLicense } from "react-icons/gr";
+import { uploadFile, uploadMediaFileToDB } from "@/lib/commonFunctions";
+import { toast } from "react-toastify";
+import CustomSelector from "../uiCompoents/CustomSelector";
+import { units } from "@/lib/data/servicePanelData";
+import { useQueryClient } from "@tanstack/react-query";
+import manufacturerContext from "@/lib/context/manufacturerContext";
+
+const ProductDetailView = ({ product, close }) => {
+  const [selectedView, setSelectedView] = useState("specifications");
+  const [showEditView, setShowEditView] = useState(false);
+  const exempted = ["image", "description"];
+  return (
+    <div className="w-full h-full flex flex-col gap-2 justify-center ">
+      <div className="flex md:hidden justify-start items-center px-3">
+        <MdArrowBack
+          className="text-orange-800 text-xl cursor-pointer"
+          onClick={close}
+        />
+      </div>
+      <div className="h-[94%] mt-1 w-full bg-white flex flex-col p-1 relative rounded-md">
+        {showEditView ? (
+          <EditProduct data={product} close={() => setShowEditView(false)} />
+        ) : (
+          <>
+            <div className="w-full flex bg-orange-500/10">
+              <div
+                onClick={() => setSelectedView("specifications")}
+                className={`w-[50%] h-fit p-2 flex justify-center cursor-pointer ${
+                  selectedView == "specifications"
+                    ? "bg-colorPrimary text-white hover:bg-colorPrimary/80"
+                    : "bg-transparent text-orange-800 hover:bg-colorPrimary/30"
+                }`}
+              >
+                <h1 className="uppercase text-sm md:text-base">
+                  specifications
+                </h1>
+              </div>
+              <div
+                onClick={() => setSelectedView("description")}
+                className={`w-[50%] h-fit p-2 flex justify-center cursor-pointer ${
+                  selectedView == "description"
+                    ? "bg-colorPrimary text-white hover:bg-colorPrimary/80"
+                    : "bg-transparent text-orange-800 hover:bg-colorPrimary/10"
+                }`}
+              >
+                <h1 className="uppercase text-sm md:text-base">Description</h1>
+              </div>
+            </div>
+            <div className="flex flex-1 w-full overflow-auto flex-col mt-4">
+              {selectedView == "specifications" &&
+                Object.keys(product || {})
+                  .filter(
+                    (key) =>
+                      typeof product[key] != "object" &&
+                      !exempted?.includes(key)
+                  )
+                  .map((key) => {
+                    return (
+                      <div className="flex flex-col sm:flex-row odd:bg-blue-50 w-full items-start text-xs md:text-sm px-4 py-2">
+                        <span className="sm:w-[40%] text-wrap overflow-hidden font-semibold text-gray-600 uppercase">
+                          {key}:
+                        </span>
+                        <span className="sm:w-[60%] text-wrap overflow-hidden text-gray-500 capitalize">
+                          {product[key]}
+                        </span>
+                      </div>
+                    );
+                  })}
+
+              {selectedView == "description" && (
+                <div>
+                  <p className="text-gray-600 px-4 py-2">
+                    {product.description}
+                  </p>
+                </div>
+              )}
+            </div>
+            <button
+              onClick={() => {
+                setShowEditView(true), console.log("i am here");
+              }}
+              className="absolute bottom-0 right-0 bg-blue-500 p-1 rounded-tl-md z-[1]"
+            >
+              <MdEdit className="text-lg text-white" />
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default ProductDetailView;
+
+export const getIcon = (key) => {
+  const iconStyle = "text-base text-white";
+  switch (key) {
+    case "title":
+      return <CiShoppingBasket className={`${iconStyle}`} />;
+    case "brand":
+      return <SiBrandfolder className={`${iconStyle}`} />;
+    case "category":
+      return <IoCartOutline className={`${iconStyle}`} />;
+    case "subCategory":
+      return <IoCartOutline className={`${iconStyle}`} />;
+    case "ingredients":
+      return <GiSaltShaker className={`${iconStyle}`} />;
+    case "MRP":
+      return <MdOutlineCurrencyRupee className={`${iconStyle}`} />;
+    case "material":
+      return <SiCodeclimate className={`${iconStyle}`} />;
+    case "thickness":
+      return <SiCodeclimate className={`${iconStyle}`} />;
+    case "dimension":
+      return <RxDimensions className={`${iconStyle}`} />;
+    case "quantityOrSize":
+      return <IoIosResize className={`${iconStyle}`} />;
+    case "foodType":
+      return <FaBowlFood className={`${iconStyle}`} />;
+    case "description":
+      return <MdOutlineDescription className={`${iconStyle}`} />;
+    case "shelfLife":
+      return <GiBookshelf className={`${iconStyle}`} />;
+    case "FSSAI_Lic_No":
+      return <GrLicense className={`${iconStyle}`} />;
+    case "countryOfOrigin":
+      return <CiLocationOn className={`${iconStyle}`} />;
+
+    default:
+      break;
+  }
+};
+
+export const EditProduct = ({ data, close }) => {
+  const [uploading, setUploading] = useState(false);
+  const queryClient = useQueryClient();
+  const { userDetails } = useContext(manufacturerContext);
+
+  const productSchema = {
+    title: "",
+    brand: "",
+    category: "",
+    subCategory: "",
+    ingredients: "",
+    MRP: null,
+    material: null,
+    thickness: null,
+    dimension: null,
+    measuringUnit: "",
+    quantityOrSize: "",
+    foodType: "",
+    description: "",
+    shelfLife: "",
+    FSSAI_Lic_No: null,
+    countryOfOrigin: "",
+  };
+  const productFieldNames = {
+    title: "Prduct title",
+    brand: "Brand",
+    category: "Product Category",
+    subCategory: "Sub Category",
+    ingredients: "Ingredients",
+    MRP: "MRP",
+    material: "Material",
+    thickness: "Thickness",
+    dimension: "Dimensions",
+    measuringUnit: "Measuring unit",
+    quantityOrSize: "Quantity or Size",
+    foodType: "Food Type",
+    description: "Description",
+    shelfLife: "Shelf Life",
+    FSSAI_Lic_No: "FSSAI License no",
+    countryOfOrigin: "Coutry of origin",
+  };
+  const [product, setProduct] = useState(productSchema);
+  const inputRef = useRef(null);
+  const [file, setFile] = useState(null);
+  const [otherDataFields, setOtherDataFields] = useState({});
+
+  const handleOtherFieldsChange = (value, key) => {
+    setOtherDataFields((pre) => ({ ...pre, [key]: value }));
+  };
+
+  const simpleFields = [
+    "title",
+    "brand",
+    "ingredients",
+    "material",
+    "dimension",
+    "description",
+    "countryOfOrigin",
+    "thickness",
+  ];
+
+  const simpleFieldsWithNum = ["FSSAI_Lic_No", "MRP", "quantityOrSize"];
+  const selectors = {
+    category: [
+      {
+        label: "Fitness",
+        value: "fitness",
+        subCategory: [
+          { label: "Gym Equipment", value: "gym_equipment" },
+          { label: "Yoga Mats", value: "yoga_mats" },
+          { label: "Dumbbells", value: "dumbbells" },
+          { label: "Supplements", value: "supplements" },
+          { label: "Wearables", value: "wearables" },
+          { label: "Others", value: "others" },
+        ],
+      },
+      {
+        label: "Electronics",
+        value: "electronics",
+        subCategory: [
+          { label: "Mobile Phones", value: "mobile_phones" },
+          { label: "Laptops", value: "laptops" },
+          { label: "Headphones", value: "headphones" },
+          { label: "Smartwatches", value: "smartwatches" },
+          { label: "Gaming Consoles", value: "gaming_consoles" },
+          { label: "Others", value: "others" },
+        ],
+      },
+      {
+        label: "Fashion",
+        value: "fashion",
+        subCategory: [
+          { label: "Men's Clothing", value: "mens_clothing" },
+          { label: "Women's Clothing", value: "womens_clothing" },
+          { label: "Footwear", value: "footwear" },
+          { label: "Accessories", value: "accessories" },
+          { label: "Jewelry", value: "jewelry" },
+          { label: "Others", value: "others" },
+        ],
+      },
+      {
+        label: "Home & Kitchen",
+        value: "home_kitchen",
+        subCategory: [
+          { label: "Furniture", value: "furniture" },
+          { label: "Kitchen Appliances", value: "kitchen_appliances" },
+          { label: "Cookware", value: "cookware" },
+          { label: "Home Decor", value: "home_decor" },
+          { label: "Storage & Organization", value: "storage_organization" },
+          { label: "Others", value: "others" },
+        ],
+      },
+      {
+        label: "Beauty & Personal Care",
+        value: "beauty_personal_care",
+        subCategory: [
+          { label: "Skincare", value: "skincare" },
+          { label: "Haircare", value: "haircare" },
+          { label: "Makeup", value: "makeup" },
+          { label: "Fragrances", value: "fragrances" },
+          { label: "Grooming Essentials", value: "grooming_essentials" },
+          { label: "Others", value: "others" },
+        ],
+      },
+      {
+        label: "Sports & Outdoors",
+        value: "sports_outdoors",
+        subCategory: [
+          { label: "Camping & Hiking", value: "camping_hiking" },
+          { label: "Cycling", value: "cycling" },
+          { label: "Team Sports", value: "team_sports" },
+          { label: "Water Sports", value: "water_sports" },
+          { label: "Outdoor Gear", value: "outdoor_gear" },
+          { label: "Others", value: "others" },
+        ],
+      },
+      {
+        label: "Automotive",
+        value: "automotive",
+        subCategory: [
+          { label: "Car Accessories", value: "car_accessories" },
+          { label: "Bike Accessories", value: "bike_accessories" },
+          { label: "Car Maintenance", value: "car_maintenance" },
+          { label: "Motorcycle Gear", value: "motorcycle_gear" },
+          { label: "Tires & Wheels", value: "tires_wheels" },
+          { label: "Others", value: "others" },
+        ],
+      },
+      {
+        label: "Toys & Games",
+        value: "toys_games",
+        subCategory: [
+          { label: "Board Games", value: "board_games" },
+          { label: "Action Figures", value: "action_figures" },
+          { label: "Educational Toys", value: "educational_toys" },
+          { label: "Dolls & Plush Toys", value: "dolls_plush_toys" },
+          { label: "Outdoor Play", value: "outdoor_play" },
+          { label: "Others", value: "others" },
+        ],
+      },
+      {
+        label: "Books & Stationery",
+        value: "books_stationery",
+        subCategory: [
+          { label: "Fiction", value: "fiction" },
+          { label: "Non-Fiction", value: "non_fiction" },
+          { label: "Educational Books", value: "educational_books" },
+          { label: "Notebooks & Journals", value: "notebooks_journals" },
+          { label: "Art Supplies", value: "art_supplies" },
+          { label: "Others", value: "others" },
+        ],
+      },
+      {
+        label: "Health & Wellness",
+        value: "health_wellness",
+        subCategory: [
+          { label: "Vitamins & Supplements", value: "vitamins_supplements" },
+          { label: "Medical Equipment", value: "medical_equipment" },
+          { label: "Mental Wellness", value: "mental_wellness" },
+          { label: "Pain Relief", value: "pain_relief" },
+          { label: "Weight Management", value: "weight_management" },
+          { label: "Others", value: "others" },
+        ],
+      },
+      {
+        label: "Other",
+        value: "others",
+        subCategory: [{ label: "Other", value: "others" }],
+      },
+    ],
+    subCategory: [
+      { label: "Gym Equipment", value: "gym_equipment" },
+      { label: "Yoga Mats", value: "yoga_mats" },
+      { label: "Dumbbells", value: "dumbbells" },
+      { label: "Supplements", value: "supplements" },
+      { label: "Wearables", value: "wearables" },
+    ],
+    measuringUnit: units,
+  };
+
+  useEffect(() => {
+    if (data) {
+      setProduct((pre) => ({ ...pre, ...data }));
+    }
+  }, [data]);
+
+  const isValidImageSize = async (file) => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.src = URL.createObjectURL(file);
+      img.onload = () => {
+        const { width, height } = img;
+        console.log("width, height", width, height);
+        URL.revokeObjectURL(img.src); // Clean up object URL
+        if (width >= 500 && width <= 1025 && height >= 500 && height <= 1025) {
+          resolve(true);
+        } else {
+          resolve(false);
+        }
+      };
+      img.onerror = () => reject(new Error("Failed to load image"));
+    });
+  };
+
+  const onChangeFile = async (e) => {
+    let file = e.target.files[0];
+    if (!file) {
+      return;
+    }
+
+    // const isValid = await isValidImageSize(file);
+
+    // if (!isValid) {
+    //   toast.error("Image dimensions must be between 500x500 and 1000x1000.");
+    //   return;
+    // }
+
+    if (inputRef?.current?.value) {
+      inputRef.current.value = "";
+    }
+    const tempURL = URL.createObjectURL(file);
+    if (tempURL) {
+      setFile(file);
+      setProduct((pre) => ({ ...pre, tempImageURL: tempURL }));
+    } else {
+      toast.error(message || "Error uploading file");
+    }
+  };
+
+  const onChangeValue = (value, key) => {
+    setProduct((pre) => ({ ...pre, [key]: value }));
+  };
+
+  const rowItemStyle = "w-full my-1";
+
+  const feildsValidated = () => {
+    if (!product.title || product.title?.length < 3) {
+      toast.error("Product title must be atleast 3 characters long");
+      return false;
+    }
+    if (product.MRP < 1) {
+      toast.error("MRP must be greater than 0");
+      return false;
+    }
+    if (!product.brand || product.brand?.length < 3) {
+      toast.error("Brand name must be atleast 3 characters long");
+      return false;
+    }
+    if (!product.description || product.description?.length < 10) {
+      toast.error("Description must be atleast 10 characters long");
+      return false;
+    }
+
+    return true;
+  };
+
+  const updateDetails = async () => {
+    try {
+      // setIsEditing(false);
+
+      // if (!feildsValidated()) {
+      //   return;
+      // }
+
+      let body = { ...product };
+
+      if (body.category == "others") {
+        body.category = otherDataFields?.category;
+        body.subCategory = otherDataFields?.subCategory;
+      } else if (body.subCategory == "others") {
+        body.subCategory = otherDataFields?.subCategory;
+      }
+
+      return console.log(body);
+
+      setUploading(true);
+      if (file) {
+        const fileExtension = file.name.split(".").pop();
+        const fileName = `${Date.now()}.${fileExtension}`;
+        const storagePath = `userProducts/${userDetails?.docId}/${fileName}`;
+        const uploadRes = await uploadMediaFileToDB(file, storagePath);
+        console.log("upload res is", uploadRes);
+        if (uploadRes.success) {
+          let { downloadURL } = uploadRes;
+          body.image = downloadURL;
+          delete body.tempImageURL;
+          setFile(null);
+        } else {
+          throw new Error("Failed to upload image");
+        }
+      }
+
+      // uncomment later
+      // if (file) {
+      //   console.log("file is", file);
+      //   const resp = await uploadMediaFileToDB(file, `/products/${file.name}`);
+      //   console.log("resp", resp);
+      //   body.image = resp.downloadURL;
+      //   delete body.tempImageURL;
+      // }
+
+      delete body.tempImageURL;
+      const token = localStorage.getItem("authToken");
+      let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/service/manufacturer/updateProduct`;
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+          "Content-type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(body),
+      });
+      const ress = await response.json();
+      if (ress.success) {
+        toast.success(ress.message);
+        queryClient.invalidateQueries(["userProducts"]);
+        close();
+      } else {
+        toast.error(ress.message || "Something went wrong");
+      }
+    } catch (error) {
+      console.log("error in updatePrduct", error.message);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  useEffect(() => {
+    setOtherDataFields({});
+    setProduct((product) => ({ ...pre, subCategory: "" }));
+  }, [product?.category]);
+
+  const getSubCategories = () => {
+    if (!product.category) {
+      return [];
+    }
+    let category = selectors?.category?.find(
+      (item) => item.value == product.category
+    );
+
+    return category?.subCategory;
+  };
+  return (
+    <div className="w-full h-full flex flex-col">
+      <div className="h-[90%] w-full overflow-auto mt-2 py-2 px-3">
+        <div
+          className={`${rowItemStyle} my-2 pt-3 flex gap-2 flex-col items-start`}
+        >
+          <img
+            src={product.tempImageURL || product.image}
+            className="h-24 w-24 rounded-full shadow-xl border"
+          />
+          <button
+            onClick={() => {
+              inputRef?.current?.click();
+            }}
+            className="text-blue-500 underline"
+          >
+            Change image
+          </button>
+
+          <input
+            accept="image/*"
+            type={"file"}
+            className="hidden"
+            ref={inputRef}
+            onChange={onChangeFile}
+          />
+        </div>
+
+        {Object.keys(productSchema)?.map((key) => {
+          if (
+            simpleFields?.includes(key) ||
+            simpleFieldsWithNum?.includes(key)
+          ) {
+            return (
+              <div className={`${rowItemStyle} my-2 pt-3`}>
+                <CustomInput
+                  label={productFieldNames[key] || key}
+                  value={product[key]}
+                  type={
+                    simpleFieldsWithNum?.includes(key) ? "number" : "string"
+                  }
+                  onChangeValue={(value) => onChangeValue(value, key)}
+                  icon={getIcon(key)}
+                />
+              </div>
+            );
+          } else if (selectors[key]) {
+            if (key == "category" && product.category == "others") {
+              return (
+                <>
+                  <div className={`${rowItemStyle} my-2 pt-3`}>
+                    <CustomSelector
+                      label={productFieldNames[key] || key}
+                      options={
+                        key == "subCategory"
+                          ? product?.category
+                            ? getSubCategories()
+                            : []
+                          : selectors[key]
+                      }
+                      value={product[key]}
+                      onChangeValue={(value) => onChangeValue(value, key)}
+                      icon={getIcon(key)}
+                    />
+                  </div>
+
+                  <div className={`${rowItemStyle} my-2 pt-3`}>
+                    <CustomInput
+                      label={"Type category"}
+                      value={otherDataFields[key]}
+                      type={"string"}
+                      onChangeValue={(value) =>
+                        handleOtherFieldsChange(value, key)
+                      }
+                      icon={getIcon("category")}
+                    />
+                  </div>
+
+                  <div className={`${rowItemStyle} my-2 pt-3`}>
+                    <CustomInput
+                      label={"Type sub category"}
+                      value={otherDataFields["subCategory"]}
+                      type={"string"}
+                      onChangeValue={(value) =>
+                        handleOtherFieldsChange(value, "subCategory")
+                      }
+                      icon={getIcon("subCategory")}
+                    />
+                  </div>
+                </>
+              );
+            }
+
+            if (key == "subCategory" && product["category"] == "others") {
+              return null;
+            }
+
+            if (key == "subCategory" && product["subCategory"] == "others") {
+              return (
+                <>
+                  <div className={`${rowItemStyle} my-2 pt-3`}>
+                    <CustomSelector
+                      label={productFieldNames[key] || key}
+                      options={
+                        key == "subCategory"
+                          ? product?.category
+                            ? getSubCategories()
+                            : []
+                          : selectors[key]
+                      }
+                      value={product[key]}
+                      onChangeValue={(value) => onChangeValue(value, key)}
+                      icon={getIcon(key)}
+                    />
+                  </div>
+
+                  <div className={`${rowItemStyle} my-2 pt-3`}>
+                    <CustomInput
+                      label={"Type sub category"}
+                      value={otherDataFields["subCategory"]}
+                      type={"string"}
+                      onChangeValue={(value) =>
+                        handleOtherFieldsChange(value, "subCategory")
+                      }
+                      icon={getIcon("subCategory")}
+                    />
+                  </div>
+                </>
+              );
+            }
+
+            return (
+              <div className={`${rowItemStyle} my-2 pt-3`}>
+                <CustomSelector
+                  label={productFieldNames[key] || key}
+                  options={
+                    key == "subCategory"
+                      ? product?.category
+                        ? getSubCategories()
+                        : []
+                      : selectors[key]
+                  }
+                  value={product[key]}
+                  onChangeValue={(value) => onChangeValue(value, key)}
+                  icon={getIcon(key)}
+                />
+              </div>
+            );
+          }
+        })}
+      </div>
+
+      <div className="h-[10%] w-full flex justify-center gap-3 items-center">
+        <button
+          onClick={close}
+          className="bg-blue-500 rounded py-1 px-3 h-fit text-white"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={updateDetails}
+          disabled={uploading}
+          className="bg-colorPrimary disabled:bg-colorPrimary/40 disabled:animate-pulse rounded py-1 px-3 h-fit text-white"
+        >
+          {uploading ? "Saving.." : "Save"}
+        </button>
+      </div>
+    </div>
+  );
+};
