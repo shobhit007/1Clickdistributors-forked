@@ -1,54 +1,20 @@
-export const updates = [
-  {
-    disposition: "In Progress",
-    subDisposition: "Under Review",
-    remark: "Team is currently analyzing the requirements",
-    date: "2025-02-25",
-  },
-  {
-    disposition: "Completed",
-    subDisposition: "Approved",
-    remark: "Documentation finalized and signed off",
-    date: "2025-02-24",
-  },
-  {
-    disposition: "Pending",
-    subDisposition: "Awaiting Feedback",
-    remark: "Waiting for client response on initial draft",
-    date: "2025-02-23",
-  },
-  {
-    disposition: "On Hold",
-    subDisposition: "Resource Allocation",
-    remark: "Waiting for additional team members",
-    date: "2025-02-22",
-  },
-  {
-    disposition: "In Progress",
-    subDisposition: "Development",
-    remark: "Coding phase has started",
-    date: "2025-02-21",
-  },
-];
-
 import { convertFromTimeStamp, formatValue } from "@/lib/commonFunctions";
-import manufacturerContext from "@/lib/context/manufacturerContext";
 import { serviceDispositionColors } from "@/lib/data/commonData";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import moment from "moment";
 // UpdatesList.jsx
 import React, { useContext, useState } from "react";
+import { GoDotFill } from "react-icons/go";
 import { toast } from "react-toastify";
 //   import { updates } from './UpdatesData';
 
-const UpdatesList = ({}) => {
+const UpdatesList = ({ selectedLead, type, userName }) => {
+  console.log("type is", type);
   // Colors for different dispositions
-  const { selectedLead, setSelectedLead } = useContext(manufacturerContext);
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
   const getStatusColor = (disposition) => {
     let color = serviceDispositionColors[disposition] || "gray";
-    console.log("coolor", color);
     return color;
   };
 
@@ -56,19 +22,43 @@ const UpdatesList = ({}) => {
     try {
       setLoading(true);
       const token = localStorage.getItem("authToken");
-      let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/service/manufacturer/getAllUpdatesOfLead`;
-      const response = await fetch(API_URL, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          serviceDocId: selectedLead?.serviceDocId,
-          readStatus: selectedLead?.readStatus || false,
-        }),
-      });
+      if (!type) {
+        return;
+      }
+
+      let response;
+      if (type == "manufacturer") {
+        let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/service/manufacturer/getAllUpdatesOfLead`;
+        response = await fetch(API_URL, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            serviceDocId: selectedLead?.serviceDocId,
+            manufacturer_readStatus:
+              selectedLead?.manufacturer_readStatus || false,
+          }),
+        });
+      }
+      if (type == "distributor") {
+        let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/service/distributor/getAllUpdatesOfLead`;
+        response = await fetch(API_URL, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            serviceDocId: selectedLead?.serviceDocId,
+            distributor_readStatus:
+              selectedLead?.distributor_readStatus || false,
+          }),
+        });
+      }
       const data = await response.json();
+      console.log("increasedReadCount", data.increasedReadCount);
 
       if (data.increasedReadCount) {
         queryClient.invalidateQueries(["allocatedLeads"]);
@@ -88,7 +78,7 @@ const UpdatesList = ({}) => {
   };
 
   const { data: allUpdates, refetch } = useQuery({
-    queryKey: ["allUpdatesOfUsers", selectedLead?.serviceDocId],
+    queryKey: ["allUpdatesOfUsers", selectedLead?.serviceDocId, type],
     queryFn: getLeadUpdates,
   });
 
@@ -103,7 +93,7 @@ const UpdatesList = ({}) => {
           <h2 className="text-xl font-bold text-gray-500 mb-4 bg-gradient-to-r from-gray-500 to-gray-700 bg-clip-text text-transparent ">
             Updates Timeline
           </h2>
-          <div className="space-y-6">
+          <div className="space-y-3">
             {allUpdates.map((update, index) => (
               <div
                 key={index}
@@ -117,15 +107,21 @@ const UpdatesList = ({}) => {
                   className={`absolute left-0 top-0 h-full w-1 bg-gradient-to-b}`}
                 ></div>
 
-                <div className="p-3 ml-2">
-                  <div className="flex justify-between items-center mb-1">
-                    <div>
+                <div className="p-2 ml-2">
+                  <span className="text-gray-500 text-xs flex gap-1 items-center">
+                    <GoDotFill />
+                    {update.userType == type
+                      ? userName || update.userType
+                      : selectedLead?.full_name || update.userType}
+                  </span>
+                  <div className="flex justify-between items-center">
+                    <div className="flex gap-1 items-center">
                       <h3 className="text-lg font-bold text-gray-600 group-hover:text-indigo-600 transition-colors duration-300 capitalize">
                         {formatValue(update.disposition)}
                       </h3>
                       {update.subDisposition && (
                         <p className="text-sm text-gray-500 capitalize">
-                          {formatValue(update.subDisposition)}
+                          ({formatValue(update.subDisposition)})
                         </p>
                       )}
                     </div>

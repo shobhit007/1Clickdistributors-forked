@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import React, { useState, useEffect, useRef } from "react";
 import { toast } from "react-toastify";
 
-const ManualSwiper = ({ type = "manufacturer" }) => {
+const ManualSwiper = ({ place = "manufacturer" }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
@@ -15,10 +15,12 @@ const ManualSwiper = ({ type = "manufacturer" }) => {
       let token = localStorage.getItem("authToken");
       let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/service/manufacturer/getLeadPanelImages`;
       const response = await fetch(API_URL, {
-        method: "GET",
+        method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
+        body: JSON.stringify({ place }),
       });
 
       let data = await response.json();
@@ -33,7 +35,7 @@ const ManualSwiper = ({ type = "manufacturer" }) => {
   };
 
   const { data, refetch, isLoading } = useQuery({
-    queryKey: ["lead_panel_pictures", type],
+    queryKey: ["lead_panel_pictures", place],
     queryFn: getImagesForUserPanel,
   });
 
@@ -101,7 +103,12 @@ const ManualSwiper = ({ type = "manufacturer" }) => {
     return <img className="h-12 object-cover mt-5" src="/loader.gif" />;
   }
 
-  if (!data?.length) return <div></div>;
+  if (!data?.length)
+    return (
+      <div>
+        <button onClick={refetch}>Refetch</button>
+      </div>
+    );
 
   return (
     <div className="relative w-full h-full group">

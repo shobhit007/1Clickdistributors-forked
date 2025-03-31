@@ -4,6 +4,12 @@ import { storage } from "/lib/firebase";
 import { toast } from "react-toastify";
 import TableColumns from "./tableColumns";
 import { useQuery } from "@tanstack/react-query";
+import Modal from "../utills/Modal";
+import { MdClose, MdDelete, MdEdit } from "react-icons/md";
+import AddImages from "./addImages";
+import useModal from "../hooks/useModal";
+import AnimatedModal from "../utills/AnimatedModal";
+import ConfirmationModal from "../uiCompoents/ConfirmationModal";
 
 const index = () => {
   const [loginImage, setLoginImage] = useState("");
@@ -11,6 +17,10 @@ const index = () => {
   const [progress, setProgress] = useState(0);
   const [loading, setLoading] = useState(false);
   const [editingImage, setEditingImage] = useState(false);
+  const [showAddNewImageModal, setShowAddNewImageModal] = useState(false);
+  const [selectedItemToDelete, setSelectedItemToDelete] = useState(null);
+  const { open, close, modalOpen } = useModal();
+  const [deltetingItem, setDeletingItem] = useState(false);
 
   const getLoginPageImage = async () => {
     try {
@@ -100,10 +110,98 @@ const index = () => {
     }
   };
 
-  console.log("editingImage", editingImage);
+  const getImagesForPanel = async () => {
+    try {
+      let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/service/manufacturer/getLeadPanelImages`;
+      let token = localStorage.getItem("authToken");
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+          "Content-type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await response.json();
+      if (data.success) {
+        return data.data;
+      } else {
+        return null;
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  const { data: allImages, refetch: refetchImage } = useQuery({
+    queryKey: ["leadpanelImages"],
+    queryFn: getImagesForPanel,
+  });
+
+  const handleDeleteItem = async () => {
+    try {
+      setDeletingItem(true);
+      const token = localStorage.getItem("authToken");
+      const API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/panel/deleteImageFromLeadPanel/${selectedItemToDelete.docId}`;
+      const response = await fetch(API_URL, {
+        method: "DELETE",
+        headers: {
+          "Content-type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        toast.success("Item deleted successfully");
+        refetchImage();
+      } else {
+        toast.error(data.message || "Failed to delete product");
+      }
+    } catch (error) {
+      console.error("Error deleting product:", error.message);
+      toast.error("Error deleting product");
+    } finally {
+      setDeletingItem(false);
+    }
+  };
 
   return (
     <div className="w-full h-auto p-3">
+      {showAddNewImageModal && (
+        <Modal>
+          <div className="min-w-[45vw] min-h-[60vh] bg-white relative rounded-md">
+            <button
+              onClick={() => setShowAddNewImageModal(false)}
+              className="absolute top-0 right-0 p-2 bg-red-500"
+            >
+              <MdClose className="text-white text-xl" />
+            </button>
+            <AddImages
+              type={showAddNewImageModal?.type}
+              previousData={showAddNewImageModal}
+              close={() => setShowAddNewImageModal(false)}
+            />
+          </div>
+        </Modal>
+      )}
+
+      <AnimatedModal close={close} open={open} modalOpen={modalOpen}>
+        <ConfirmationModal
+          heading="Are you sure?"
+          subHeading={`You really want to delete this image?\nThis cannot be undone later.`}
+          confirmationText="Yes, delete"
+          cancelText="Not now"
+          onConfirm={() => {
+            if (selectedItemToDelete) {
+              handleDeleteItem();
+              close();
+            }
+          }}
+          onCancel={() => close()}
+          loading={deltetingItem}
+        />
+      </AnimatedModal>
+
       <div className="flex flex-col gap-2 ">
         <div className="flex flex-col">
           <span className="text-gray-600 text-lg underline font-semibold">
@@ -163,6 +261,134 @@ const index = () => {
 
       <div className="mt-3 w-full">
         <TableColumns />
+      </div>
+
+      <div className="flex flex-col mt-3">
+        <span className="text-gray-600 text-lg underline font-semibold">
+          3. Pictures to show in manufacturer panel
+        </span>
+        <div className="flex items-center gap-2 my-2">
+          <button
+            onClick={() =>
+              setShowAddNewImageModal({
+                type: "manufacturer",
+              })
+            }
+            className="text-white bg-blue-500 p-2 rounded"
+          >
+            Add image
+          </button>
+          <button
+            onClick={() => refetchImage()}
+            className="text-white bg-blue-500 p-2 rounded"
+          >
+            Refetch Images
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 p-2">
+          {allImages
+            ?.filter((item) => item.type == "manufacturer")
+            ?.map((item, index) => (
+              <div
+                key={index}
+                className="border rounded-md shadow-md flex flex-col"
+              >
+                <img
+                  src={item.url}
+                  alt={item.heading}
+                  className="h-auto rounded w-full max-h-[150px] object-cover"
+                />
+                <div className="p-2 flex flex-col">
+                  <span className="text-gray-800 capitalize font-semibold text-xl">
+                    {item.heading}
+                  </span>
+                  <a
+                    href={item.hyperLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-500 text-sm underline -mt-1"
+                  >
+                    Hyperlink
+                  </a>
+                  <div className="flex gap-2 mt-1">
+                    <MdEdit
+                      onClick={() => setShowAddNewImageModal(item)}
+                      className="text-base text-blue-500 cursor-pointer"
+                    />
+                    <MdDelete
+                      onClick={() => {
+                        setSelectedItemToDelete(item);
+                        open();
+                      }}
+                      className="text-red-500 text-base cursor-pointer"
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+        </div>
+      </div>
+
+      <div className="flex flex-col mt-3">
+        <span className="text-gray-600 text-lg underline font-semibold">
+          4. Pictures to show in Distributor panel
+        </span>
+        <div className="flex items-center gap-2 my-2">
+          <button
+            onClick={() =>
+              setShowAddNewImageModal({
+                type: "distributor",
+              })
+            }
+            className="text-white bg-blue-500 p-2 rounded"
+          >
+            Add image
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 p-2">
+          {allImages
+            ?.filter((item) => item.type == "distributor")
+            ?.map((item, index) => (
+              <div
+                key={index}
+                className="border rounded-md shadow-md flex flex-col"
+              >
+                <img
+                  src={item.url}
+                  alt={item.heading}
+                  className="h-auto rounded w-full max-h-[150px] object-cover"
+                />
+                <div className="p-2 flex flex-col">
+                  <span className="text-gray-800 capitalize font-semibold text-xl">
+                    {item.heading}
+                  </span>
+                  <a
+                    href={item.hyperLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-500 text-sm underline -mt-1"
+                  >
+                    Hyperlink
+                  </a>
+                  <div className="flex gap-2 mt-1">
+                    <MdEdit
+                      onClick={() => setShowAddNewImageModal(item)}
+                      className="text-base text-blue-500 cursor-pointer"
+                    />
+                    <MdDelete
+                      onClick={() => {
+                        setSelectedItemToDelete(item);
+                        open();
+                      }}
+                      className="text-red-500 text-base cursor-pointer"
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+        </div>
       </div>
     </div>
   );

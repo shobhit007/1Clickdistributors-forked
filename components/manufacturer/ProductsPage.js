@@ -31,7 +31,7 @@ const ProductsPage = () => {
       const token = localStorage.getItem("authToken");
       let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/service/manufacturer/getAllProductsOfUser`;
       const response = await fetch(API_URL, {
-        method: "GET",
+        method: "POST",
         headers: {
           "Content-type": "application/json",
           Authorization: `Bearer ${token}`,
@@ -67,13 +67,14 @@ const ProductsPage = () => {
     try {
       setDeletingProduct(true);
       const token = localStorage.getItem("authToken");
-      const API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/service/manufacturer/deleteProduct/${productId}`;
+      const API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/service/manufacturer/deleteProduct`;
       const response = await fetch(API_URL, {
-        method: "DELETE",
+        method: "POST",
         headers: {
           "Content-type": "application/json",
           Authorization: `Bearer ${token}`,
         },
+        body: JSON.stringify({ productId }),
       });
 
       const data = await response.json();

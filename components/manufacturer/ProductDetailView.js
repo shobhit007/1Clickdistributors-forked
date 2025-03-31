@@ -444,9 +444,6 @@ export const EditProduct = ({ data, close }) => {
       } else if (body.subCategory == "others") {
         body.subCategory = otherDataFields?.subCategory;
       }
-
-      return console.log(body);
-
       setUploading(true);
       if (file) {
         const fileExtension = file.name.split(".").pop();
@@ -501,7 +498,7 @@ export const EditProduct = ({ data, close }) => {
 
   useEffect(() => {
     setOtherDataFields({});
-    setProduct((product) => ({ ...pre, subCategory: "" }));
+    setProduct((pre) => ({ ...pre, subCategory: "" }));
   }, [product?.category]);
 
   const getSubCategories = () => {

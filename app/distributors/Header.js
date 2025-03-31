@@ -39,12 +39,17 @@ const Header = () => {
               // href={`tel:${userDetails?.serviceExecutivePhone}`}
               className="cursor-pointer flex gap-2 px-3 py-[2px] items-center bg-gray-500/20 rounded-full "
             >
-              <Image
+              {/* <Image
                 src={userDetails?.serviceExecutiveImage}
                 height={40}
                 width={40}
                 objectFit="cover"
                 className="rounded-full shdadow hidden md:block"
+              /> */}
+
+              <img
+                className="h-10 w-10 object-cover rounded-full "
+                src={userDetails?.serviceExecutiveImage}
               />
               <div className="flex flex-col gap-[2px]">
                 <div className="flex items-center gap-1">

@@ -67,9 +67,9 @@ const LeadsView = ({ place }) => {
 
         let filtered = data.data;
         if (place == "prospects") {
-          filtered = filtered.filter((item) => item.disposition == "prospect");
+          filtered = filtered.filter((item) => item.manufacturer_disposition == "prospect");
         } else if (place == "deals") {
-          filtered = filtered.filter((item) => item.disposition == "deal");
+          filtered = filtered.filter((item) => item.manufacturer_disposition == "deal");
         }
         return filtered;
       } else {
@@ -210,15 +210,15 @@ const ListView = ({ leads, setLeads, originalData }) => {
         // Condition 2: Match `Dispositions`
         if (appliedFilters?.dispositions?.length) {
           dispositionsCheckPass = appliedFilters?.dispositions?.includes(
-            lead.disposition
+            lead.manufacturer_disposition
           );
         }
 
         // condition 3: if leadTypFilter is applied
         if (leadTypFilter == "read") {
-          leadTypeCheckPass = lead?.readStatus == "read" && !lead?.archived;
+          leadTypeCheckPass = lead?.manufacturer_readStatus == "read" && !lead?.archived;
         } else if (leadTypFilter == "unread") {
-          leadTypeCheckPass = !lead?.readStatus && !lead?.archived;
+          leadTypeCheckPass = !lead?.manufacturer_readStatus && !lead?.archived;
         } else if (leadTypFilter == "archived") {
           leadTypeCheckPass = lead?.archived == true;
         } else {
@@ -254,7 +254,7 @@ const ListView = ({ leads, setLeads, originalData }) => {
 
     data.forEach((item) => {
       count["all"]++;
-      if (item.readStatus == "read") {
+      if (item.manufacturer_readStatus == "read") {
         count["read"]++;
       } else {
         count["unread"]++;
@@ -370,17 +370,17 @@ const ListView = ({ leads, setLeads, originalData }) => {
                       <MdOutlineMailOutline />
                       {lead?.email || "...."}
                     </span>
-                    {lead?.disposition && (
+                    {lead?.manufacturer_disposition && (
                       <span
                         className="text-white w-fit px-3 rounded text-[11px] mt-[2px] capitalize"
                         style={{
                           backgroundColor:
                             serviceDispositionColors[
-                              lead.disposition || "gray"
+                              lead.manufacturer_disposition || "gray"
                             ],
                         }}
                       >
-                        {formatValue(lead.disposition)}
+                        {formatValue(lead.manufacturer_disposition)}
                       </span>
                     )}
                   </div>

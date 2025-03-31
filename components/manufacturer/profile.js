@@ -55,6 +55,7 @@ const Profile = () => {
         password: userDetails.password,
         city: userDetails.city,
         designation: userDetails?.designation,
+        email_2: userDetails?.email_2,
       });
     }
   }, [userDetails]);

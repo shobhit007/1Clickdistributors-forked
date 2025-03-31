@@ -44,7 +44,8 @@ const LeadDetailView = ({
   jumpToPreviousLead,
   jumpToNextLead,
 }) => {
-  const { selectedLead, setSelectedLead } = useContext(manufacturerContext);
+  const { selectedLead, setSelectedLead, userDetails } =
+    useContext(manufacturerContext);
   const { open, close, modalOpen } = useModal();
   const [updateLoading, setUpdateLoading] = useState(false);
   const queryClient = useQueryClient();
@@ -255,7 +256,7 @@ const LeadDetailView = ({
             </div>
 
             <div className="md:w-[48%] h-[160px] md:h-[120px]">
-              <ManualSwiper />
+              <ManualSwiper place="manufacturer" />
             </div>
           </div>
 
@@ -278,13 +279,14 @@ const LeadDetailView = ({
               <div className={`${boxStyle}`}>
                 <span className={`${keyStyle}`}>Disposition:</span>
                 <span className={`${valueStyle} capitalize`}>
-                  {formatValue(selectedLead?.disposition)}
+                  {formatValue(selectedLead?.manufacturer_disposition)}
                 </span>
               </div>
               <div className={`${boxStyle}`}>
                 <span className={`${keyStyle}`}>Sub Disposition:</span>
                 <span className={`${valueStyle} capitalize`}>
-                  {formatValue(selectedLead?.subDisposition) || "_"}
+                  {formatValue(selectedLead?.manufacturer_subDisposition) ||
+                    "_"}
                 </span>
               </div>
             </div>
@@ -299,7 +301,11 @@ const LeadDetailView = ({
             </div>
           </div>
 
-          <UpdatesList />
+          <UpdatesList
+            selectedLead={selectedLead}
+            type={"manufacturer"}
+            userName={userDetails?.full_name}
+          />
         </div>
       </div>
     </div>
@@ -374,8 +380,10 @@ const UpdateLeadModal = ({ updateLoading, setUpdateLoading, close }) => {
 
   useEffect(() => {
     if (selectedLead) {
-      setSelectedDisposition(selectedLead?.disposition || null);
-      setSelectedSubDisposition(selectedLead?.subDisposition || null);
+      setSelectedDisposition(selectedLead?.manufacturer_disposition || null);
+      setSelectedSubDisposition(
+        selectedLead?.manufacturer_subDisposition || null
+      );
     }
   }, [selectedLead]);
 

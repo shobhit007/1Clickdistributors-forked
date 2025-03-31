@@ -15,7 +15,6 @@ import useModal from "../hooks/useModal";
 import CustomSelector from "../uiCompoents/CustomSelector";
 import { FaNetworkWired } from "react-icons/fa6";
 import { CustomTextarea } from "../uiCompoents/CustomInput";
-import UpdatesList from "./UpdatesList";
 import { toast } from "react-toastify";
 import {
   service_manufacturer_dispositions,
@@ -37,15 +36,16 @@ import "swiper/css";
 import "swiper/css/autoplay";
 import "swiper/css/effect-fade";
 import "swiper/css/pagination";
-import ManualSwiper from "./ManualSwiper";
 import { CiMinimize2 } from "react-icons/ci";
+import ManualSwiper from "../manufacturer/ManualSwiper";
+import UpdatesList from "../manufacturer/UpdatesList";
 
 const LeadDetailView = ({
   isSmallDevice,
   jumpToPreviousLead,
   jumpToNextLead,
 }) => {
-  const { selectedLead, setSelectedLead } = useContext(distributorContext);
+  const { selectedLead, setSelectedLead , userDetails} = useContext(distributorContext);
   const { open, close, modalOpen } = useModal();
   const [updateLoading, setUpdateLoading] = useState(false);
   const queryClient = useQueryClient();
@@ -262,7 +262,7 @@ const LeadDetailView = ({
             </div>
 
             <div className="md:w-[48%] h-[160px] md:h-[120px]">
-              <ManualSwiper />
+              <ManualSwiper place="distributor" />
             </div>
           </div>
 
@@ -306,7 +306,11 @@ const LeadDetailView = ({
             </div>
           </div>
 
-          <UpdatesList />
+          <UpdatesList
+            selectedLead={selectedLead}
+            type="distributor"
+            userName={userDetails?.full_name}
+          />
         </div>
       </div>
     </div>

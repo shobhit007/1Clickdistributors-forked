@@ -15,10 +15,11 @@ import { copyToClipboard } from "@/lib/commonFunctions";
 
 const Header = () => {
   const { userDetails, setShowSidebar } = useContext(manufacturerContext);
+  console.log("user details", userDetails);
 
   return (
     <div className="w-full flex justify-between  px-4 py-1 items-center">
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 overflow-hidden">
         <button onClick={() => setShowSidebar(true)} className="lg:hidden">
           <RxHamburgerMenu className="text-orange-800 text-2xl" />
         </button>
@@ -38,13 +39,11 @@ const Header = () => {
               // href={`tel:${userDetails?.serviceExecutivePhone}`}
               className="cursor-pointer flex gap-2 px-3 py-[2px] items-center bg-gray-500/20 rounded-full "
             >
-              <Image
+              <img
+                className="h-10 w-10 object-cover rounded-full"
                 src={userDetails?.serviceExecutiveImage}
-                height={40}
-                width={40}
-                objectFit="cover"
-                className="rounded-full shdadow hidden md:block"
               />
+
               <div className="flex flex-col gap-[2px]">
                 <div className="flex items-center gap-1">
                   <FaRegUser className="text-gray-700 text-xs" />
@@ -114,9 +113,26 @@ const Header = () => {
           </PopoverContent>
         </Popover>
 
-        <div className="hidden md:flex flex-col text-xs items-start font-semibold text-slate-600 mr-6">
-          <span className="">Hi, Welcome</span>
-          <span className="-mt-[2px] font-bold capitalize text-slate-800 text-sm">{userDetails?.full_name}</span>
+        <div className="hidden md:flex flex-row text-xs items-start font-semibold text-slate-600 mr-6 gap-1 bg-gray-500/20 px-3 py-[2px] rounded-full">
+          {userDetails?.profileImageURL && (
+            // <Image
+            //   src={userDetails?.profileImageURL}
+            //   height={40}
+            //   width={40}
+            //   objectFit="cover"
+            //   className="rounded-full shdadow-lg"
+            // />
+            <img
+              className="h-10 w-10 object-cover rounded-full"
+              src={userDetails?.profileImageURL}
+            />
+          )}
+          <div className="flex flex-col">
+            <span className="">Hi Welcome</span>
+            <span className="-mt-[2px] font-bold capitalize text-slate-800 text-sm">
+              {userDetails?.full_name}
+            </span>
+          </div>
         </div>
       </div>
     </div>
