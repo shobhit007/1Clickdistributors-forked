@@ -7,7 +7,7 @@ function PersonalDetails({ register, errors }) {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            First Name *
+            Full Name *
           </label>
           <input
             {...register("full_name")}
@@ -89,6 +89,16 @@ function PersonalDetails({ register, errors }) {
           <input
             {...register("city")}
             placeholder="City"
+            className="input w-full border rounded border-gray-300 p-3"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Tag*
+          </label>
+          <input
+            {...register("tag")}
+            placeholder="Tag"
             className="input w-full border rounded border-gray-300 p-3"
           />
         </div>

@@ -21,7 +21,7 @@ import { units } from "@/lib/data/servicePanelData";
 import { useQueryClient } from "@tanstack/react-query";
 import manufacturerContext from "@/lib/context/manufacturerContext";
 
-const ProductDetailView = ({ product, close }) => {
+const ProductDetailView = ({ product, close, visibleEditButton = true }) => {
   const [selectedView, setSelectedView] = useState("specifications");
   const [showEditView, setShowEditView] = useState(false);
   const exempted = ["image", "description"];
@@ -72,7 +72,10 @@ const ProductDetailView = ({ product, close }) => {
                   )
                   .map((key) => {
                     return (
-                      <div className="flex flex-col sm:flex-row odd:bg-blue-50 w-full items-start text-xs md:text-sm px-4 py-2">
+                      <div
+                        key={key}
+                        className="flex flex-col sm:flex-row odd:bg-blue-50 w-full items-start text-xs md:text-sm px-4 py-2"
+                      >
                         <span className="sm:w-[40%] text-wrap overflow-hidden font-semibold text-gray-600 uppercase">
                           {key}:
                         </span>
@@ -91,14 +94,16 @@ const ProductDetailView = ({ product, close }) => {
                 </div>
               )}
             </div>
-            <button
-              onClick={() => {
-                setShowEditView(true), console.log("i am here");
-              }}
-              className="absolute bottom-0 right-0 bg-blue-500 p-1 rounded-tl-md z-[1]"
-            >
-              <MdEdit className="text-lg text-white" />
-            </button>
+            {visibleEditButton && (
+              <button
+                onClick={() => {
+                  setShowEditView(true);
+                }}
+                className="absolute bottom-0 right-0 bg-blue-500 p-1 rounded-tl-md z-[1]"
+              >
+                <MdEdit className="text-lg text-white" />
+              </button>
+            )}
           </>
         )}
       </div>

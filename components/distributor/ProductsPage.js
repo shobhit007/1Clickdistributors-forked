@@ -10,7 +10,6 @@ import ProductDetailView, { EditProduct } from "./ProductDetailView";
 import Image from "next/image";
 import { useQuery } from "@tanstack/react-query";
 import Modal from "../utills/Modal";
-import AddNewProductView from "./AddNewProductView";
 import Tooltip from "@mui/material/Tooltip";
 import useModal from "../hooks/useModal";
 import AnimatedModal from "../utills/AnimatedModal";
