@@ -49,7 +49,7 @@ const index = ({
     try {
       if (!dateObjToSearch) return null;
       const token = localStorage.getItem("authToken");
-      let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/service/distributor/getLeads`;
+      let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/service/distributor/getLeads`;
       setLoading(true);
       let payload = {
         startDate: dateObjToSearch?.selectedStartDate,

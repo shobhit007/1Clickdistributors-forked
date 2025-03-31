@@ -32,7 +32,7 @@ function BusinessDetails({
             Company Type
           </label>
           <select
-            {...register("companyType")}
+            {...register("company_type")}
             className="select w-full border rounded border-gray-300 p-3"
           >
             <option value="Proprietorship">Proprietorship</option>
@@ -44,7 +44,7 @@ function BusinessDetails({
           </select>
         </div>
 
-        {serviceType === "distributor" && (
+        {/* {serviceType === "distributor" && (
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Experience *
@@ -56,7 +56,7 @@ function BusinessDetails({
               className="input w-full border rounded border-gray-300 p-3"
             />
           </div>
-        )}
+        )} */}
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -64,11 +64,11 @@ function BusinessDetails({
           </label>
           <div className="flex gap-2">
             <input
-              {...register("turnover")}
+              {...register("turnOver")}
               placeholder="Turnover"
               className="input w-full border rounded border-gray-300 p-3"
             />
-            <select
+            {/* <select
               {...register("turnover_type")}
               className="select w-full border rounded border-gray-300 p-3"
             >
@@ -76,7 +76,7 @@ function BusinessDetails({
               <option value="crore">Crore</option>
               <option value="million">Million</option>
               <option value="billion">Billion</option>
-            </select>
+            </select> */}
           </div>
         </div>
 
@@ -118,7 +118,7 @@ function BusinessDetails({
             City *
           </label>
           <input
-            {...register("city")}
+            {...register("businessCity")}
             placeholder="City"
             className="input w-full border rounded border-gray-300 p-3"
           />
@@ -128,13 +128,13 @@ function BusinessDetails({
             State *
           </label>
           <input
-            {...register("state")}
+            {...register("businessState")}
             placeholder="State"
             className="input w-full border rounded border-gray-300 p-3"
           />
         </div>
 
-        {serviceType === "distributor" && (
+        {/* {serviceType === "distributor" && (
           <>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -211,16 +211,15 @@ function BusinessDetails({
                     <div className="w-full h-64 mt-2 p-2 overflow-x-hidden overflow-y-auto">
                       {fields.map((item, index) => (
                         <div
-                          key={item.id} // Use `item.id` provided by `useFieldArray`
+                          key={item.id}
                           className="w-full flex items-center justify-between p-2 rounded border border-gray-300 mt-1 first:mt-0"
                         >
                           <span className="block text-sm text-gray-600 break-words max-w-[90%]">
-                            {/* Ensure the text wraps properly and doesn't overflow */}
                             {item.name}
                           </span>
                           <button
                             onClick={() => remove(index)}
-                            className="flex-shrink-0" // Ensure button doesn't shrink
+                            className="flex-shrink-0" 
                           >
                             <IoClose
                               size={18}
@@ -235,7 +234,7 @@ function BusinessDetails({
               )}
             </div>
           </>
-        )}
+        )} */}
       </div>
     </fieldset>
   );

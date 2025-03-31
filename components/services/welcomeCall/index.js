@@ -14,7 +14,7 @@ import ProductDetails from "./tabs/ProductDetails";
 import TaxDetails from "./tabs/TaxDetails";
 import BankDetails from "./tabs/BankDetails";
 import { toggle } from "@nextui-org/theme";
-import { welcomeCallDispositions } from "@/lib/data/commonData";
+import { company_types, welcomeCallDispositions } from "@/lib/data/commonData";
 
 const TABS = [
   {
@@ -49,6 +49,8 @@ function WelcomeCall({
     return null;
   }
 
+  // console.log("selected row", selectedRow);
+
   const {
     register,
     handleSubmit,
@@ -64,22 +66,11 @@ function WelcomeCall({
     },
   });
 
-  const [visibleProducts, setVisibleProducts] = useState(false);
-  const [visibleCategoryModal, setVisibleCategoryModal] = useState(false);
-  const [visibleSubCategoryModal, setVisibleSubCategoryModal] = useState(false);
-  const [serviceProducts, setServiceProducts] = useState([]);
-  const [imageLoading, setImageLoading] = useState(false);
-  const [isLive, setIsLive] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [currentTab, setCurrentTab] = useState("personal_details");
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const [selectedSubCategory, setSelectedSubCategory] = useState("");
   const [selectedDisposition, setSelectedDisposition] = useState(
     welcomeCallDispositions[0].value
   );
-  const [categories, setCategories] = useState([]);
-  const [subCategories, setSubCategories] = useState({});
-  const [isLoadingCategories, setIsLoadingCategories] = useState(false);
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -134,52 +125,37 @@ function WelcomeCall({
     // Set personal details
     setValue("tag", selectedRow?.tag || "");
     setValue("full_name", selectedRow?.full_name || "");
-    setValue("jobTitle", selectedRow?.jobTitle || "");
+    setValue("designation", selectedRow?.designation || "");
     setValue("mobile", selectedRow?.phone_number || "");
-    setValue("location", selectedRow?.location || "");
+    setValue("city", selectedRow?.city || "");
     setValue("email", selectedRow?.email || "");
     setValue("altEmail", selectedRow?.email_2 || "");
 
     // Set business details
     setValue("companyName", selectedRow?.companyName || "");
-    setValue("companyType", selectedRow?.companyType || "");
-    setValue("turnover", selectedRow?.turnover || "");
+    setValue("company_type", selectedRow?.company_type || "");
+    setValue("turnOver", selectedRow?.turnOver || "");
     setValue("turnover_type", selectedRow?.turnover_type || "");
     setValue("yearOfEstablishment", selectedRow?.yearOfEstablishment || "");
     setValue("address", selectedRow?.address || "");
     setValue("pincode", selectedRow?.pincode || "");
-    setValue("city", selectedRow?.city || "");
-    setValue("state", selectedRow?.state || "");
+    setValue("businessCity", selectedRow?.businessCity || "");
+    setValue("businessState", selectedRow?.businessState || "");
 
     // Set tax details
-    setValue("gstNumber", selectedRow?.taxDetails?.gst?.gstNumber || "");
-    setValue("gstDocument", selectedRow?.taxDetails?.gst?.document || "");
-    setValue("panNumber", selectedRow?.taxDetails?.pan?.panNumber || "");
-    setValue("panDocument", selectedRow?.taxDetails?.pan?.document || "");
-    setValue("tanNumber", selectedRow?.taxDetails?.tan?.tanNumber || "");
-    setValue("tanDocument", selectedRow?.taxDetails?.tan?.document || "");
+    setValue("gstNumber", selectedRow?.taxDetails?.gst?.number || "");
+    setValue("gstImage", selectedRow?.taxDetails?.gst?.image || "");
+    setValue("panNumber", selectedRow?.taxDetails?.pan?.number || "");
+    setValue("panImage", selectedRow?.taxDetails?.pan?.image || "");
+    setValue("tanNumber", selectedRow?.taxDetails?.tan?.number || "");
+    setValue("tanImage", selectedRow?.taxDetails?.tan?.image || "");
 
     // Set bank details
-    setValue("accountType", selectedRow?.bankDetails?.accountType || "");
-    setValue("accountNumber", selectedRow?.bankDetails?.accountNumber || "");
-    setValue("ifsc", selectedRow?.bankDetails?.ifsc || "");
-    setValue("cancelCheque", selectedRow?.bankDetails?.cancelCheque || "");
+    setValue("accountType", selectedRow?.bankAccountType || "");
+    setValue("accountNumber", selectedRow?.bankAccountNumber || "");
+    setValue("ifsc", selectedRow?.bankIFSC_code || "");
+    setValue("cancelCheque", selectedRow?.cancelledChequeImage || "");
   }, [setValue, selectedRow]);
-
-  // set category and sub category
-  useEffect(() => {
-    if (categories.length > 0) {
-      const category = selectedRow?.category || categories[0];
-      const subCategory =
-        selectedRow?.subCategory ||
-        (subCategories[category] && subCategories[category].length > 0
-          ? subCategories[category][0]
-          : "");
-
-      setSelectedCategory(category);
-      setSelectedSubCategory(subCategory);
-    }
-  }, [categories, subCategories, selectedRow]);
 
   // set default company name
   useEffect(() => {
@@ -188,134 +164,6 @@ function WelcomeCall({
       setValue("companyName", selectedRow?.company_name);
     }
   }, [selectedRow, setValue, data]);
-
-  // set products
-  useEffect(() => {
-    const products = data?.products;
-    if (products) {
-      setServiceProducts(products);
-    }
-  }, [data]);
-
-  const fetchCategoriesAndSubCategories = async () => {
-    try {
-      setIsLoadingCategories(true);
-      const token = localStorage.getItem("authToken");
-      const API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/service/getCategoriesAndSubCategories`;
-
-      const response = await fetch(API_URL, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        if (data.success) {
-          // Update the states with fetched data
-          setCategories(data.categories || []);
-          setSubCategories(data.subCategories || {});
-        } else {
-          toast.error(data.message || "Failed to fetch categories");
-        }
-      } else {
-        toast.error("Failed to fetch categories");
-      }
-    } catch (error) {
-      console.error("Error fetching categories:", error);
-      toast.error("Error fetching categories");
-    } finally {
-      setIsLoadingCategories(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchCategoriesAndSubCategories();
-  }, []); // Empty dependency array means this runs once when component mounts
-
-  const selectedImage = watch("productImage");
-
-  const uploadProduct = async () => {
-    const title = watch("productName");
-    const image = watch("productImage");
-
-    if (!title || !image) {
-      alert("Both title and image are required.");
-      return;
-    }
-
-    try {
-      setImageLoading(true);
-      const result = await uploadFile({
-        file: image,
-        path: `service/${selectedRow?.leadId}/productImages`,
-      });
-
-      if (result.success) {
-        const token = localStorage.getItem("authToken");
-        let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/service/uploadServiceProduct`;
-        const response = await fetch(API_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            leadId: selectedRow?.leadId,
-            product: {
-              title,
-              image: "www.example.com",
-            },
-          }),
-        });
-
-        if (response.ok) {
-          setValue("productName", "");
-          setValue("productImage", null);
-          setImageLoading(false);
-          refetch();
-          toast.success("Product uploaded successfully");
-        }
-      } else {
-        toast.error(result.error);
-        setImageLoading(false);
-      }
-    } catch (error) {
-      toast.error(error.message);
-      setImageLoading(false);
-    }
-  };
-
-  const deleteProduct = async (productId) => {
-    try {
-      const token = localStorage.getItem("authToken");
-      let API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/service/deleteServiceProduct`;
-      const response = await fetch(API_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          leadId: selectedRow?.leadId,
-          productId,
-        }),
-      });
-
-      if (response.ok) {
-        refetch();
-      }
-    } catch (error) {
-      toast.error(error.message);
-    }
-  };
-
-  const handleFileChange = (event) => {
-    const file = event.target.files[0];
-    setValue("productImage", file);
-  };
 
   const onSubmit = async (data) => {
     const leadId = selectedRow.leadId;
@@ -327,8 +175,6 @@ function WelcomeCall({
 
     let gstPdfUrl = "";
     let panPdfUrl = "";
-    let tanPdfUrl = "";
-    let cancelChequeUrl = "";
 
     // Helper to upload a file if provided
     const uploadIfExists = async (fileData, label) => {
@@ -357,45 +203,40 @@ function WelcomeCall({
 
     const groupedData = {
       full_name: data.full_name,
-      jobTitle: data.jobTitle,
+      designation: data.designation,
       phone_number: data.mobile,
       email: data.email,
       email_2: data.altEmail,
-      location: data.location,
+      city: data.city,
       companyName: data.companyName,
-      companyType: data.companyType,
-      turnover: data.turnover,
+      company_type: data.company_type,
+      turnOver: data.turnOver,
       turnover_type: data.turnover_type,
       yearOfEstablishment: data.yearOfEstablishment,
       address: data.address,
       pincode: data.pincode,
-      city: data.city,
-      state: data.state,
-      category: selectedCategory,
-      subCategory: selectedSubCategory,
-      whatsAppNumber: data.whatsAppNumber,
-      tag: data.tag,
+      businessCity: data.businessCity,
+      businessState: data.businessState,
       taxDetails: {
         gst: {
-          gstNumber: data.gst,
-          document: gstPdfUrl,
+          number: data.gst,
+          image: gstPdfUrl,
         },
         pan: {
-          panNumber: data.pan,
-          document: panPdfUrl,
+          number: data.pan,
+          image: panPdfUrl,
         },
         tan: {
-          tanNumber: data.tan,
-          document: tanPdfUrl,
+          number: data.tan,
+          image: tanPdfUrl,
         },
       },
-      bankDetails: {
-        accountType: data.accountType,
-        accountNumber: data.accountNumber,
-        ifsc: data.ifsc,
-        cancelCheque: cancelChequeUrl,
-      },
+      bankAccountNumber: data.accountNumber,
+      bankAccountType: data.accountType,
+      bankIFSC_code: data.ifsc,
+      cancelledChequeImage: data.cancelChequeUrl,
       leadId: leadId,
+      tag: data.tag,
     };
 
     const API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/service/updateWelcomeCall`;
@@ -459,56 +300,41 @@ function WelcomeCall({
     }
   };
 
-  const toggleCategoryModal = () => setVisibleCategoryModal((p) => !p);
-  const toggleSubCategoryModal = () => setVisibleSubCategoryModal((p) => !p);
-
-  const handleCategory = (val) => {
-    if (!val) {
-      toast.error("Please enter a category");
-    }
-    setCategories((prev) => [...prev, val]);
-    toggleCategoryModal();
-  };
-
-  const handleSubCategory = (category, value) => {
-    const updatedSubCategories = { ...subCategories };
-    if (!updatedSubCategories[category]) {
-      updatedSubCategories[category] = [];
-    }
-
-    updatedSubCategories[category] = [...updatedSubCategories[category], value];
-
-    setSubCategories(updatedSubCategories);
-    toggleSubCategoryModal();
-  };
-
   const toggleBrandModal = () => setShowModal((p) => !p);
 
   // fields
-  const firstName = watch("firstName");
-  const designation = watch("jobTitle");
+  const full_name = watch("full_name");
+  const designation = watch("designation");
   const mobile = watch("mobile");
   const email = watch("email");
   const tag = watch("tag");
   const companyName = watch("companyName");
-  const turnover = watch("turnover");
+  const turnOver = watch("turnOver");
   const establishmentYear = watch("yearOfEstablishment");
-  const gstNumber = watch("gst");
-  const pantNumber = watch("pan");
+  const gstNumber = watch("gstNumber");
+  const pantNumber = watch("panNumber");
+  const businessState = watch("businessState");
+  const businessCity = watch("businessCity");
+  const pincode = watch("pincode");
+  const category = watch("category");
+  const subCategory = watch("subCategory");
 
   const progressFields = {
-    firstName: firstName,
+    full_name: full_name,
     companyName: companyName,
     phone: mobile,
     email: email,
     designation: designation,
-    category: selectedCategory,
-    subCategory: selectedSubCategory,
     tag: tag,
-    turnover: turnover,
+    turnOver: turnOver,
     establishmentYear: establishmentYear,
     gstNumber: gstNumber,
     pantNumber: pantNumber,
+    pincode,
+    businessState,
+    businessCity,
+    category,
+    subCategory,
   };
 
   const calculateProgress = () => {
@@ -520,36 +346,6 @@ function WelcomeCall({
   };
 
   const progress = calculateProgress();
-
-  // remove category
-  const removeCategory = async (categoryToRemove) => {
-    try {
-      const token = localStorage.getItem("authToken");
-      const API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/service/removeProductCategory`;
-
-      const response = await fetch(API_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          category: categoryToRemove,
-        }),
-      });
-
-      if (response.ok) {
-        toast.success("Category removed successfully");
-        setCategories((prev) => prev.filter((cat) => cat !== categoryToRemove));
-      } else {
-        const error = await response.json();
-        toast.error(error.message || "Failed to remove category");
-      }
-    } catch (error) {
-      toast.error("Error removing category");
-      console.error(error);
-    }
-  };
 
   const render = () => (
     <>
@@ -583,23 +379,7 @@ function WelcomeCall({
       <div
         style={{ display: currentTab === "product_details" ? "block" : "none" }}
       >
-        <ProductDetails
-          register={register}
-          errors={errors}
-          serviceType={serviceType}
-          categories={categories}
-          subCategories={subCategories}
-          toggleCategoryModal={toggleCategoryModal}
-          toggleSubCategoryModal={toggleSubCategoryModal}
-          handleFileChange={handleFileChange}
-          imageLoading={imageLoading}
-          uploadProduct={uploadProduct}
-          selectedCategory={selectedCategory}
-          selectedSubCategory={selectedSubCategory}
-          selectedImage={selectedImage}
-          setSelectedCategory={setSelectedCategory}
-          setSelectedSubCategory={setSelectedSubCategory}
-        />
+        <ProductDetails selectedRow={selectedRow} />
       </div>
       <div style={{ display: currentTab === "tax_details" ? "block" : "none" }}>
         <TaxDetails
@@ -607,6 +387,7 @@ function WelcomeCall({
           errors={errors}
           serviceType={serviceType}
           setValue={setValue}
+          watch={watch}
         />
       </div>
       <div
@@ -617,6 +398,7 @@ function WelcomeCall({
           errors={errors}
           serviceType={serviceType}
           setValue={setValue}
+          watch={watch}
         />
       </div>
     </>
@@ -789,362 +571,24 @@ function WelcomeCall({
                   ))}
                 </div>
                 {render()}
-                <div className="flex w-full justify-end mt-4 py-2">
-                  <button
-                    type="submit"
-                    className="btn btn-primary ml-auto mr-0 w-36 p-3 rounded bg-blue-400 hover:bg-blue-500 text-white font-medium"
-                  >
-                    Submit
-                  </button>
-                </div>
+                {currentTab !== "product_details" && (
+                  <div className="flex w-full justify-end mt-4 py-2">
+                    <button
+                      type="submit"
+                      className="btn btn-primary ml-auto mr-0 w-36 p-3 rounded bg-blue-400 hover:bg-blue-500 text-white font-medium"
+                    >
+                      Submit
+                    </button>
+                  </div>
+                )}
               </form>
             </div>
           </div>
         </div>
       </div>
-
-      {/* Modal for Product list, Category, SubCategory, etc. */}
-      {visibleProducts && (
-        <ProductsList
-          products={serviceProducts}
-          onClose={() => setVisibleProducts(false)}
-          remove={deleteProduct}
-        />
-      )}
-
-      {visibleCategoryModal && (
-        <AddCategory
-          onClose={toggleCategoryModal}
-          handleCategory={handleCategory}
-          categories={categories}
-          removeCategory={removeCategory}
-        />
-      )}
-
-      {visibleSubCategoryModal && (
-        <AddSubCategory
-          categories={categories}
-          onClose={toggleSubCategoryModal}
-          handleSubCategory={handleSubCategory}
-          subCategories={subCategories}
-          setSubCategories={setSubCategories}
-        />
-      )}
     </div>
   );
 }
-
-const AddCategory = ({
-  onClose,
-  handleCategory,
-  categories,
-  removeCategory,
-}) => {
-  const [text, setText] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  const addNewCategory = async () => {
-    if (!text) {
-      toast.error("Please enter a category name");
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const token = localStorage.getItem("authToken");
-      const API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/service/addProductCategory`;
-
-      const response = await fetch(API_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          category: text,
-        }),
-      });
-
-      if (response.ok) {
-        toast.success("Category added successfully");
-        handleCategory(text);
-      } else {
-        const error = await response.json();
-        toast.error(error.message || "Failed to add category");
-      }
-    } catch (error) {
-      toast.error("Error adding category");
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div className="fixed inset-0 flex items-center justify-center w-full bg-black/35 z-[100]">
-      <div className="w-full max-w-96 mx-auto bg-white rounded-lg overflow-x-hidden overflow-y-auto p-6">
-        <div className="flex w-full p-2 justify-end">
-          <button onClick={onClose}>
-            <IoClose size={24} color="black" />
-          </button>
-        </div>
-
-        {/* Category List */}
-        <div className="mb-4">
-          <h3 className="text-sm font-medium text-gray-600 mb-2">
-            Existing Categories
-          </h3>
-          <div className="max-h-40 overflow-y-auto">
-            {categories.map((category, index) => (
-              <div
-                key={index}
-                className="flex items-center justify-between p-2 border-b hover:bg-gray-50"
-              >
-                <span className="text-sm text-gray-700">{category}</span>
-                <button
-                  onClick={() => removeCategory(category)}
-                  className="p-1.5 text-red-600 hover:bg-red-50 rounded"
-                >
-                  <FiTrash size={16} />
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Add New Category Form */}
-        <div className="flex flex-col items-center gap-2 mt-4">
-          <input
-            type="text"
-            placeholder="Enter Category Name"
-            className="input w-full border rounded border-gray-300 p-3"
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-          />
-          <button
-            onClick={addNewCategory}
-            disabled={loading}
-            type="button"
-            className={`w-full h-12 flex gap-2 items-center justify-center text-blue-600 border border-blue-500 rounded hover:bg-blue-100 ${
-              loading ? "opacity-50 cursor-not-allowed" : ""
-            }`}
-          >
-            {loading ? (
-              "Adding..."
-            ) : (
-              <>
-                <FiPlus size={20} />
-                Add Category
-              </>
-            )}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const AddSubCategory = ({
-  onClose,
-  categories,
-  handleSubCategory,
-  subCategories,
-  setSubCategories,
-}) => {
-  const [text, setText] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  const addNewSubCategory = async () => {
-    if (!text || !selectedCategory) {
-      toast.error("Please select category and enter subcategory name");
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const token = localStorage.getItem("authToken");
-      const API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/service/addProductSubCategory`;
-
-      const response = await fetch(API_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          category: selectedCategory,
-          subCategory: text,
-        }),
-      });
-
-      if (response.ok) {
-        toast.success("Subcategory added successfully");
-        handleSubCategory(selectedCategory, text);
-        setText("");
-      } else {
-        const error = await response.json();
-        toast.error(error.message || "Failed to add subcategory");
-      }
-    } catch (error) {
-      toast.error("Error adding subcategory");
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const removeSubCategory = async (category, subCategory) => {
-    try {
-      const token = localStorage.getItem("authToken");
-      const API_URL = `${process.env.NEXT_PUBLIC_BASEURL}/admin/service/removeProductSubCategory`;
-
-      const response = await fetch(API_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          category,
-          subCategory,
-        }),
-      });
-
-      if (response.ok) {
-        toast.success("Subcategory removed successfully");
-        setSubCategories((prev) => ({
-          ...prev,
-          [category]: prev[category].filter((sub) => sub !== subCategory),
-        }));
-      } else {
-        const error = await response.json();
-        toast.error(error.message || "Failed to remove subcategory");
-      }
-    } catch (error) {
-      toast.error("Error removing subcategory");
-      console.error(error);
-    }
-  };
-
-  return (
-    <div className="fixed inset-0 flex items-center justify-center w-full bg-black/35 z-[100]">
-      <div className="w-full max-w-96 mx-auto bg-white rounded-lg overflow-x-hidden overflow-y-auto p-6">
-        <div className="flex w-full p-2 justify-end">
-          <button onClick={onClose}>
-            <IoClose size={24} color="black" />
-          </button>
-        </div>
-
-        {/* Existing SubCategories List */}
-        {selectedCategory && subCategories[selectedCategory]?.length > 0 && (
-          <div className="mb-4">
-            <h3 className="text-sm font-medium text-gray-600 mb-2">
-              Existing Subcategories for {selectedCategory}
-            </h3>
-            <div className="max-h-40 overflow-y-auto">
-              {subCategories[selectedCategory]?.map((subCat, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between p-2 border-b hover:bg-gray-50"
-                >
-                  <span className="text-sm text-gray-700">{subCat}</span>
-                  <button
-                    onClick={() => removeSubCategory(selectedCategory, subCat)}
-                    className="p-1.5 text-red-600 hover:bg-red-50 rounded"
-                  >
-                    <FiTrash size={16} />
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Add New SubCategory Form */}
-        <div className="flex flex-col items-center gap-2 mt-2">
-          <select
-            className="select w-full border rounded border-gray-300 p-3 mb-2"
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-          >
-            <option value="">Select Category</option>
-            {categories.map((category, index) => (
-              <option key={index} value={category}>
-                {category}
-              </option>
-            ))}
-          </select>
-          <input
-            type="text"
-            placeholder="Enter Sub Category Name"
-            className="input w-full border rounded border-gray-300 p-3"
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-          />
-          <button
-            onClick={addNewSubCategory}
-            disabled={loading}
-            type="button"
-            className={`w-full h-12 flex gap-2 items-center justify-center text-blue-600 border border-blue-500 rounded hover:bg-blue-100 ${
-              loading ? "opacity-50 cursor-not-allowed" : ""
-            }`}
-          >
-            {loading ? (
-              "Adding..."
-            ) : (
-              <>
-                <FiPlus size={20} />
-                Add Subcategory
-              </>
-            )}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const ProductsList = ({ products, onClose, remove }) => {
-  return (
-    <div className="fixed inset-0 w-full bg-black/35 z-[100] p-6">
-      <div className="w-full max-w-96 mx-auto bg-white rounded-lg overflow-x-hidden overflow-y-auto">
-        <div className="flex w-full p-2 justify-end">
-          <button onClick={onClose}>
-            <IoClose size={24} color="black" />
-          </button>
-        </div>
-        <div className="w-full flex flex-col gap-2 mt-4">
-          {products.map((field, index) => (
-            <div
-              key={index}
-              className="flex items-center gap-2 border p-2 rounded"
-            >
-              {field.image && (
-                <img
-                  src={field.image}
-                  alt={field.title}
-                  className="h-20 w-20 object-cover rounded"
-                />
-              )}
-              <div className="flex-1">
-                <p className="text-sm font-medium">Title: {field.title}</p>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => remove(field.id)}
-                className="p-2 text-red-600 border border-red-500 rounded hover:bg-red-100"
-              >
-                <FiTrash size={20} />
-              </button>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-};
 
 function PDFFileSelector({
   register,
