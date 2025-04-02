@@ -284,7 +284,7 @@ const Profile = () => {
                   onChangeValue={(value) =>
                     onChangeValue(value, "phone_number")
                   }
-                  type="number"
+                  type="text"
                   disabled={!isEditing}
                   icon={<FaPhoneAlt className={`${iconStyle}`} />}
                 />

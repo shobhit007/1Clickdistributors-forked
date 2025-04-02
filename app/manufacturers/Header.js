@@ -33,85 +33,87 @@ const Header = () => {
       </div>
 
       <div className="flex items-center gap-5">
-        <Popover>
-          <PopoverTrigger asChild>
-            <div
-              // href={`tel:${userDetails?.serviceExecutivePhone}`}
-              className="cursor-pointer flex gap-2 px-3 py-[2px] items-center bg-gray-500/20 rounded-full "
-            >
-              <img
-                className="h-10 w-10 object-cover rounded-full"
-                src={userDetails?.serviceExecutiveImage}
-              />
+        {userDetails?.serviceExecutiveName && (
+          <Popover>
+            <PopoverTrigger asChild>
+              <div
+                // href={`tel:${userDetails?.serviceExecutivePhone}`}
+                className="cursor-pointer flex gap-2 px-3 py-[2px] items-center bg-gray-500/20 rounded-full "
+              >
+                <img
+                  className="h-10 w-10 object-cover rounded-full"
+                  src={userDetails?.serviceExecutiveImage}
+                />
 
-              <div className="flex flex-col gap-[2px]">
-                <div className="flex items-center gap-1">
-                  <FaRegUser className="text-gray-700 text-xs" />
-                  <h1 className="text-xs font-semibold text-gray-600">
-                    {userDetails?.serviceExecutiveName}
-                  </h1>
-                </div>
-                <div className="flex items-center gap-1 text-[10px]">
-                  <h1 className=" text-gray-600">Your POC details</h1>
+                <div className="flex flex-col gap-[2px]">
+                  <div className="flex items-center gap-1">
+                    <FaRegUser className="text-gray-700 text-xs" />
+                    <h1 className="text-xs font-semibold text-gray-600">
+                      {userDetails?.serviceExecutiveName}
+                    </h1>
+                  </div>
+                  <div className="flex items-center gap-1 text-[10px]">
+                    <h1 className=" text-gray-600">Your POC details</h1>
+                  </div>
                 </div>
               </div>
-            </div>
-          </PopoverTrigger>
-          <PopoverContent className="w-full bg-[#0b0c3a] p-3 flex flex-col gap-1">
-            <h1 className="text-base font-semibold text-white">
-              Hi, I am {userDetails?.serviceExecutiveName}, Your POC
-            </h1>
+            </PopoverTrigger>
+            <PopoverContent className="w-full bg-[#0b0c3a] p-3 flex flex-col gap-1">
+              <h1 className="text-base font-semibold text-white">
+                Hi, I am {userDetails?.serviceExecutiveName}, Your POC
+              </h1>
 
-            <div
-              className="flex gap-2 items-center text-gray-200 mt-2"
-              onClick={() => console.log("userDetails", userDetails)}
-            >
-              <MdEmail className="text-orange-500 text-base" />
-              <span className="">{userDetails?.serviceExecutiveEmail}</span>
-              <MdCopyAll
-                className="text-gray-200 text-lg ml-1 cursor-pointer"
-                onClick={() => {
-                  copyToClipboard(userDetails?.serviceExecutiveEmail);
-                }}
-              />
-            </div>
-            <div
-              className="flex gap-2 items-center text-gray-200 mt-1"
-              onClick={() => console.log("userDetails", userDetails)}
-            >
-              <FaPhone className="text-orange-500 text-base" />
-              <span className="">{userDetails?.serviceExecutivePhone}</span>
-              <MdCopyAll
-                className="text-gray-200 text-lg ml-1 cursor-pointer"
-                onClick={() => {
-                  copyToClipboard(userDetails?.serviceExecutivePhone);
-                }}
-              />
-            </div>
+              <div
+                className="flex gap-2 items-center text-gray-200 mt-2"
+                onClick={() => console.log("userDetails", userDetails)}
+              >
+                <MdEmail className="text-orange-500 text-base" />
+                <span className="">{userDetails?.serviceExecutiveEmail}</span>
+                <MdCopyAll
+                  className="text-gray-200 text-lg ml-1 cursor-pointer"
+                  onClick={() => {
+                    copyToClipboard(userDetails?.serviceExecutiveEmail);
+                  }}
+                />
+              </div>
+              <div
+                className="flex gap-2 items-center text-gray-200 mt-1"
+                onClick={() => console.log("userDetails", userDetails)}
+              >
+                <FaPhone className="text-orange-500 text-base" />
+                <span className="">{userDetails?.serviceExecutivePhone}</span>
+                <MdCopyAll
+                  className="text-gray-200 text-lg ml-1 cursor-pointer"
+                  onClick={() => {
+                    copyToClipboard(userDetails?.serviceExecutivePhone);
+                  }}
+                />
+              </div>
 
-            <div className="flex gap-3 mt-4 items-center">
-              <a
-                href={`tel:${userDetails?.serviceExecutivePhone}`}
-                className="bg-colorPrimary py-1 px-2 flex items-center text-white gap-2 rounded-md"
-              >
-                <FaPhone className="text-sm" />
-                <span>Call now</span>
-              </a>
-              <button
-                className="bg-transparent border border-white rounded-md py-1 px-2 flex items-center gap-2 text-white hover:bg-white/40"
-                onClick={() => {
-                  window.open(
-                    `https://wa.me/${userDetails?.serviceExecutivePhone}`,
-                    "_blank"
-                  );
-                }}
-              >
-                <FaWhatsapp className="text-lg text-green-500" />
-                <span>Whatsapp</span>
-              </button>
-            </div>
-          </PopoverContent>
-        </Popover>
+              <div className="flex gap-3 mt-4 items-center">
+                <a
+                  href={`tel:${userDetails?.serviceExecutivePhone}`}
+                  className="bg-colorPrimary py-1 px-2 flex items-center text-white gap-2 rounded-md"
+                >
+                  <FaPhone className="text-sm" />
+                  <span>Call now</span>
+                </a>
+                <button
+                  className="bg-transparent border border-white rounded-md py-1 px-2 flex items-center gap-2 text-white hover:bg-white/40"
+                  onClick={() => {
+                    window.open(
+                      `https://wa.me/${userDetails?.serviceExecutivePhone}`,
+                      "_blank"
+                    );
+                  }}
+                >
+                  <FaWhatsapp className="text-lg text-green-500" />
+                  <span>Whatsapp</span>
+                </button>
+              </div>
+            </PopoverContent>
+          </Popover>
+        )}
 
         <div className="hidden md:flex flex-row text-xs items-start font-semibold text-slate-600 mr-6 gap-1 bg-gray-500/20 px-3 py-[2px] rounded-full">
           {userDetails?.profileImageURL && (

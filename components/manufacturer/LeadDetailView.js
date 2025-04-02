@@ -154,7 +154,7 @@ const LeadDetailView = ({
   return (
     <div className="w-full h-full p-0 md:p-2 lg:pt-5">
       <AnimatedModal open={open} close={close} modalOpen={modalOpen}>
-        <div className="min-w-[20vw] min-h-[50vh] bg-white rounded-md p-4">
+        <div className="min-w-[55vw] min-h-[60vh] bg-white rounded-md p-4">
           <UpdateLeadModal
             updateLoading={updateLoading}
             setUpdateLoading={setUpdateLoading}

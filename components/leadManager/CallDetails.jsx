@@ -118,7 +118,7 @@ const CallDetails = ({ data: leadDetails, refetchLead, type, selectedTab }) => {
           followUpDate: "",
           remarks: "",
         });
-        selectedValue("");
+        setSelectedValue("");
       } else {
         toast.error("Something went wrong");
       }
