@@ -153,7 +153,7 @@ export default function Sales() {
     });
   };
 
-  const staticColumns = [];
+  const staticColumns = ["leadType"];
 
   let updateBtn = ["Select"].map((key) => {
     return {
