@@ -168,13 +168,10 @@ function WelcomeCall({
   const onSubmit = async (data) => {
     const leadId = selectedRow.leadId;
 
-    if (data.accountNumber !== data.confirmAccountNumber) {
-      toast.error("Account numbers do not match");
-      return;
-    }
-
     let gstPdfUrl = "";
     let panPdfUrl = "";
+    let tanPdfUrl = "";
+    let cancelChequeUrl = "";
 
     // Helper to upload a file if provided
     const uploadIfExists = async (fileData, label) => {

@@ -75,7 +75,9 @@ const CustomTable = ({
               pre.filter((item) => item[uniqueKey] !== row[uniqueKey])
             );
           } else {
-            setSelectedRows((pre) => [...pre, row]);
+            setSelectedRows((pre) => {
+              return [...pre, row];
+            });
           }
         }
       },
